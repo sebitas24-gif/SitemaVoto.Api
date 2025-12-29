@@ -15,6 +15,6 @@ namespace VotoModelos
 
         public string TipoEvento { get; set; }
 
-        public string EstadoProceso { get; set; }
+        public string EstadoProceso { get; set; }  
     }
 }
