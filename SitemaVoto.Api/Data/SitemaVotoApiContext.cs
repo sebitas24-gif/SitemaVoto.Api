@@ -12,5 +12,13 @@ using VotoModelos;
         {
         }
 
-        public DbSet<VotoModelos.Auditoria> Auditoria { get; set; } = default!;
+        public DbSet<VotoModelos.Auditoria> Auditorias { get; set; } = default!;
+
+public DbSet<VotoModelos.Papeleta> Papeletas { get; set; } = default!;
+
+public DbSet<VotoModelos.ProcesoElectoral> ProcesoElectorals { get; set; } = default!;
+
+public DbSet<VotoModelos.Votante> Votantes { get; set; } = default!;
+
+public DbSet<VotoModelos.Voto> Votos { get; set; } = default!;
     }

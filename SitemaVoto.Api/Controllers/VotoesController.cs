@@ -11,47 +11,47 @@ namespace SitemaVoto.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuditoriasController : ControllerBase
+    public class VotoesController : ControllerBase
     {
         private readonly SitemaVotoApiContext _context;
 
-        public AuditoriasController(SitemaVotoApiContext context)
+        public VotoesController(SitemaVotoApiContext context)
         {
             _context = context;
         }
 
-        // GET: api/Auditorias
+        // GET: api/Votoes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Auditoria>>> GetAuditoria()
+        public async Task<ActionResult<IEnumerable<Voto>>> GetVoto()
         {
-            return await _context.Auditorias.ToListAsync();
+            return await _context.Votos.ToListAsync();
         }
 
-        // GET: api/Auditorias/5
+        // GET: api/Votoes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Auditoria>> GetAuditoria(int id)
+        public async Task<ActionResult<Voto>> GetVoto(int id)
         {
-            var auditoria = await _context.Auditorias.FindAsync(id);
+            var voto = await _context.Votos.FindAsync(id);
 
-            if (auditoria == null)
+            if (voto == null)
             {
                 return NotFound();
             }
 
-            return auditoria;
+            return voto;
         }
 
-        // PUT: api/Auditorias/5
+        // PUT: api/Votoes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAuditoria(int id, Auditoria auditoria)
+        public async Task<IActionResult> PutVoto(int id, Voto voto)
         {
-            if (id != auditoria.Id)
+            if (id != voto.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(auditoria).State = EntityState.Modified;
+            _context.Entry(voto).State = EntityState.Modified;
 
             try
             {
@@ -59,7 +59,7 @@ namespace SitemaVoto.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AuditoriaExists(id))
+                if (!VotoExists(id))
                 {
                     return NotFound();
                 }
@@ -72,36 +72,36 @@ namespace SitemaVoto.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/Auditorias
+        // POST: api/Votoes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Auditoria>> PostAuditoria(Auditoria auditoria)
+        public async Task<ActionResult<Voto>> PostVoto(Voto voto)
         {
-            _context.Auditorias.Add(auditoria);
+            _context.Votos.Add(voto);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAuditoria", new { id = auditoria.Id }, auditoria);
+            return CreatedAtAction("GetVoto", new { id = voto.Id }, voto);
         }
 
-        // DELETE: api/Auditorias/5
+        // DELETE: api/Votoes/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAuditoria(int id)
+        public async Task<IActionResult> DeleteVoto(int id)
         {
-            var auditoria = await _context.Auditorias.FindAsync(id);
-            if (auditoria == null)
+            var voto = await _context.Votos.FindAsync(id);
+            if (voto == null)
             {
                 return NotFound();
             }
 
-            _context.Auditorias.Remove(auditoria);
+            _context.Votos.Remove(voto);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AuditoriaExists(int id)
+        private bool VotoExists(int id)
         {
-            return _context.Auditorias.Any(e => e.Id == id);
+            return _context.Votos.Any(e => e.Id == id);
         }
     }
 }

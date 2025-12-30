@@ -11,47 +11,47 @@ namespace SitemaVoto.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuditoriasController : ControllerBase
+    public class PapeletasController : ControllerBase
     {
         private readonly SitemaVotoApiContext _context;
 
-        public AuditoriasController(SitemaVotoApiContext context)
+        public PapeletasController(SitemaVotoApiContext context)
         {
             _context = context;
         }
 
-        // GET: api/Auditorias
+        // GET: api/Papeletas
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Auditoria>>> GetAuditoria()
+        public async Task<ActionResult<IEnumerable<Papeleta>>> GetPapeleta()
         {
-            return await _context.Auditorias.ToListAsync();
+            return await _context.Papeletas.ToListAsync();
         }
 
-        // GET: api/Auditorias/5
+        // GET: api/Papeletas/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Auditoria>> GetAuditoria(int id)
+        public async Task<ActionResult<Papeleta>> GetPapeleta(int id)
         {
-            var auditoria = await _context.Auditorias.FindAsync(id);
+            var papeleta = await _context.Papeletas.FindAsync(id);
 
-            if (auditoria == null)
+            if (papeleta == null)
             {
                 return NotFound();
             }
 
-            return auditoria;
+            return papeleta;
         }
 
-        // PUT: api/Auditorias/5
+        // PUT: api/Papeletas/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAuditoria(int id, Auditoria auditoria)
+        public async Task<IActionResult> PutPapeleta(int id, Papeleta papeleta)
         {
-            if (id != auditoria.Id)
+            if (id != papeleta.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(auditoria).State = EntityState.Modified;
+            _context.Entry(papeleta).State = EntityState.Modified;
 
             try
             {
@@ -59,7 +59,7 @@ namespace SitemaVoto.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AuditoriaExists(id))
+                if (!PapeletaExists(id))
                 {
                     return NotFound();
                 }
@@ -72,36 +72,36 @@ namespace SitemaVoto.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/Auditorias
+        // POST: api/Papeletas
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Auditoria>> PostAuditoria(Auditoria auditoria)
+        public async Task<ActionResult<Papeleta>> PostPapeleta(Papeleta papeleta)
         {
-            _context.Auditorias.Add(auditoria);
+            _context.Papeletas.Add(papeleta);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAuditoria", new { id = auditoria.Id }, auditoria);
+            return CreatedAtAction("GetPapeleta", new { id = papeleta.Id }, papeleta);
         }
 
-        // DELETE: api/Auditorias/5
+        // DELETE: api/Papeletas/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAuditoria(int id)
+        public async Task<IActionResult> DeletePapeleta(int id)
         {
-            var auditoria = await _context.Auditorias.FindAsync(id);
-            if (auditoria == null)
+            var papeleta = await _context.Papeletas.FindAsync(id);
+            if (papeleta == null)
             {
                 return NotFound();
             }
 
-            _context.Auditorias.Remove(auditoria);
+            _context.Papeletas.Remove(papeleta);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AuditoriaExists(int id)
+        private bool PapeletaExists(int id)
         {
-            return _context.Auditorias.Any(e => e.Id == id);
+            return _context.Papeletas.Any(e => e.Id == id);
         }
     }
 }

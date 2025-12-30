@@ -11,47 +11,47 @@ namespace SitemaVoto.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuditoriasController : ControllerBase
+    public class VotantesController : ControllerBase
     {
         private readonly SitemaVotoApiContext _context;
 
-        public AuditoriasController(SitemaVotoApiContext context)
+        public VotantesController(SitemaVotoApiContext context)
         {
             _context = context;
         }
 
-        // GET: api/Auditorias
+        // GET: api/Votantes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Auditoria>>> GetAuditoria()
+        public async Task<ActionResult<IEnumerable<Votante>>> GetVotante()
         {
-            return await _context.Auditorias.ToListAsync();
+            return await _context.Votantes.ToListAsync();
         }
 
-        // GET: api/Auditorias/5
+        // GET: api/Votantes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Auditoria>> GetAuditoria(int id)
+        public async Task<ActionResult<Votante>> GetVotante(int id)
         {
-            var auditoria = await _context.Auditorias.FindAsync(id);
+            var votante = await _context.Votantes.FindAsync(id);
 
-            if (auditoria == null)
+            if (votante == null)
             {
                 return NotFound();
             }
 
-            return auditoria;
+            return votante;
         }
 
-        // PUT: api/Auditorias/5
+        // PUT: api/Votantes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAuditoria(int id, Auditoria auditoria)
+        public async Task<IActionResult> PutVotante(int id, Votante votante)
         {
-            if (id != auditoria.Id)
+            if (id != votante.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(auditoria).State = EntityState.Modified;
+            _context.Entry(votante).State = EntityState.Modified;
 
             try
             {
@@ -59,7 +59,7 @@ namespace SitemaVoto.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AuditoriaExists(id))
+                if (!VotanteExists(id))
                 {
                     return NotFound();
                 }
@@ -72,36 +72,36 @@ namespace SitemaVoto.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/Auditorias
+        // POST: api/Votantes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Auditoria>> PostAuditoria(Auditoria auditoria)
+        public async Task<ActionResult<Votante>> PostVotante(Votante votante)
         {
-            _context.Auditorias.Add(auditoria);
+            _context.Votantes.Add(votante);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAuditoria", new { id = auditoria.Id }, auditoria);
+            return CreatedAtAction("GetVotante", new { id = votante.Id }, votante);
         }
 
-        // DELETE: api/Auditorias/5
+        // DELETE: api/Votantes/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAuditoria(int id)
+        public async Task<IActionResult> DeleteVotante(int id)
         {
-            var auditoria = await _context.Auditorias.FindAsync(id);
-            if (auditoria == null)
+            var votante = await _context.Votantes.FindAsync(id);
+            if (votante == null)
             {
                 return NotFound();
             }
 
-            _context.Auditorias.Remove(auditoria);
+            _context.Votantes.Remove(votante);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AuditoriaExists(int id)
+        private bool VotanteExists(int id)
         {
-            return _context.Auditorias.Any(e => e.Id == id);
+            return _context.Votantes.Any(e => e.Id == id);
         }
     }
 }
