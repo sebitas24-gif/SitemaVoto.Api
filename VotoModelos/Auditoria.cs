@@ -13,8 +13,8 @@ namespace VotoModelos
 
         public DateTime FechaHora { get; set; }
 
-        public string TipoEvento { get; set; }
+        public string? TipoEvento { get; set; }
 
-        public string EstadoProceso { get; set; }  
+        public string? EstadoProceso { get; set; }  
     }
 }

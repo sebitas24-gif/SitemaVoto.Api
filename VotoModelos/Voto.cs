@@ -16,6 +16,6 @@ namespace VotoModelos
         // NO guarda relación directa con el votante
         public int OpcionElectoralId { get; set; }
 
-        public string VotoEncriptado { get; set; }
+        public string? VotoEncriptado { get; set; }
     }
 }

@@ -13,6 +13,6 @@ namespace VotoModelos
 
         public DateTime FechaEmision { get; set; }
 
-        public string CodigoConfirmacion { get; set; }
+        public string? CodigoConfirmacion { get; set; }
     }
 }
