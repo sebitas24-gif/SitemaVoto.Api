@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+
 using VotoModelos;
 namespace SitemaVoto.Api
 {
@@ -10,6 +10,8 @@ namespace SitemaVoto.Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddDbContext<SitemaVotoApiContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("SitemaVotoApiContext") ?? throw new InvalidOperationException("Connection string 'SitemaVotoApiContext' not found.")));
 
             // Add services to the container.
 
