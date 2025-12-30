@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35818.85 d17.13
+VisualStudioVersion = 17.13.35818.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SitemaVoto.Api", "SitemaVoto.Api\SitemaVoto.Api.csproj", "{9D2B3182-2D64-41EA-BD56-15638B938817}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VotoModelos", "VotoModelos\VotoModelos.csproj", "{3D5E3D86-51A5-492D-B4B3-B3EAF0C82C74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voto.ApiConsumer", "Voto.ApiConsumer\Voto.ApiConsumer.csproj", "{D65B0252-3711-432C-ADFA-D62128482700}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiTest", "ApiTest\ApiTest.csproj", "{0C250F5C-CE40-4CFD-9769-EB4F9DA578D5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{3D5E3D86-51A5-492D-B4B3-B3EAF0C82C74}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D5E3D86-51A5-492D-B4B3-B3EAF0C82C74}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D5E3D86-51A5-492D-B4B3-B3EAF0C82C74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D65B0252-3711-432C-ADFA-D62128482700}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D65B0252-3711-432C-ADFA-D62128482700}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D65B0252-3711-432C-ADFA-D62128482700}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D65B0252-3711-432C-ADFA-D62128482700}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C250F5C-CE40-4CFD-9769-EB4F9DA578D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C250F5C-CE40-4CFD-9769-EB4F9DA578D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C250F5C-CE40-4CFD-9769-EB4F9DA578D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C250F5C-CE40-4CFD-9769-EB4F9DA578D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

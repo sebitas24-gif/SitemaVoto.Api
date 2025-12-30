@@ -8,13 +8,16 @@ namespace VotoModelos
 
         public string? Cedula { get; set; }
 
-        public string? Nombres { get; set; }
+        public string? Nombre { get; set; }
+
+        public string? Apellido { get; set; }
+
+        public DateTime FechaNacimiento { get; set; }
 
         public bool EstaHabilitado { get; set; }
 
         public bool YaVoto { get; set; }
 
-        // Ruta o referencia de la imagen usada solo para verificación
         public string? ImagenVerificacion { get; set; }
     }
 }
