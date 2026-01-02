@@ -34,8 +34,8 @@ namespace SitemaVoto.Api
 
             // Configure the HTTP request pipeline.
             //if (app.Environment.IsDevelopment())
-            
-                app.UseSwagger();
+
+            app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 // Usa la ruta absoluta para que ZeroTier no se confunda
@@ -48,8 +48,8 @@ namespace SitemaVoto.Api
             });
 
             app.UseCors("AllowAll");
-                //app.UseHttpsRedirection();
-            
+            //app.UseHttpsRedirection();
+
 
             app.UseAuthorization();
 

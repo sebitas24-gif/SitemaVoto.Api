@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SitemaVoto.Api.Migrations
 {
     [DbContext(typeof(SitemaVotoApiContext))]
-    [Migration("20251231155654_nue")]
-    partial class nue
+    [Migration("20260102030200_n")]
+    partial class n
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -107,7 +107,7 @@ namespace SitemaVoto.Api.Migrations
                     b.Property<bool>("EstaHabilitado")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime>("FechaNacimiento")
+                    b.Property<DateTime?>("FechaNacimiento")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ImagenVerificacion")

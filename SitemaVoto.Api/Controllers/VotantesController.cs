@@ -22,7 +22,7 @@ namespace SitemaVoto.Api.Controllers
 
         // GET: api/Votantes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Votante>>> GetVotante()
+        public async Task<ActionResult<IEnumerable<Votante>>> GetVotantes()
         {
             return await _context.Votantes.ToListAsync();
         }

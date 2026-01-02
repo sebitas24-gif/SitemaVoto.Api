@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SitemaVoto.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class nue : Migration
+    public partial class n : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -66,7 +66,7 @@ namespace SitemaVoto.Api.Migrations
                     Cedula = table.Column<string>(type: "text", nullable: true),
                     Nombre = table.Column<string>(type: "text", nullable: true),
                     Apellido = table.Column<string>(type: "text", nullable: true),
-                    FechaNacimiento = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaNacimiento = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     EstaHabilitado = table.Column<bool>(type: "boolean", nullable: false),
                     YaVoto = table.Column<bool>(type: "boolean", nullable: false),
                     ImagenVerificacion = table.Column<string>(type: "text", nullable: true)

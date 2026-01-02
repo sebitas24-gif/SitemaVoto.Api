@@ -1,4 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System;
+
+
 
 namespace VotoModelos
 {
@@ -12,7 +15,8 @@ namespace VotoModelos
 
         public string? Apellido { get; set; }
 
-        public DateTime FechaNacimiento { get; set; }
+       
+        public DateTime? FechaNacimiento { get; set; }
 
         public bool EstaHabilitado { get; set; }
 

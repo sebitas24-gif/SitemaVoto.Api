@@ -104,7 +104,7 @@ namespace SitemaVoto.Api.Migrations
                     b.Property<bool>("EstaHabilitado")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime>("FechaNacimiento")
+                    b.Property<DateTime?>("FechaNacimiento")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ImagenVerificacion")
