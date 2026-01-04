@@ -41,37 +41,44 @@ namespace VotoMVC.Controllers
         // POST: VotosController1/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(VotoModelos.Voto data)
+        public ActionResult Create(VotoModelos.Voto data, int idVotante)
         {
-            // CAMBIO 1: Limpiamos el ID para que la DB asigne el nuevo
-            data.Id = 0;
+            var votanteResult = Crud<VotoModelos.Votante>.GetById(idVotante);
 
-            // CAMBIO 2: Generamos la fecha exacta para Swagger (Formato ISO automático)
-            data.FechaHora = DateTime.Now;
-
-            // CAMBIO 3: Encriptamos el voto antes de enviarlo
-            data.VotoEncriptado = BCrypt.Net.BCrypt.HashPassword(data.OpcionElectoralId.ToString());
-
-            try
+            if (votanteResult?.Data == null)
             {
-                // Usamos la ruta completa para evitar errores de ambigüedad
-                var result = Voto.ApiConsumer.Crud<VotoModelos.Voto>.Create(data);
-
-                // MODIFICACIÓN AQUÍ: Si el resultado no es nulo y la API no dio error de conexión
-                if (result != null && (result.Data != null || result.Message == null))
-                {
-                    return RedirectToAction(nameof(Index));
-                }
-
-                // Si realmente hubo un error en la API, lo mostramos
-                ModelState.AddModelError("", "Respuesta API: " + (result?.Message ?? "Error desconocido"));
+                ModelState.AddModelError("", "El votante no existe.");
                 return View(data);
             }
-            catch (Exception ex)
+
+            if (votanteResult.Data.YaVoto)
             {
-                ModelState.AddModelError("", "Error al procesar: " + ex.Message);
+                ModelState.AddModelError("", "Este votante ya ejerció su voto.");
                 return View(data);
             }
+
+            // 2️⃣ Preparar voto (EL USUARIO NO VE ESTO)
+            data.Id = 0; // 🔹 CAMBIO: la DB asigna
+            data.FechaHora = DateTime.Now; // 🔹 CAMBIO: sistema
+            data.VotoEncriptado = BCrypt.Net.BCrypt.HashPassword(
+                $"{data.OpcionElectoralId}-{Guid.NewGuid()}"
+            ); // 🔹 CAMBIO: voto anónimo real
+
+            // 3️⃣ Guardar voto
+            var votoResult = Crud<VotoModelos.Voto>.Create(data);
+
+            if (votoResult == null || !string.IsNullOrEmpty(votoResult.Message))
+            {
+                ModelState.AddModelError("", votoResult?.Message ?? "Error al registrar el voto.");
+                return View(data);
+            }
+
+            // 4️⃣ Marcar votante como que ya votó
+            votanteResult.Data.YaVoto = true;
+            Crud<VotoModelos.Votante>.Update(votanteResult.Data.Id, votanteResult.Data);
+
+            // 5️⃣ Fin
+            return RedirectToAction("Confirmacion");
         }
 
         // GET: VotosController1/Delete/5

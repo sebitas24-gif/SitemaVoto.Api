@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SitemaVoto.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class N2 : Migration
+    public partial class Estructura : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -28,13 +28,31 @@ namespace SitemaVoto.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OpcionElectoral",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nombre = table.Column<string>(type: "text", nullable: false),
+                    Partido = table.Column<string>(type: "text", nullable: false),
+                    Activo = table.Column<bool>(type: "boolean", nullable: false),
+                    ProcesoElectoralId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OpcionElectoral", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Papeletas",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FechaEmision = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CodigoConfirmacion = table.Column<string>(type: "text", nullable: true)
+                    CodigoConfirmacion = table.Column<string>(type: "text", nullable: true),
+                    VotanteId = table.Column<int>(type: "integer", nullable: false),
+                    ProcesoElectoralId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -48,9 +66,9 @@ namespace SitemaVoto.Api.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Nombre = table.Column<string>(type: "text", nullable: true),
-                    Estado = table.Column<string>(type: "text", nullable: true),
                     FechaInicio = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    FechaFin = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    FechaFin = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Activo = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -66,7 +84,7 @@ namespace SitemaVoto.Api.Migrations
                     Cedula = table.Column<string>(type: "text", nullable: true),
                     Nombre = table.Column<string>(type: "text", nullable: true),
                     Apellido = table.Column<string>(type: "text", nullable: true),
-                    FechaNacimiento = table.Column<string>(type: "text", nullable: true),
+                    FechaNacimiento = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     EstaHabilitado = table.Column<bool>(type: "boolean", nullable: false),
                     YaVoto = table.Column<bool>(type: "boolean", nullable: false),
                     ImagenVerificacion = table.Column<string>(type: "text", nullable: true)
@@ -97,6 +115,9 @@ namespace SitemaVoto.Api.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Auditorias");
+
+            migrationBuilder.DropTable(
+                name: "OpcionElectoral");
 
             migrationBuilder.DropTable(
                 name: "Papeletas");

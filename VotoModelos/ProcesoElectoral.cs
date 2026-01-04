@@ -13,11 +13,9 @@ namespace VotoModelos
 
         public string? Nombre { get; set; }
 
-        // ACTIVO, CERRADO, NO_INICIADO
-        public string? Estado { get; set; }
-
         public DateTime FechaInicio { get; set; }
 
         public DateTime FechaFin { get; set; }
+        public bool Activo { get; set; }
     }
 }

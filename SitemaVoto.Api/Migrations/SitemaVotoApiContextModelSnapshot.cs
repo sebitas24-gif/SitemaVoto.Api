@@ -43,6 +43,33 @@ namespace SitemaVoto.Api.Migrations
                     b.ToTable("Auditorias");
                 });
 
+            modelBuilder.Entity("VotoModelos.OpcionElectoral", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Partido")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ProcesoElectoralId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OpcionElectoral");
+                });
+
             modelBuilder.Entity("VotoModelos.Papeleta", b =>
                 {
                     b.Property<int>("Id")
@@ -57,6 +84,12 @@ namespace SitemaVoto.Api.Migrations
                     b.Property<DateTime>("FechaEmision")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("ProcesoElectoralId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("VotanteId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.ToTable("Papeletas");
@@ -70,8 +103,8 @@ namespace SitemaVoto.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Estado")
-                        .HasColumnType("text");
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("FechaFin")
                         .HasColumnType("timestamp with time zone");
