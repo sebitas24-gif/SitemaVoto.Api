@@ -104,7 +104,6 @@ namespace VotoMVC.Controllers
                 return View(data);
             }
 
-
             // Si pasó todos los filtros, preparamos y guardamos
             data.Id = 0;
             data.YaVoto = false;

@@ -60,18 +60,14 @@
             <td>
                 @Html.DisplayFor(modelItem => item.ImagenVerificacion)
             </td>
-                @if (!string.IsNullOrEmpty(item.ImagenVerificacion) && item.ImagenVerificacion != "N/A")
+                @if (!string.IsNullOrEmpty(item.ImagenVerificacion) && item.ImagenVerificacion.Length > 15)
                 {
-                    // Esto corta el texto a 10 caracteres y pone puntos suspensivos
-                    var textoCorto = item.ImagenVerificacion.Length > 10
-                    ? item.ImagenVerificacion.Substring(0, 10) + "..."
-                    : item.ImagenVerificacion;
-
-                    <span title="@item.ImagenVerificacion">@textoCorto</span>
+                    @* Mostramos solo los primeros 15 caracteres *@
+                    <span>@(item.ImagenVerificacion.Substring(0, 15))...</span>
                 }
                 else
                 {
-                    <span class="text-muted">Sin foto</span>
+                    @item.ImagenVerificacion
                 }
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
