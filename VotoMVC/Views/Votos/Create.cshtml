@@ -13,22 +13,13 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="FechaHora" class="control-label"></label>
-                <input asp-for="FechaHora" class="form-control" />
-                <span asp-validation-for="FechaHora" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="OpcionElectoralId" class="control-label"></label>
-                <input asp-for="OpcionElectoralId" class="form-control" />
+                <label>Seleccione su Candidato (ID)</label>
+                <input asp-for="OpcionElectoralId" class="form-control" type="number" min="1" required />
                 <span asp-validation-for="OpcionElectoralId" class="text-danger"></span>
             </div>
+           
             <div class="form-group">
-                <label asp-for="VotoEncriptado" class="control-label"></label>
-                <input asp-for="VotoEncriptado" class="form-control" />
-                <span asp-validation-for="VotoEncriptado" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Registrar Voto" class="btn btn-success w-100" />
             </div>
         </form>
     </div>
