@@ -19,4 +19,6 @@ public DbSet<VotoModelos.Voto> Voto { get; set; } = default!;
 public DbSet<VotoModelos.Papeleta> Papeleta { get; set; } = default!;
 
 public DbSet<VotoModelos.Auditoria> Auditoria { get; set; } = default!;
+
+public DbSet<VotoModelos.ProcesoElectoral> ProcesoElectoral { get; set; } = default!;
     }
