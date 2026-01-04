@@ -1,5 +1,6 @@
 ﻿using VotoModelos;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace Voto.ApiConsumer
 {
@@ -13,21 +14,25 @@ namespace Voto.ApiConsumer
             {
                 using (var httpClient = new HttpClient())
                 {
-                    // invocar al servicio web
-                    var json = Newtonsoft.Json.JsonConvert.SerializeObject(data);
-                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                    // Forzamos el formato ISO que Swagger usa exitosamente
+                    var settings = new JsonSerializerSettings
+                    {
+                        DateFormatString = "yyyy-MM-ddTHH:mm:ss.fffZ",
+                        NullValueHandling = NullValueHandling.Ignore
+                    };
+
+                    var json = JsonConvert.SerializeObject(data, settings);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
                     var response = httpClient.PostAsync(UrlBase, content).Result;
+
                     if (response.IsSuccessStatusCode)
                     {
-                        json = response.Content.ReadAsStringAsync().Result;
-                        // deserializar la respuesta
-                        var newData = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiResult<T>>(json);
-                        return newData;
+                        var resJson = response.Content.ReadAsStringAsync().Result;
+                        return JsonConvert.DeserializeObject<ApiResult<T>>(resJson);
                     }
-                    else
-                    {
-                        return ApiResult<T>.Fail($"Error: {response.StatusCode}");
-                    }
+
+                    return ApiResult<T>.Fail($"Error {response.StatusCode}");
                 }
             }
             catch (Exception ex)
@@ -57,6 +62,26 @@ namespace Voto.ApiConsumer
                 return new ApiResult<List<T>> { Message = ex.Message };
             }
         }
+        public static ApiResult<T> GetByCedula(string cedula)
+{
+    try
+    {
+        using (var client = new HttpClient())
+        {
+            // Nota: Verifica si tu API tiene esta ruta, si no, usaremos ReadAll
+            var response = client.GetAsync($"{UrlBase}/cedula/{cedula}").Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                var data = JsonConvert.DeserializeObject<T>(json);
+                return new ApiResult<T> { Data = data };
+            }
+            return ApiResult<T>.Fail("No encontrado");
+        }
+    }
+    catch (Exception ex) { return ApiResult<T>.Fail(ex.Message); }
+}
 
         public static ApiResult<T> ReadBy(string field, string value)
         {
@@ -80,75 +105,73 @@ namespace Voto.ApiConsumer
         }
         public static ApiResult<T> GetById(int id)
         {
-            using (var client = new HttpClient())
+            try
             {
-                // Usamos UrlBase que ya tiene la IP de ZeroTier y el puerto 5050
-                var response = client.GetAsync($"{UrlBase}/{id}").Result;
+                using (var client = new HttpClient())
+                {
+                    // La URL ahora se formará correctamente: .../api/Votantes/5
+                    var response = client.GetAsync($"{UrlBase}/{id}").Result;
 
-                var result = new ApiResult<T>();
-                if (response.IsSuccessStatusCode)
-                {
+                    if (!response.IsSuccessStatusCode)
+                        return ApiResult<T>.Fail($"Error: {response.StatusCode}");
+
                     var json = response.Content.ReadAsStringAsync().Result;
-                    // Deserializamos el JSON plano que manda tu API
-                    result.Data = JsonConvert.DeserializeObject<T>(json);
+                    // Deserializamos directamente al objeto T
+                    var data = JsonConvert.DeserializeObject<T>(json);
+                    return new ApiResult<T> { Data = data };
                 }
-                else
-                {
-                    result.Message = $"Error: {response.StatusCode}";
-                }
-                return result;
             }
+            catch (Exception ex) { return ApiResult<T>.Fail(ex.Message); }
         }
         public static ApiResult<List<T>> GetAll()
         {
-            return ReadAll();
+            using var client = new HttpClient();
+            var response = client.GetAsync(UrlBase).Result;
+
+            if (!response.IsSuccessStatusCode)
+                return ApiResult<List<T>>.Fail("Error API");
+
+            var json = response.Content.ReadAsStringAsync().Result;
+            var data = JsonConvert.DeserializeObject<List<T>>(json);
+
+            return ApiResult<List<T>>.Ok(data);
         }
+        private static JsonSerializerSettings _settings = new JsonSerializerSettings
+        {
+            DateFormatString = "yyyy-MM-ddTHH:mm:ss.fffZ",
+            NullValueHandling = NullValueHandling.Ignore
+        };
         public static ApiResult<T> Update(int id, T data)
         {
-            using (var client = new HttpClient())
-            {
-                var json = JsonConvert.SerializeObject(data);
-                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                var response = client.PutAsync($"{UrlBase}/{id}", content).Result;
-
-                if (response.IsSuccessStatusCode)
-                {
-                    return new ApiResult<T> { Data = data }; // Retornamos los datos actualizados
-                }
-                return new ApiResult<T> { Message = "Error al actualizar" };
-            }
-        }
-        public static ApiResult<bool> Delete(string id)
-        {
-            // consumir una API y ejecutar el verbo DELETE
             try
             {
-                using (var httpClient = new HttpClient())
+                using (var client = new HttpClient())
                 {
-                    // invocar al servicio web
-                    var response = httpClient.DeleteAsync($"{UrlBase}/{id}").Result;
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return ApiResult<bool>.Ok(true);
-                    }
-                    else
-                    {
-                        return ApiResult<bool>.Fail($"Error: {response.StatusCode}");
-                    }
+                    var json = JsonConvert.SerializeObject(data, _settings);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    var response = client.PutAsync($"{UrlBase}/{id}", content).Result;
+
+                    return response.IsSuccessStatusCode
+                        ? ApiResult<T>.Ok(data)
+                        : ApiResult<T>.Fail($"Error API: {response.StatusCode}");
                 }
             }
-            catch (Exception ex)
-            {
-                return ApiResult<bool>.Fail(ex.Message);
-            }
+            catch (Exception ex) { return ApiResult<T>.Fail(ex.Message); }
         }
         public static ApiResult<bool> Delete(int id)
         {
-            using (var client = new HttpClient())
+            try
             {
-                var response = client.DeleteAsync($"{UrlBase}/{id}").Result;
-                return new ApiResult<bool> { Data = response.IsSuccessStatusCode };
+                using (var client = new HttpClient())
+                {
+                    var response = client.DeleteAsync($"{UrlBase}/{id}").Result;
+                    return response.IsSuccessStatusCode
+                        ? ApiResult<bool>.Ok(true)
+                        : ApiResult<bool>.Fail($"No se pudo eliminar: {response.StatusCode}");
+                }
             }
+            catch (Exception ex) { return ApiResult<bool>.Fail(ex.Message); }
         }
     }
 }
