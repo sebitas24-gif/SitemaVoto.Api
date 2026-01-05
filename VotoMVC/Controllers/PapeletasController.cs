@@ -10,7 +10,7 @@ namespace VotoMVC.Controllers
     {
         public PapeletasController()
         {
-            Voto.ApiConsumer.Crud<VotoModelos.Papeleta>.UrlBase = "http://10.241.253.223:5208/api/Papeletas";
+            Voto.ApiConsumer.Crud<VotoModelos.Papeleta>.UrlBase = "http://10.241.253.223:8080/api/Papeletas";
         }
         // GET: PapeletasController
         public ActionResult Index()
@@ -41,7 +41,6 @@ namespace VotoMVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(Papeleta data)
         {
-
             try
             {
                 var result = Crud<Papeleta>.Create(data);

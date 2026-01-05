@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SitemaVoto.Api.Migrations
 {
     [DbContext(typeof(SitemaVotoApiContext))]
-    [Migration("20260105000736_SistemaVotoVersionFinal")]
-    partial class SistemaVotoVersionFinal
+    [Migration("20260105024454_inicio")]
+    partial class inicio
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,7 +36,7 @@ namespace SitemaVoto.Api.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("FechaHora")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("TipoEvento")
                         .HasColumnType("text");
@@ -46,7 +46,7 @@ namespace SitemaVoto.Api.Migrations
                     b.ToTable("Auditorias");
                 });
 
-            modelBuilder.Entity("VotoModelos.OpcionElectorales", b =>
+            modelBuilder.Entity("VotoModelos.OpcionElectoral", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -88,7 +88,7 @@ namespace SitemaVoto.Api.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("FechaEmision")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("ProcesoElectoralId")
                         .HasColumnType("integer");
@@ -113,17 +113,17 @@ namespace SitemaVoto.Api.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("FechaFin")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("FechaInicio")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Nombre")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProcesoElectorals");
+                    b.ToTable("ProcesoElectorales");
                 });
 
             modelBuilder.Entity("VotoModelos.Votante", b =>
@@ -144,7 +144,7 @@ namespace SitemaVoto.Api.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("FechaNacimiento")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ImagenVerificacion")
                         .HasColumnType("text");
@@ -153,7 +153,6 @@ namespace SitemaVoto.Api.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("YaVoto")
@@ -173,7 +172,7 @@ namespace SitemaVoto.Api.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("FechaHora")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("OpcionElectoralId")
                         .HasColumnType("integer");

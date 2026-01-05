@@ -16,7 +16,7 @@ using VotoModelos;
 
     public DbSet<VotoModelos.Papeleta> Papeletas { get; set; } = default!;
 
-    public DbSet<VotoModelos.ProcesoElectoral> ProcesoElectorals { get; set; } = default!;
+    public DbSet<VotoModelos.ProcesoElectoral> ProcesoElectorales { get; set; } = default!;
 
     public DbSet<VotoModelos.Votante> Votantes { get; set; } = default!;
 

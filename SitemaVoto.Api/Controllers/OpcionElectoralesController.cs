@@ -20,14 +20,14 @@ namespace SitemaVoto.Api.Controllers
             _context = context;
         }
 
-        // GET: api/OpcionElectorals
+        // GET: api/OpcionElectorales
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<OpcionElectoral>>> GetOpcionElectoral()
+        public async Task<ActionResult<IEnumerable<OpcionElectoral>>> GetOpcionElectorales()
         {
             return await _context.OpcionElectorales.ToListAsync();
         }
 
-        // GET: api/OpcionElectorals/5
+        // GET: api/OpcionElectorales/5
         [HttpGet("{id}")]
         public async Task<ActionResult<OpcionElectoral>> GetOpcionElectoral(int id)
         {
@@ -41,7 +41,7 @@ namespace SitemaVoto.Api.Controllers
             return opcionElectoral;
         }
 
-        // PUT: api/OpcionElectorals/5
+        // PUT: api/OpcionElectorales/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutOpcionElectoral(int id, OpcionElectoral opcionElectoral)
@@ -72,7 +72,7 @@ namespace SitemaVoto.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/OpcionElectorals
+        // POST: api/OpcionElectorales
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<OpcionElectoral>> PostOpcionElectoral(OpcionElectoral opcionElectoral)
@@ -83,7 +83,7 @@ namespace SitemaVoto.Api.Controllers
             return CreatedAtAction("GetOpcionElectoral", new { id = opcionElectoral.Id }, opcionElectoral);
         }
 
-        // DELETE: api/OpcionElectorals/5
+        // DELETE: api/OpcionElectorales/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOpcionElectoral(int id)
         {

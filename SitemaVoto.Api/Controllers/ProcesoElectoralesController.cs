@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,27 +12,27 @@ namespace SitemaVoto.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProcesoElectoralsController : ControllerBase
+    public class ProcesoElectoralesController : ControllerBase
     {
         private readonly SitemaVotoApiContext _context;
 
-        public ProcesoElectoralsController(SitemaVotoApiContext context)
+        public ProcesoElectoralesController(SitemaVotoApiContext context)
         {
             _context = context;
         }
 
-        // GET: api/ProcesoElectorals
+        // GET: api/ProcesoElectorales
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProcesoElectoral>>> GetProcesoElectoral()
         {
-            return await _context.ProcesoElectorals.ToListAsync();
+            return await _context.ProcesoElectorales.ToListAsync();
         }
 
-        // GET: api/ProcesoElectorals/5
+        // GET: api/ProcesoElectorales/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ProcesoElectoral>> GetProcesoElectoral(int id)
         {
-            var procesoElectoral = await _context.ProcesoElectorals.FindAsync(id);
+            var procesoElectoral = await _context.ProcesoElectorales.FindAsync(id);
 
             if (procesoElectoral == null)
             {
@@ -41,7 +42,7 @@ namespace SitemaVoto.Api.Controllers
             return procesoElectoral;
         }
 
-        // PUT: api/ProcesoElectorals/5
+        // PUT: api/ProcesoElectorales/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProcesoElectoral(int id, ProcesoElectoral procesoElectoral)
@@ -72,28 +73,28 @@ namespace SitemaVoto.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/ProcesoElectorals
+        // POST: api/ProcesoElectorales
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<ProcesoElectoral>> PostProcesoElectoral(ProcesoElectoral procesoElectoral)
         {
-            _context.ProcesoElectorals.Add(procesoElectoral);
+            _context.ProcesoElectorales.Add(procesoElectoral);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetProcesoElectoral", new { id = procesoElectoral.Id }, procesoElectoral);
         }
 
-        // DELETE: api/ProcesoElectorals/5
+        // DELETE: api/ProcesoElectorales/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProcesoElectoral(int id)
         {
-            var procesoElectoral = await _context.ProcesoElectorals.FindAsync(id);
+            var procesoElectoral = await _context.ProcesoElectorales.FindAsync(id);
             if (procesoElectoral == null)
             {
                 return NotFound();
             }
 
-            _context.ProcesoElectorals.Remove(procesoElectoral);
+            _context.ProcesoElectorales.Remove(procesoElectoral);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -101,7 +102,7 @@ namespace SitemaVoto.Api.Controllers
 
         private bool ProcesoElectoralExists(int id)
         {
-            return _context.ProcesoElectorals.Any(e => e.Id == id);
+            return _context.ProcesoElectorales.Any(e => e.Id == id);
         }
     }
 }

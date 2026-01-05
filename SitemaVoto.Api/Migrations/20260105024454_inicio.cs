@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SitemaVoto.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class SistemaVotoVersionFinal : Migration
+    public partial class inicio : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,7 @@ namespace SitemaVoto.Api.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    FechaHora = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaHora = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     TipoEvento = table.Column<string>(type: "text", nullable: true),
                     EstadoProceso = table.Column<string>(type: "text", nullable: true)
                 },
@@ -41,7 +41,7 @@ namespace SitemaVoto.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OpcionElectoral", x => x.Id);
+                    table.PrimaryKey("PK_OpcionElectorales", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -50,7 +50,7 @@ namespace SitemaVoto.Api.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    FechaEmision = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaEmision = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     CodigoConfirmacion = table.Column<string>(type: "text", nullable: true),
                     VotanteId = table.Column<int>(type: "integer", nullable: false),
                     ProcesoElectoralId = table.Column<int>(type: "integer", nullable: false)
@@ -61,19 +61,19 @@ namespace SitemaVoto.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProcesoElectorals",
+                name: "ProcesoElectorales",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Nombre = table.Column<string>(type: "text", nullable: true),
-                    FechaInicio = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    FechaFin = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaInicio = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    FechaFin = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Activo = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProcesoElectorals", x => x.Id);
+                    table.PrimaryKey("PK_ProcesoElectorales", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -85,8 +85,8 @@ namespace SitemaVoto.Api.Migrations
                     Cedula = table.Column<string>(type: "text", nullable: true),
                     Nombre = table.Column<string>(type: "text", nullable: true),
                     Apellido = table.Column<string>(type: "text", nullable: true),
-                    Password = table.Column<string>(type: "text", nullable: false),
-                    FechaNacimiento = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Password = table.Column<string>(type: "text", nullable: true),
+                    FechaNacimiento = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     EstaHabilitado = table.Column<bool>(type: "boolean", nullable: false),
                     YaVoto = table.Column<bool>(type: "boolean", nullable: false),
                     ImagenVerificacion = table.Column<string>(type: "text", nullable: true)
@@ -102,7 +102,7 @@ namespace SitemaVoto.Api.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    FechaHora = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaHora = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     OpcionElectoralId = table.Column<int>(type: "integer", nullable: false),
                     ProcesoElectoralId = table.Column<int>(type: "integer", nullable: false),
                     VotoEncriptado = table.Column<string>(type: "text", nullable: true)
@@ -126,7 +126,7 @@ namespace SitemaVoto.Api.Migrations
                 name: "Papeletas");
 
             migrationBuilder.DropTable(
-                name: "ProcesoElectorals");
+                name: "ProcesoElectorales");
 
             migrationBuilder.DropTable(
                 name: "Votantes");

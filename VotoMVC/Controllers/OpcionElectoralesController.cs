@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Voto.ApiConsumer;
 using VotoModelos;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VotoMVC.Controllers
 {
@@ -8,7 +10,7 @@ namespace VotoMVC.Controllers
     {
         public OpcionElectoralesController()
         {
-            Voto.ApiConsumer.Crud<VotoModelos.OpcionElectoral>.UrlBase = "http://10.241.253.223:5208/api/OpcionElectorales";
+            Voto.ApiConsumer.Crud<VotoModelos.OpcionElectoral>.UrlBase = "http://10.241.253.223:8080/api/OpcionElectorales";
         }
         // GET: OpcionElectoralesController
         public ActionResult Index()
@@ -21,7 +23,11 @@ namespace VotoMVC.Controllers
         // GET: OpcionElectoralesController/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var result = Crud<Votante>.GetById(id);
+            if (result?.Data == null)
+                return RedirectToAction(nameof(Index));
+
+            return View(result.Data);
         }
 
         // GET: OpcionElectoralesController/Create
@@ -33,57 +39,96 @@ namespace VotoMVC.Controllers
         // POST: OpcionElectoralesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(OpcionElectoral data)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var result = Crud<OpcionElectoral>.Create(data);
+
+                // Si la API devuelve el objeto creado, 'result.Data' no será nulo
+                if (result != null && result.Data != null)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+
+                ModelState.AddModelError("", "La API no pudo guardar los datos.");
+                return View(data);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                ModelState.AddModelError("", "Error: " + ex.Message);
+                return View(data);
             }
         }
 
         // GET: OpcionElectoralesController/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var result = Crud<OpcionElectoral>.GetById(id);
+
+            if (result == null || result.Data == null)
+            {
+                return NotFound();
+            }
+
+            return View(result.Data);
         }
 
         // POST: OpcionElectoralesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, OpcionElectoral data)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var result = Crud<OpcionElectoral>.Update(id, data);
+
+                if (result != null && result.Data != null)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(data);
             }
             catch
             {
-                return View();
+                return View(data);
             }
         }
 
         // GET: OpcionElectoralesController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+
+            var result = Crud<OpcionElectoral>.GetById(id);
+
+            // 2. Si no hay datos (API caída o ID inexistente), regresamos al Index
+            if (result == null || result.Data == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            // 3. Enviamos SOLO la especie a la vista
+            return View(result.Data);
         }
 
         // POST: OpcionElectoralesController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, OpcionElectoral data)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var result = Crud<OpcionElectoral>.Delete(id);
+
+                if (result != null && result.Data == true) // Si Data es true, se eliminó bien
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(data);
             }
             catch
             {
-                return View();
+                return View(data);
             }
         }
     }

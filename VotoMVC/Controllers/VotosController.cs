@@ -10,7 +10,7 @@ namespace VotoMVC.Controllers
     {
         public VotosController()
         {
-            Voto.ApiConsumer.Crud<VotoModelos.Voto>.UrlBase = "http://10.241.253.223:5208/api/Votoes";
+            Voto.ApiConsumer.Crud<VotoModelos.Voto>.UrlBase = "http://10.241.253.223:8080/api/Votoes";
         }
         // GET: VotosController1
         public ActionResult Index()

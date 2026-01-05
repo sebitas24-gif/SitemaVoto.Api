@@ -14,7 +14,7 @@ namespace SitemaVoto.Api
     configuration.ReadFrom.Configuration(context.Configuration));
             builder.Services.AddDbContext<SitemaVotoApiContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("SitemaVotoApiContext") ?? throw new InvalidOperationException("Connection string 'SitemaVotoApiContext' not found.")));
-
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             // Add services to the container.
             builder.Services.AddCors(options => {
                 options.AddPolicy("AllowAll", b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
@@ -55,7 +55,7 @@ namespace SitemaVoto.Api
 
 
             app.MapControllers();
-          
+      
 
             app.Run();
         }
