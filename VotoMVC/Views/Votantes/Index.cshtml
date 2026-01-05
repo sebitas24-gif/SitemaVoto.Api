@@ -60,14 +60,15 @@
             <td>
                 @Html.DisplayFor(modelItem => item.ImagenVerificacion)
             </td>
-                @if (!string.IsNullOrEmpty(item.ImagenVerificacion) && item.ImagenVerificacion.Length > 15)
+                @if (!string.IsNullOrEmpty(item.ImagenVerificacion) && item.ImagenVerificacion != "N/A")
                 {
-                    @* Mostramos solo los primeros 15 caracteres *@
-                    <span>@(item.ImagenVerificacion.Substring(0, 15))...</span>
+                    <img src="@item.ImagenVerificacion"
+                         style="width:60px; height:60px; border-radius:50%; object-fit:cover; border: 1px solid #ddd;"
+                         alt="Foto" />
                 }
                 else
                 {
-                    @item.ImagenVerificacion
+                    <span class="badge bg-secondary">Sin foto</span>
                 }
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

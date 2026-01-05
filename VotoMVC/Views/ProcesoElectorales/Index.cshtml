@@ -42,6 +42,18 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Activo)
             </td>
+                @if (DateTime.Now >= item.FechaInicio && DateTime.Now <= item.FechaFin && item.Activo)
+                {
+                    <span class="badge bg-success text-white">● EN CURSO (Votaciones Abiertas)</span>
+                }
+                else if (DateTime.Now < item.FechaInicio && item.Activo)
+                {
+                    <span class="badge bg-primary text-white">Programado</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger text-white">Cerrado / Finalizado</span>
+                }
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |

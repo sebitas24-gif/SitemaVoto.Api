@@ -173,5 +173,56 @@ namespace Voto.ApiConsumer
             }
             catch (Exception ex) { return ApiResult<bool>.Fail(ex.Message); }
         }
+        public static ApiResult<T> CreateProceso(T data)
+        {
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    var json = JsonConvert.SerializeObject(data);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = httpClient.PostAsync(UrlBase, content).Result;
+
+                    // Si la API responde 200 (OK) o 201 (Created), ¡fue un éxito!
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return new ApiResult<T> { Success = true, Message = "Creado con éxito" };
+                    }
+
+                    return new ApiResult<T> { Success = false, Message = "Error en la API" };
+                }
+            }
+            catch (Exception)
+            {
+                // Si hay un error de red o formato, pero IsSuccessStatusCode fue true,
+                // este método devolverá éxito de todos modos.
+                return new ApiResult<T> { Success = false, Message = "Fallo de conexión" };
+            }
+        }
+        public static ApiResult<T> UpdateProceso(int id, T data)
+        {
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    var json = JsonConvert.SerializeObject(data);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    // Usamos PUT para actualizar
+                    var response = httpClient.PutAsync($"{UrlBase}/{id}", content).Result;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return new ApiResult<T> { Success = true, Message = "Actualizado correctamente" };
+                    }
+
+                    return new ApiResult<T> { Success = false, Message = "Error al actualizar: " + response.StatusCode };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult<T> { Success = false, Message = "Error de red: " + ex.Message };
+            }
+        }
     }
 }

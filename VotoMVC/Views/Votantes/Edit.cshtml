@@ -35,9 +35,20 @@
             </div>
 
             <div class="form-group">
-                <label asp-for="ImagenVerificacion" class="control-label"></label>
-                <input asp-for="ImagenVerificacion" class="form-control" />
-                <span asp-validation-for="ImagenVerificacion" class="text-danger"></span>
+                <label>Foto Actual</label><br />
+                @if (!string.IsNullOrEmpty(Model.ImagenVerificacion) && Model.ImagenVerificacion != "N/A")
+                {
+                    <img src="@Model.ImagenVerificacion" style="width:120px; height:120px; border-radius:10px; object-fit:cover;" />
+                }
+                else
+                {
+                    <div style="width:120px; height:120px; background:#eee; display:flex; align-items:center; justify-content:center;">Sin foto</div>
+                }
+                <input type="hidden" asp-for="ImagenVerificacion" />
+                <div class="form-group mb-3">
+                    <label class="control-label">Cambiar Foto</label>
+                    <input type="file" name="FotoArchivo" class="form-control" accept="image/*" />
+                </div>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

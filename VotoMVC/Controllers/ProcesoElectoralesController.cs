@@ -40,61 +40,38 @@ namespace VotoMVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(ProcesoElectoral data)
         {
-            // FILTRO 1: Validar que el nombre no sea nulo o muy corto
+            // Filtros de validación
             if (string.IsNullOrWhiteSpace(data.Nombre) || data.Nombre.Length < 5)
             {
-                ModelState.AddModelError("Nombre", "El nombre del proceso debe tener al menos 5 caracteres.");
+                ModelState.AddModelError("Nombre", "El nombre debe ser descriptivo (ej. Elecciones Presidenciales 2026).");
                 return View(data);
             }
 
-            // FILTRO 2: Validar coherencia de fechas (Lógica de tiempo)
-            // No puedes terminar antes de empezar
             if (data.FechaFin <= data.FechaInicio)
             {
-                ModelState.AddModelError("FechaFin", "La fecha de finalización debe ser posterior a la de inicio.");
+                ModelState.AddModelError("FechaFin", "La elección no puede terminar antes de empezar.");
                 return View(data);
             }
 
-            // FILTRO 3: Validar que el proceso no empiece en el pasado
-            // Le damos un margen de 10 minutos por desfases de reloj entre tu PC y Render
-            if (data.FechaInicio < DateTime.Now.AddMinutes(-10))
-            {
-                ModelState.AddModelError("FechaInicio", "La fecha de inicio no puede ser una fecha pasada.");
-                return View(data);
-            }
+            // Ajuste de Fechas para Swagger/PostgreSQL (UTC)
+            data.FechaInicio = new DateTime(data.FechaInicio.Year, data.FechaInicio.Month, data.FechaInicio.Day,
+                                           data.FechaInicio.Hour, data.FechaInicio.Minute, 0, DateTimeKind.Utc);
 
-            // FILTRO 4: Validar que no exista otro proceso con el mismo nombre activo
-            var listado = Crud<ProcesoElectoral>.ReadAll();
-            if (listado != null && listado.Data != null)
-            {
-                var duplicado = listado.Data.FirstOrDefault(p =>
-                    p.Nombre.Trim().ToLower() == data.Nombre.Trim().ToLower() && p.Activo);
+            data.FechaFin = new DateTime(data.FechaFin.Year, data.FechaFin.Month, data.FechaFin.Day,
+                                         data.FechaFin.Hour, data.FechaFin.Minute, 0, DateTimeKind.Utc);
 
-                if (duplicado != null)
-                {
-                    ModelState.AddModelError("Nombre", "Ya existe un proceso electoral activo con este nombre.");
-                    return View(data);
-                }
-            }
-
-            // AJUSTE DE FECHAS PARA LA API (Evitar el error de formato)
-            // Forzamos a que sean tratadas como UTC para que PostgreSQL en Render no de error
-            data.FechaInicio = DateTime.SpecifyKind(data.FechaInicio, DateTimeKind.Utc);
-            data.FechaFin = DateTime.SpecifyKind(data.FechaFin, DateTimeKind.Utc);
-
-            // PREPARACIÓN FINAL
             data.Id = 0;
             data.Activo = true;
 
-            // INTENTO DE GUARDADO
-            var result = Crud<ProcesoElectoral>.Create(data);
+            
+            var result = Crud<ProcesoElectoral>.CreateProceso(data);
 
             if (result != null && result.Success)
             {
                 return RedirectToAction(nameof(Index));
             }
 
-            ModelState.AddModelError("", result?.Message ?? "Error de comunicación con la API en Render.");
+            ModelState.AddModelError("", result?.Message ?? "Error al conectar con la API.");
             return View(data);
         }
 
@@ -117,27 +94,37 @@ namespace VotoMVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, ProcesoElectoral data)
         {
-            try
+            if (id != data.Id) return NotFound();
+
+            if (ModelState.IsValid)
             {
-                var result = Crud<ProcesoElectoral>.Update(id, data);
-                if (result != null && result.Success) return RedirectToAction(nameof(Index));
-                return View(data);
+                // Forzamos UTC y segundos a 0 para mantener la paz con la API
+                data.FechaInicio = new DateTime(data.FechaInicio.Year, data.FechaInicio.Month, data.FechaInicio.Day,
+                                               data.FechaInicio.Hour, data.FechaInicio.Minute, 0, DateTimeKind.Utc);
+
+                data.FechaFin = new DateTime(data.FechaFin.Year, data.FechaFin.Month, data.FechaFin.Day,
+                                             data.FechaFin.Hour, data.FechaFin.Minute, 0, DateTimeKind.Utc);
+
+             
+                var result = Crud<ProcesoElectoral>.UpdateProceso(id, data);
+
+                if (result != null && result.Success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+
+                ModelState.AddModelError("", result?.Message ?? "Error al actualizar en la API.");
             }
-            catch { return View(data); }
+            return View(data);
         }
 
         // GET: ProcesoElectoralesController/Delete/5
         public ActionResult Delete(int id)
         {
             var result = Crud<ProcesoElectoral>.GetById(id);
-
-            // 2. Si no hay datos (API caída o ID inexistente), regresamos al Index
-            if (result == null || result.Data == null)
-            {
+            if (result?.Data == null)
                 return RedirectToAction(nameof(Index));
-            }
 
-            // 3. Enviamos SOLO la especie a la vista
             return View(result.Data);
         }
 

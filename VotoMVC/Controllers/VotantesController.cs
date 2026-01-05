@@ -64,8 +64,26 @@ namespace VotoMVC.Controllers
         // POST: VotantesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Votante data)
+        public ActionResult Create(Votante data,IFormFile FotoArchivo)
         {
+            if (FotoArchivo != null && FotoArchivo.Length > 0)
+            {
+                string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "fotos");
+                if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+
+                string nombreArchivo = Guid.NewGuid().ToString() + Path.GetExtension(FotoArchivo.FileName);
+                string filePath = Path.Combine(folderPath, nombreArchivo);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    FotoArchivo.CopyTo(stream);
+                }
+                data.ImagenVerificacion = "/fotos/" + nombreArchivo;
+            }
+            else
+            {
+                data.ImagenVerificacion = "N/A"; // Si no hay foto, ponemos N/A para que no falle la API
+            }
             // FILTRO 1: Validar que la cédula sea real 
             if (!ValidarCedulaEcuatoriana(data.Cedula))
             {
@@ -108,7 +126,7 @@ namespace VotoMVC.Controllers
             data.Id = 0;
             data.YaVoto = false;
             data.EstaHabilitado = true;
-            data.ImagenVerificacion ??= "N/A";
+           
 
             var result = Crud<Votante>.Create(data);
 
