@@ -14,7 +14,8 @@ namespace VotoModelos
 
         public string Nombre { get; set; }   // Nombre del candidato
         public string Partido { get; set; }  // Partido político
-        public bool Activo { get; set; }      // Si está habilitado para votar
+        public bool Activo { get; set; } = true;      // Si está habilitado para votar
+        public string? ImagenVerificacion { get; set; }
         public int ProcesoElectoralId { get; set; }
     }   
 }

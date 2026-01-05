@@ -24,14 +24,14 @@ namespace SitemaVoto.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OpcionElectoral>>> GetOpcionElectoral()
         {
-            return await _context.OpcionElectoral.ToListAsync();
+            return await _context.OpcionElectorales.ToListAsync();
         }
 
         // GET: api/OpcionElectorals/5
         [HttpGet("{id}")]
         public async Task<ActionResult<OpcionElectoral>> GetOpcionElectoral(int id)
         {
-            var opcionElectoral = await _context.OpcionElectoral.FindAsync(id);
+            var opcionElectoral = await _context.OpcionElectorales.FindAsync(id);
 
             if (opcionElectoral == null)
             {
@@ -77,7 +77,7 @@ namespace SitemaVoto.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<OpcionElectoral>> PostOpcionElectoral(OpcionElectoral opcionElectoral)
         {
-            _context.OpcionElectoral.Add(opcionElectoral);
+            _context.OpcionElectorales.Add(opcionElectoral);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetOpcionElectoral", new { id = opcionElectoral.Id }, opcionElectoral);
@@ -87,13 +87,13 @@ namespace SitemaVoto.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOpcionElectoral(int id)
         {
-            var opcionElectoral = await _context.OpcionElectoral.FindAsync(id);
+            var opcionElectoral = await _context.OpcionElectorales.FindAsync(id);
             if (opcionElectoral == null)
             {
                 return NotFound();
             }
 
-            _context.OpcionElectoral.Remove(opcionElectoral);
+            _context.OpcionElectorales.Remove(opcionElectoral);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -101,7 +101,7 @@ namespace SitemaVoto.Api.Controllers
 
         private bool OpcionElectoralExists(int id)
         {
-            return _context.OpcionElectoral.Any(e => e.Id == id);
+            return _context.OpcionElectorales.Any(e => e.Id == id);
         }
     }
 }

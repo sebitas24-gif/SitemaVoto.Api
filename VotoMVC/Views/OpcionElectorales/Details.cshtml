@@ -1,4 +1,4 @@
-﻿@model VotoModelos.ProcesoElectoral
+﻿@model VotoModelos.OpcionElectoral
 
 @{
     ViewData["Title"] = "Details";
@@ -7,7 +7,7 @@
 <h1>Details</h1>
 
 <div>
-    <h4>ProcesoElectoral</h4>
+    <h4>OpcionElectoral</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -17,22 +17,28 @@
             @Html.DisplayFor(model => model.Nombre)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaInicio)
+            @Html.DisplayNameFor(model => model.Partido)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaInicio)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaFin)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaFin)
+            @Html.DisplayFor(model => model.Partido)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Activo)
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Activo)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.ImagenVerificacion)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ImagenVerificacion)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.ProcesoElectoralId)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ProcesoElectoralId)
         </dd>
     </dl>
 </div>

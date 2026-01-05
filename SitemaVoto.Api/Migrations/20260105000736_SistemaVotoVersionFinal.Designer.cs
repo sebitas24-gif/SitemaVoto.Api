@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SitemaVoto.Api.Migrations
 {
     [DbContext(typeof(SitemaVotoApiContext))]
-    [Migration("20260104234648_Estructura")]
-    partial class Estructura
+    [Migration("20260105000736_SistemaVotoVersionFinal")]
+    partial class SistemaVotoVersionFinal
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,7 +46,7 @@ namespace SitemaVoto.Api.Migrations
                     b.ToTable("Auditorias");
                 });
 
-            modelBuilder.Entity("VotoModelos.OpcionElectoral", b =>
+            modelBuilder.Entity("VotoModelos.OpcionElectorales", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -56,6 +56,9 @@ namespace SitemaVoto.Api.Migrations
 
                     b.Property<bool>("Activo")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("ImagenVerificacion")
+                        .HasColumnType("text");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -70,7 +73,7 @@ namespace SitemaVoto.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OpcionElectoral");
+                    b.ToTable("OpcionElectorales");
                 });
 
             modelBuilder.Entity("VotoModelos.Papeleta", b =>
@@ -149,6 +152,10 @@ namespace SitemaVoto.Api.Migrations
                     b.Property<string>("Nombre")
                         .HasColumnType("text");
 
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("YaVoto")
                         .HasColumnType("boolean");
 
@@ -169,6 +176,9 @@ namespace SitemaVoto.Api.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("OpcionElectoralId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProcesoElectoralId")
                         .HasColumnType("integer");
 
                     b.Property<string>("VotoEncriptado")

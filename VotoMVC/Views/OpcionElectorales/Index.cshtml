@@ -1,4 +1,4 @@
-﻿@model IEnumerable<VotoModelos.Papeleta>
+﻿@model IEnumerable<VotoModelos.OpcionElectoral>
 
 @{
     ViewData["Title"] = "Index";
@@ -13,13 +13,16 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.FechaEmision)
+                @Html.DisplayNameFor(model => model.Nombre)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CodigoConfirmacion)
+                @Html.DisplayNameFor(model => model.Partido)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.VotanteId)
+                @Html.DisplayNameFor(model => model.Activo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImagenVerificacion)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.ProcesoElectoralId)
@@ -31,13 +34,16 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.FechaEmision)
+                @Html.DisplayFor(modelItem => item.Nombre)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.CodigoConfirmacion)
+                @Html.DisplayFor(modelItem => item.Partido)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.VotanteId)
+                @Html.DisplayFor(modelItem => item.Activo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ImagenVerificacion)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.ProcesoElectoralId)

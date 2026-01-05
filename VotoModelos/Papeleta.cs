@@ -16,7 +16,7 @@ namespace VotoModelos
         public DateTime FechaEmision { get; set; }
 
         // Código único (ej. un GUID o Hash) para validar que el certificado es real
-        public string? CodigoConfirmacion { get; set; }
+        public string? CodigoConfirmacion { get; set; } = Guid.NewGuid().ToString(); // Genera un código único automático
 
         // RELACIÓN DE IDENTIDAD:
         // Vincula el comprobante al ciudadano, pero NO al voto.

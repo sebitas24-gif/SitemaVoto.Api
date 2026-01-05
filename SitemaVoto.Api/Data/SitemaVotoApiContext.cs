@@ -22,5 +22,5 @@ using VotoModelos;
 
     public DbSet<VotoModelos.Voto> Votos { get; set; } = default!;
 
-    public DbSet<VotoModelos.OpcionElectoral> OpcionElectoral { get; set; } = default!;
+    public DbSet<VotoModelos.OpcionElectoral> OpcionElectorales { get; set; } = default!;
     }

@@ -14,8 +14,8 @@ namespace VotoModelos
         public string? Nombre { get; set; }
 
         public string? Apellido { get; set; }
+        public string Password { get; set; }
 
-       
         public DateTime? FechaNacimiento { get; set; }
 
         public bool EstaHabilitado { get; set; }

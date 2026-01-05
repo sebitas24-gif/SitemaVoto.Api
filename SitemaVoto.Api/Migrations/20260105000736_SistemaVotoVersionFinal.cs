@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SitemaVoto.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class Estructura : Migration
+    public partial class SistemaVotoVersionFinal : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -28,7 +28,7 @@ namespace SitemaVoto.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OpcionElectoral",
+                name: "OpcionElectorales",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -36,6 +36,7 @@ namespace SitemaVoto.Api.Migrations
                     Nombre = table.Column<string>(type: "text", nullable: false),
                     Partido = table.Column<string>(type: "text", nullable: false),
                     Activo = table.Column<bool>(type: "boolean", nullable: false),
+                    ImagenVerificacion = table.Column<string>(type: "text", nullable: true),
                     ProcesoElectoralId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -84,6 +85,7 @@ namespace SitemaVoto.Api.Migrations
                     Cedula = table.Column<string>(type: "text", nullable: true),
                     Nombre = table.Column<string>(type: "text", nullable: true),
                     Apellido = table.Column<string>(type: "text", nullable: true),
+                    Password = table.Column<string>(type: "text", nullable: false),
                     FechaNacimiento = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     EstaHabilitado = table.Column<bool>(type: "boolean", nullable: false),
                     YaVoto = table.Column<bool>(type: "boolean", nullable: false),
@@ -102,6 +104,7 @@ namespace SitemaVoto.Api.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FechaHora = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     OpcionElectoralId = table.Column<int>(type: "integer", nullable: false),
+                    ProcesoElectoralId = table.Column<int>(type: "integer", nullable: false),
                     VotoEncriptado = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -117,7 +120,7 @@ namespace SitemaVoto.Api.Migrations
                 name: "Auditorias");
 
             migrationBuilder.DropTable(
-                name: "OpcionElectoral");
+                name: "OpcionElectorales");
 
             migrationBuilder.DropTable(
                 name: "Papeletas");
