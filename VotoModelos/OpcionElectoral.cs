@@ -20,5 +20,7 @@ namespace VotoModelos
 
         public string Cargo { get; set; }
         public bool Activo { get; set; } = true;      // Si está habilitado para votar
-    }   
+        public ICollection<ResultadoOpcion> Resultados { get; set; } = new List<ResultadoOpcion>();
+
+    }
 }

@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace VotoModelos
 {
-    internal class Administrador
+    public class Administrador
     {
         [Key] public int Id { get; set; }
         public int IdVotante {  get; set; }
+        public Votante Votante { get; set; } = null!;
+
     }
 }

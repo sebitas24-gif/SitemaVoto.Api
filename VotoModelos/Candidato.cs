@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace VotoModelos
 {
-    internal class Candidato
+    public class Candidato
     {
         [Key] public int Id { get; set; }
         public int IdVotante { get; set; }
@@ -15,5 +15,7 @@ namespace VotoModelos
         public string Partido {  get; set; }
         
         public string Eslogan {  get; set; }
+        public ICollection<OpcionElectoral> Opciones { get; set; } = new List<OpcionElectoral>();
+
     }
 }

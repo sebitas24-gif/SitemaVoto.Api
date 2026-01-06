@@ -7,12 +7,14 @@ using System.Threading.Tasks;
 
 namespace VotoModelos
 {
-    internal class ResultadoOpcion
+    public class ResultadoOpcion
     {
         [Key] public int Id {  get; set; }
         public int IdProceso {  get; set; }
         public int IdOpcion { get; set;}
 
-        public int TotalVotos {  get; set; }
+        public int TotalVotos { get; set; } = 0;
+        public ProcesoElectoral? ProcesoElectoral { get; set; }
+        public OpcionElectoral? OpcionElectoral { get; set; }
     }
 }

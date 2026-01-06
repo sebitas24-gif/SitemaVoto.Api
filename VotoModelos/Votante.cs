@@ -22,5 +22,11 @@ namespace VotoModelos
         public string? ImagenVerificacion { get; set; }
 
         public DateTime? FechaNacimiento { get; set; }
+        // Navegación (1:1)
+        public Administrador? Administrador { get; set; }
+        public Candidato? Candidato { get; set; }
+
+        // Navegación (1:N)
+        public ICollection<Papeleta> Papeletas { get; set; } = new List<Papeleta>();
     }
 }

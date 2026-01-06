@@ -17,6 +17,7 @@
             public string? VotoEncriptado { get; set; }
 
             public DateTime FechaVoto { get; set; }
+            public ProcesoElectoral ProcesoElectoral{ get;set; }
          
         }
     }

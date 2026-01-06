@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace VotoModelos
 {
-    internal class HistorialResultados
+    public class HistorialResultados
     {
         [Key] public int Id {  get; set; }
         public int IdProcesoElectoral { get; set; }
@@ -16,5 +16,9 @@ namespace VotoModelos
         public int TotalVotosProcesoElectoral { get; set; }
         public double PorcentajeVictoria { get; set; }
         public DateTime FechaConsolidacion {  get; set; }
+        public ProcesoElectoral? ProcesoElectoral { get; set; }
+        public OpcionElectoral? OpcionGanadora { get; set; }
+
+
     }
 }
