@@ -7,14 +7,9 @@ using System.Threading.Tasks;
 
 namespace VotoModelos
 {
-    public class Auditoria
+    internal class Administrador
     {
         [Key] public int Id { get; set; }
-
-        public DateTime FechaHora { get; set; }
-
-        public string? TipoEvento { get; set; }
-
-        public string? EstadoProceso { get; set; }  
+        public int IdVotante {  get; set; }
     }
 }

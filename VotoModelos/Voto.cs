@@ -12,16 +12,11 @@
         {
             [Key] public int Id { get; set; }
 
-            public DateTime FechaHora { get; set; }
+            public int IdOpcionElectoral{ get; set; }
 
-            // NO guarda relación directa con el votante
-            public int OpcionElectoralId { get; set; }
-            // Agregamos el ProcesoElectoralId para saber a qué elección pertenece
-      
-            public int ProcesoElectoralId { get; set; }
+            public string? VotoEncriptado { get; set; }
 
-        // Usamos este campo STRING para la seguridad/encriptación
-         public string? VotoEncriptado { get; set; } 
-   
+            public DateTime FechaVoto { get; set; }
+         
         }
     }

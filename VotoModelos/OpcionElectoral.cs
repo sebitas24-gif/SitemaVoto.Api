@@ -12,10 +12,13 @@ namespace VotoModelos
         [Key]
         public int Id { get; set; }
 
-        public string Nombre { get; set; }   // Nombre del candidato
-        public string Partido { get; set; }  // Partido político
+        public int IdProcesoElectoral{ get; set; }
+
+        public int IdCandidato {  get; set; }
+        public string NombreOpcion { get; set; }   // Nombre del candidato
+        public string Tipo { get; set; }  // Partido político
+
+        public string Cargo { get; set; }
         public bool Activo { get; set; } = true;      // Si está habilitado para votar
-        public string? ImagenVerificacion { get; set; }
-        public int ProcesoElectoralId { get; set; }
     }   
 }
