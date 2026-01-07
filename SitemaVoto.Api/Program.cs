@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using SitemaVoto.Api.Services;
 using VotoModelos;
 namespace SitemaVoto.Api
 {
@@ -20,7 +21,8 @@ namespace SitemaVoto.Api
                 options.AddPolicy("AllowAll", b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
 
-            builder.Services.AddControllers();
+        
+            builder.Services.AddScoped<AuthService>();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -34,6 +36,7 @@ namespace SitemaVoto.Api
 
             // Configure the HTTP request pipeline.
             //if (app.Environment.IsDevelopment())
+            app.UseCors("AllowAll");
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
@@ -47,7 +50,7 @@ namespace SitemaVoto.Api
                 ForwardedHeaders = ForwardedHeaders.All
             });
 
-            app.UseCors("AllowAll");
+          
             //app.UseHttpsRedirection();
 
 
