@@ -11,47 +11,47 @@ namespace SitemaVoto.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PapeletasController : ControllerBase
+    public class AdministradorsController : ControllerBase
     {
         private readonly SitemaVotoApiContext _context;
 
-        public PapeletasController(SitemaVotoApiContext context)
+        public AdministradorsController(SitemaVotoApiContext context)
         {
             _context = context;
         }
 
-        // GET: api/Papeletas
+        // GET: api/Administradors
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Papeleta>>> GetPapeletas()
+        public async Task<ActionResult<IEnumerable<Administrador>>> GetAdministrador()
         {
-            return await _context.Papeletas.ToListAsync();
+            return await _context.Administrador.ToListAsync();
         }
 
-        // GET: api/Papeletas/5
+        // GET: api/Administradors/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Papeleta>> GetPapeleta(int id)
+        public async Task<ActionResult<Administrador>> GetAdministrador(int id)
         {
-            var papeleta = await _context.Papeletas.FindAsync(id);
+            var administrador = await _context.Administrador.FindAsync(id);
 
-            if (papeleta == null)
+            if (administrador == null)
             {
                 return NotFound();
             }
 
-            return papeleta;
+            return administrador;
         }
 
-        // PUT: api/Papeletas/5
+        // PUT: api/Administradors/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPapeleta(int id, Papeleta papeleta)
+        public async Task<IActionResult> PutAdministrador(int id, Administrador administrador)
         {
-            if (id != papeleta.Id)
+            if (id != administrador.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(papeleta).State = EntityState.Modified;
+            _context.Entry(administrador).State = EntityState.Modified;
 
             try
             {
@@ -59,7 +59,7 @@ namespace SitemaVoto.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!PapeletaExists(id))
+                if (!AdministradorExists(id))
                 {
                     return NotFound();
                 }
@@ -72,36 +72,36 @@ namespace SitemaVoto.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/Papeletas
+        // POST: api/Administradors
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Papeleta>> PostPapeleta(Papeleta papeleta)
+        public async Task<ActionResult<Administrador>> PostAdministrador(Administrador administrador)
         {
-            _context.Papeletas.Add(papeleta);
+            _context.Administrador.Add(administrador);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPapeleta", new { id = papeleta.Id }, papeleta);
+            return CreatedAtAction("GetAdministrador", new { id = administrador.Id }, administrador);
         }
 
-        // DELETE: api/Papeletas/5
+        // DELETE: api/Administradors/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePapeleta(int id)
+        public async Task<IActionResult> DeleteAdministrador(int id)
         {
-            var papeleta = await _context.Papeletas.FindAsync(id);
-            if (papeleta == null)
+            var administrador = await _context.Administrador.FindAsync(id);
+            if (administrador == null)
             {
                 return NotFound();
             }
 
-            _context.Papeletas.Remove(papeleta);
+            _context.Administrador.Remove(administrador);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool PapeletaExists(int id)
+        private bool AdministradorExists(int id)
         {
-            return _context.Papeletas.Any(e => e.Id == id);
+            return _context.Administrador.Any(e => e.Id == id);
         }
     }
 }

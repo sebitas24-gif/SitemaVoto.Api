@@ -51,18 +51,7 @@ namespace VotoMVC.Controllers
                 return View(data);
             }
 
-            if (votanteResult.Data.YaVoto)
-            {
-                ModelState.AddModelError("", "Este votante ya ejerció su voto.");
-                return View(data);
-            }
-
-            // 2️⃣ Preparar voto (EL USUARIO NO VE ESTO)
-            data.Id = 0; // 🔹 CAMBIO: la DB asigna
-            data.FechaHora = DateTime.Now; // 🔹 CAMBIO: sistema
-            data.VotoEncriptado = BCrypt.Net.BCrypt.HashPassword(
-                $"{data.OpcionElectoralId}-{Guid.NewGuid()}"
-            ); // 🔹 CAMBIO: voto anónimo real
+           
 
             // 3️⃣ Guardar voto
             var votoResult = Crud<VotoModelos.Voto>.Create(data);
@@ -74,7 +63,7 @@ namespace VotoMVC.Controllers
             }
 
             // 4️⃣ Marcar votante como que ya votó
-            votanteResult.Data.YaVoto = true;
+          
             Crud<VotoModelos.Votante>.Update(votanteResult.Data.Id, votanteResult.Data);
 
             // 5️⃣ Fin
@@ -120,15 +109,7 @@ namespace VotoMVC.Controllers
 
                 // 2. IMPORTANTE: Si el usuario cambió el candidato, 
                 // debemos re-generar el hash de seguridad
-                data.VotoEncriptado = BCrypt.Net.BCrypt.HashPassword(data.OpcionElectoralId.ToString());
-
-                // 3. La fecha normalmente no se edita, pero la API la requiere.
-                // Si en tu vista la quitaste, asegúrate de que no vaya nula:
-                if (data.FechaHora == DateTime.MinValue)
-                {
-                    data.FechaHora = DateTime.Now;
-                }
-
+             
                 // 4. Enviamos la actualización a la API
                 var result = Voto.ApiConsumer.Crud<VotoModelos.Voto>.Update(id, data);
 

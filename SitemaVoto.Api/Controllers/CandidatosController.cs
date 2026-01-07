@@ -11,47 +11,47 @@ namespace SitemaVoto.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuditoriasController : ControllerBase
+    public class CandidatosController : ControllerBase
     {
         private readonly SitemaVotoApiContext _context;
 
-        public AuditoriasController(SitemaVotoApiContext context)
+        public CandidatosController(SitemaVotoApiContext context)
         {
             _context = context;
         }
 
-        // GET: api/Auditorias
+        // GET: api/Candidatos
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Auditoria>>> GetAuditoria()
+        public async Task<ActionResult<IEnumerable<Candidato>>> GetCandidato()
         {
-            return await _context.Auditorias.ToListAsync();
+            return await _context.Candidato.ToListAsync();
         }
 
-        // GET: api/Auditorias/5
+        // GET: api/Candidatos/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Auditoria>> GetAuditoria(int id)
+        public async Task<ActionResult<Candidato>> GetCandidato(int id)
         {
-            var auditoria = await _context.Auditorias.FindAsync(id);
+            var candidato = await _context.Candidato.FindAsync(id);
 
-            if (auditoria == null)
+            if (candidato == null)
             {
                 return NotFound();
             }
 
-            return auditoria;
+            return candidato;
         }
 
-        // PUT: api/Auditorias/5
+        // PUT: api/Candidatos/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAuditoria(int id, Auditoria auditoria)
+        public async Task<IActionResult> PutCandidato(int id, Candidato candidato)
         {
-            if (id != auditoria.Id)
+            if (id != candidato.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(auditoria).State = EntityState.Modified;
+            _context.Entry(candidato).State = EntityState.Modified;
 
             try
             {
@@ -59,7 +59,7 @@ namespace SitemaVoto.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AuditoriaExists(id))
+                if (!CandidatoExists(id))
                 {
                     return NotFound();
                 }
@@ -72,36 +72,36 @@ namespace SitemaVoto.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/Auditorias
+        // POST: api/Candidatos
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Auditoria>> PostAuditoria(Auditoria auditoria)
+        public async Task<ActionResult<Candidato>> PostCandidato(Candidato candidato)
         {
-            _context.Auditorias.Add(auditoria);
+            _context.Candidato.Add(candidato);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAuditoria", new { id = auditoria.Id }, auditoria);
+            return CreatedAtAction("GetCandidato", new { id = candidato.Id }, candidato);
         }
 
-        // DELETE: api/Auditorias/5
+        // DELETE: api/Candidatos/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAuditoria(int id)
+        public async Task<IActionResult> DeleteCandidato(int id)
         {
-            var auditoria = await _context.Auditorias.FindAsync(id);
-            if (auditoria == null)
+            var candidato = await _context.Candidato.FindAsync(id);
+            if (candidato == null)
             {
                 return NotFound();
             }
 
-            _context.Auditorias.Remove(auditoria);
+            _context.Candidato.Remove(candidato);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AuditoriaExists(int id)
+        private bool CandidatoExists(int id)
         {
-            return _context.Auditorias.Any(e => e.Id == id);
+            return _context.Candidato.Any(e => e.Id == id);
         }
     }
 }

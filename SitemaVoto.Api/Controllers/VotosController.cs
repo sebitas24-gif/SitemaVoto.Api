@@ -11,23 +11,23 @@ namespace SitemaVoto.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class VotoesController : ControllerBase
+    public class VotosController : ControllerBase
     {
         private readonly SitemaVotoApiContext _context;
 
-        public VotoesController(SitemaVotoApiContext context)
+        public VotosController(SitemaVotoApiContext context)
         {
             _context = context;
         }
 
-        // GET: api/Votoes
+        // GET: api/Votos
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Voto>>> GetVoto()
+        public async Task<ActionResult<IEnumerable<Voto>>> GetVotos()
         {
             return await _context.Votos.ToListAsync();
         }
 
-        // GET: api/Votoes/5
+        // GET: api/Votos/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Voto>> GetVoto(int id)
         {
@@ -41,7 +41,7 @@ namespace SitemaVoto.Api.Controllers
             return voto;
         }
 
-        // PUT: api/Votoes/5
+        // PUT: api/Votos/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutVoto(int id, Voto voto)
@@ -72,7 +72,7 @@ namespace SitemaVoto.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/Votoes
+        // POST: api/Votos
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Voto>> PostVoto(Voto voto)
@@ -83,7 +83,7 @@ namespace SitemaVoto.Api.Controllers
             return CreatedAtAction("GetVoto", new { id = voto.Id }, voto);
         }
 
-        // DELETE: api/Votoes/5
+        // DELETE: api/Votos/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVoto(int id)
         {

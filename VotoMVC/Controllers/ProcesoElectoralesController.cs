@@ -61,7 +61,7 @@ namespace VotoMVC.Controllers
                                          data.FechaFin.Hour, data.FechaFin.Minute, 0, DateTimeKind.Utc);
 
             data.Id = 0;
-            data.Activo = true;
+         
 
             
             var result = Crud<ProcesoElectoral>.CreateProceso(data);

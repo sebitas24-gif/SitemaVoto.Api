@@ -124,8 +124,7 @@ namespace VotoMVC.Controllers
 
             // Si pasó todos los filtros, preparamos y guardamos
             data.Id = 0;
-            data.YaVoto = false;
-            data.EstaHabilitado = true;
+         
            
 
             var result = Crud<Votante>.Create(data);

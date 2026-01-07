@@ -9,12 +9,13 @@ namespace VotoModelos
 {
     public class Candidato
     {
-        [Key] public int Id { get; set; }
-        public int IdVotante { get; set; }
+          [Key] public int Id { get; set; }
 
-        public string Partido {  get; set; }
-        
-        public string Eslogan {  get; set; }
+        public int IdVotante { get; set; }
+        public Votante Votante { get; set; } = null!;
+
+        public string? Partido { get; set; }
+        public string? Eslogan { get; set; }
         public ICollection<OpcionElectoral> Opciones { get; set; } = new List<OpcionElectoral>();
 
     }

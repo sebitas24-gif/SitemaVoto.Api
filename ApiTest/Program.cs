@@ -19,8 +19,7 @@ namespace ApiTest
                 Apellido = "Perez",
                 Cedula = "12345678",
                 FechaNacimiento = new DateTime(1990, 1, 1),
-                EstaHabilitado = true,
-                YaVoto = false
+            
             };
 
             // 2. Intento de creación
