@@ -1,14 +1,26 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Voto.ApiConsumer;
+using VotoModelos;
 
 namespace VotoMVC.Controllers
 {
     public class VotantesController : Controller
     {
+        public VotantesController()
+        {
+            // IMPORTANTE: Si la API en el otro PC usa un puerto específico
+            Voto.ApiConsumer.Crud<VotoModelos.Votante>.UrlBase = "http://10.241.253.223:8085/api/Votantes";
+        }
         // GET: VotantesController
         public ActionResult Index()
         {
-            return View();
+            var apiResult = Crud<Votante>.ReadAll();
+
+            // Si apiResult es nulo o Data es nulo, mandamos lista vacía
+            var modelo = apiResult?.Data ?? new List<Votante>();
+
+            return View(modelo);
         }
 
         // GET: VotantesController/Details/5

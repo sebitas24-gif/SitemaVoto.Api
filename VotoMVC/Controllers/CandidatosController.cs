@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Voto.ApiConsumer;
 using VotoModelos;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VotoMVC.Controllers
 {
@@ -26,7 +27,15 @@ namespace VotoMVC.Controllers
         // GET: CandidatosController/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var result = Crud<Candidato>.GetById(id);
+
+            // Verificamos que no sea nulo antes de ir a la vista
+            if (result == null || result.Data == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(result.Data);
         }
 
         // GET: CandidatosController/Create
@@ -53,42 +62,70 @@ namespace VotoMVC.Controllers
         // GET: CandidatosController/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var result = Crud<Candidato>.GetById(id);
+
+            if (result == null || result.Data == null)
+            {
+                return NotFound();
+            }
+
+            return View(result.Data);
         }
 
         // POST: CandidatosController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, Candidato data)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var result = Crud<Candidato>.Update(id, data);
+
+                if (result != null && result.Data != null)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(data);
             }
             catch
             {
-                return View();
+                return View(data);
             }
         }
 
         // GET: CandidatosController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var result = Crud<Candidato>.GetById(id);
+
+            // 2. Si no hay datos (API caída o ID inexistente), regresamos al Index
+            if (result == null || result.Data == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            // 3. Enviamos SOLO la candidato a la vista
+            return View(result.Data);
         }
 
         // POST: CandidatosController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, Candidato data)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var result = Crud<Candidato>.Delete(id);
+
+                if (result != null && result.Data == true) // Si Data es true, se eliminó bien
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(data);
             }
             catch
             {
-                return View();
+                return View(data);
             }
         }
     }
