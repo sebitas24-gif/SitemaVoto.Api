@@ -89,4 +89,6 @@ public DbSet<VotoModelos.OpcionElectoral> OpcionElectoral { get; set; } = defaul
     }
 
 public DbSet<VotoModelos.Candidato> Candidato { get; set; } = default!;
+
+public DbSet<VotoModelos.Administrador> Administrador { get; set; } = default!;
 }
