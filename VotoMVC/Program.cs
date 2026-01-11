@@ -13,6 +13,7 @@ namespace VotoMVC
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddHttpClient<VotoMVC.Services.AdminApiService>();
             builder.Services.AddHttpClient();
             builder.Services.AddSession(options =>
             {

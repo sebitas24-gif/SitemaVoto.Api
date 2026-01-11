@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["Title"] = "Asignar Roles";
+}
+
+<h2>Asignar Roles</h2>
+
+<form method="post" asp-action="HacerAdmin">
+    <label>IdVotante:</label>
+    <input name="IdVotante" class="form-control" />
+    <button type="submit" class="btn btn-primary mt-2">Hacer ADMIN</button>
+</form>
+
+<hr />
+
+<form method="post" asp-action="HacerCandidato">
+    <label>IdVotante:</label>
+    <input name="IdVotante" class="form-control" />
+
+    <label class="mt-2">Partido:</label>
+    <input name="Partido" class="form-control" />
+
+    <label class="mt-2">Eslogan:</label>
+    <input name="Eslogan" class="form-control" />
+
+    <button type="submit" class="btn btn-success mt-2">Hacer CANDIDATO</button>
+</form>
+
+<hr />
+
+<form method="post" asp-action="QuitarAdmin">
+    <label>IdVotante:</label>
+    <input name="IdVotante" class="form-control" />
+    <button type="submit" class="btn btn-danger mt-2">Quitar ADMIN</button>
+</form>
+
+<hr />
+
+<form method="post" asp-action="QuitarCandidato">
+    <label>IdVotante:</label>
+    <input name="IdVotante" class="form-control" />
+    <button type="submit" class="btn btn-danger mt-2">Quitar CANDIDATO</button>
+</form>
+
+@if (TempData["msg"] != null)
+{
+    <div class="alert alert-info mt-3">@TempData["msg"]</div>
+}
+
