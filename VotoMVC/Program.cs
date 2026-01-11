@@ -20,6 +20,7 @@ namespace VotoMVC
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+            builder.Services.AddScoped<VotoMVC.Services.AuthApiService>();
 
             var app = builder.Build();
 
