@@ -14,107 +14,69 @@ namespace VotoMVC.Controllers
             _api = api;
         }
 
-        private string? Cedula() => HttpContext.Session.GetString("cedula");
-        private string? Token() => HttpContext.Session.GetString("token");
-
-        // ✅ LECTURA
-        [HttpGet]
+        // GET: /Votacion/Index
         public async Task<IActionResult> Index()
         {
-            var proc = await _api.GetProcesoActivoAsync();
-            if (proc == null) return View("SinProceso");
-
-            int idProceso = (int)proc.idProceso;
-
-            var opcionesRaw = await _api.GetOpcionesAsync(idProceso) ?? new List<dynamic>();
-
-            var vm = new VotacionIndexVM
-            {
-                IdProceso = idProceso,
-                NombreProceso = (string?)proc.nombre,
-                TipoEleccion = (string?)proc.tipoEleccion,
-                Opciones = opcionesRaw.Select(o => new OpcionVM
-                {
-                    IdOpcion = (int)o.idOpcion,
-                    NombreOpcion = (string?)o.nombreOpcion,
-                    Tipo = (string?)o.tipo,
-                    Cargo = (string?)o.cargo
-                }).ToList()
-            };
-
-            return View(vm);
-        }
-
-        // ✅ POST (solo navegación, no guarda nada aún)
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Confirmar(VotacionIndexVM vm)
-        {
-            if (vm.OpcionSeleccionadaId == null)
-            {
-                TempData["msg"] = "Selecciona una opción antes de continuar.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            // guardamos selección en TempData para no exponer en URL
-            TempData["idProceso"] = vm.IdProceso;
-            TempData["idOpcion"] = vm.OpcionSeleccionadaId.Value;
-
-            return RedirectToAction(nameof(ConfirmarVista));
-        }
-
-        // ✅ LECTURA: pantalla confirmación
-        [HttpGet]
-        public async Task<IActionResult> ConfirmarVista()
-        {
-            if (TempData["idProceso"] == null || TempData["idOpcion"] == null)
-                return RedirectToAction(nameof(Index));
-
-            int idProceso = (int)TempData["idProceso"]!;
-            int idOpcion = (int)TempData["idOpcion"]!;
-
-            // recargar opciones para mostrar nombre de la opción elegida
-            var opcionesRaw = await _api.GetOpcionesAsync(idProceso) ?? new List<dynamic>();
-            var elegido = opcionesRaw.FirstOrDefault(o => (int)o.idOpcion == idOpcion);
-
-            var vm = new ConfirmarVotoVM
-            {
-                IdProceso = idProceso,
-                IdOpcion = idOpcion,
-                NombreOpcion = elegido != null ? (string?)elegido.nombreOpcion : "Opción",
-                Cargo = elegido != null ? (string?)elegido.cargo : ""
-            };
-
-            return View("Confirmar", vm);
-        }
-
-        // ✅ ESCRITURA: emitir voto real
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Emitir(ConfirmarVotoVM vm)
-        {
-            var cedula = Cedula();
+            var cedula = HttpContext.Session.GetString("cedula");
             if (string.IsNullOrWhiteSpace(cedula))
                 return RedirectToAction("Login", "Auth");
 
-            var resp = await _api.EmitirAsync(cedula, vm.IdProceso, vm.IdOpcion, Token());
-            if (resp == null)
+            var proceso = await _api.ObtenerProcesoActivoAsync();
+            var opciones = await _api.ObtenerOpcionesActivoAsync();
+
+            if (proceso == null || opciones == null)
             {
-                TempData["msg"] = "Error al emitir voto.";
-                return RedirectToAction(nameof(Index));
+                ViewBag.Error = "No hay proceso electoral activo o no se pudieron cargar opciones.";
+                return View(new OpcionesActivoVM());
             }
 
-            var final = new FinalVM
+            ViewBag.Proceso = proceso;
+            return View(opciones);
+        }
+
+        // POST: /Votacion/Confirmar
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Confirmar(int idOpcion)
+        {
+            var cedula = HttpContext.Session.GetString("cedula");
+            if (string.IsNullOrWhiteSpace(cedula))
+                return RedirectToAction("Login", "Auth");
+
+            var opciones = await _api.ObtenerOpcionesActivoAsync();
+            if (opciones == null)
             {
-                Message = (string?)resp.message,
-                CodigoVerificacion = (string?)resp.codigoVerificacion,
-                FechaEmision = DateTime.UtcNow
-            };
+                TempData["Error"] = "No se pudieron cargar opciones.";
+                return RedirectToAction("Index");
+            }
 
-            // cerrar sesión por seguridad
-            HttpContext.Session.Clear();
+            var op = opciones.Opciones.FirstOrDefault(x => x.IdOpcion == idOpcion);
+            if (op == null)
+            {
+                TempData["Error"] = "Opción inválida.";
+                return RedirectToAction("Index");
+            }
 
-            return View("Final", final);
+            return View(op);
+        }
+
+        // POST: /Votacion/Emitir
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Emitir(int idOpcion)
+        {
+            var cedula = HttpContext.Session.GetString("cedula");
+            if (string.IsNullOrWhiteSpace(cedula))
+                return RedirectToAction("Login", "Auth");
+
+            var conf = await _api.EmitirVotoAsync(cedula, idOpcion);
+            if (conf == null)
+            {
+                TempData["Error"] = "No se pudo registrar el voto (puede que ya votaste).";
+                return RedirectToAction("Index");
+            }
+
+            return View("Confirmacion", conf);
         }
     }
 }

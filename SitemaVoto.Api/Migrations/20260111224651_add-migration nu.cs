@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SitemaVoto.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class nue : Migration
+    public partial class addmigrationnu : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -148,7 +148,7 @@ namespace SitemaVoto.Api.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     IdProcesoElectoral = table.Column<int>(type: "integer", nullable: false),
-                    IdCandidato = table.Column<int>(type: "integer", nullable: false),
+                    IdCandidato = table.Column<int>(type: "integer", nullable: true),
                     NombreOpcion = table.Column<string>(type: "text", nullable: false),
                     Tipo = table.Column<string>(type: "text", nullable: false),
                     Cargo = table.Column<string>(type: "text", nullable: false),

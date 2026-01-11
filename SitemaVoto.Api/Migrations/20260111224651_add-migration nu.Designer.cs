@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SitemaVoto.Api.Migrations
 {
     [DbContext(typeof(SitemaVotoApiContext))]
-    [Migration("20260108120934_nue")]
-    partial class nue
+    [Migration("20260111224651_add-migration nu")]
+    partial class addmigrationnu
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -125,7 +125,7 @@ namespace SitemaVoto.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("IdCandidato")
+                    b.Property<int?>("IdCandidato")
                         .HasColumnType("integer");
 
                     b.Property<int>("IdProcesoElectoral")

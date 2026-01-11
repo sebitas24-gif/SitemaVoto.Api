@@ -1,33 +1,57 @@
-﻿@model VotoMVC.ViewModelos.Votacion.VotacionIndexVM
+﻿@model VotoMVC.ViewModelos.OpcionesActivoVM
+@{
+    var proceso = ViewBag.Proceso as VotoMVC.ViewModelos.ProcesoActivoVM;
+}
 
 <h2>Votación</h2>
 
-@if (TempData["msg"] != null)
+@if (TempData["Error"] != null)
 {
-    <div class="alert alert-warning">@TempData["msg"]</div>
+    <p style="color:red">@TempData["Error"]</p>
+}
+@if (ViewBag.Error != null)
+{
+    <p style="color:red">@ViewBag.Error</p>
 }
 
-<p><b>Proceso:</b> @Model.NombreProceso</p>
-<p><b>Tipo:</b> @Model.TipoEleccion</p>
+@if (proceso != null)
+{
+    <p><b>Proceso:</b> @proceso.Nombre</p>
+    <p><b>Tipo:</b> @proceso.TipoEleccion</p>
+    <p><b>Fecha:</b> @proceso.FechaInicio.ToShortDateString() - @proceso.FechaFin.ToShortDateString()</p>
+}
 
-<form asp-action="Confirmar" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="IdProceso" />
-
-    <h4>Seleccione una opción</h4>
-
-    @foreach (var o in Model.Opciones)
-    {
-        <div class="form-check">
-            <input class="form-check-input"
-                   type="radio"
-                   name="OpcionSeleccionadaId"
-                   value="@o.IdOpcion" />
-            <label class="form-check-label">
-                <b>@o.NombreOpcion</b> (@o.Tipo) - @o.Cargo
-            </label>
-        </div>
-    }
-
-    <button class="btn btn-primary mt-3" type="submit">Continuar</button>
-</form>
+@if (Model?.Opciones == null || Model.Opciones.Count == 0)
+{
+    <p>No hay opciones disponibles.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Opción</th>
+                <th>Cargo</th>
+                <th>Tipo</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var op in Model.Opciones)
+            {
+                <tr>
+                    <td>@op.NombreOpcion</td>
+                    <td>@op.Cargo</td>
+                    <td>@op.Tipo</td>
+                    <td>
+                        <form asp-action="Confirmar" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="idOpcion" value="@op.IdOpcion" />
+                            <button type="submit">Seleccionar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

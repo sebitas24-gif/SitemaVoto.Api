@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using VotoMVC.ViewModelos.Votacion;
+using VotoMVC.ViewModelos;
 namespace VotoMVC.Services
 {
     public class VotacionApiService
@@ -10,41 +11,30 @@ namespace VotoMVC.Services
         public VotacionApiService(HttpClient http, IConfiguration config)
         {
             _http = http;
-            _baseUrl = config["ApiSettings:BaseUrl"]!.TrimEnd('/');
+            _baseUrl = config["ApiSettings:BaseUrl"]!;
         }
 
-        private void SetBearer(string? token)
+        public async Task<ProcesoActivoVM?> ObtenerProcesoActivoAsync()
         {
-            _http.DefaultRequestHeaders.Authorization = null;
-            if (!string.IsNullOrWhiteSpace(token))
-                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var res = await _http.GetAsync($"{_baseUrl}/api/votacion/proceso-activo");
+            if (!res.IsSuccessStatusCode) return null;
+            return await res.Content.ReadFromJsonAsync<ProcesoActivoVM>();
         }
 
-        // LECTURA
-        public async Task<dynamic?> GetProcesoActivoAsync()
+        public async Task<OpcionesActivoVM?> ObtenerOpcionesActivoAsync()
         {
-            return await _http.GetFromJsonAsync<dynamic>($"{_baseUrl}/api/votacion/proceso-activo");
+            var res = await _http.GetAsync($"{_baseUrl}/api/votacion/opciones-activo");
+            if (!res.IsSuccessStatusCode) return null;
+            return await res.Content.ReadFromJsonAsync<OpcionesActivoVM>();
         }
 
-        // LECTURA
-        public async Task<List<dynamic>?> GetOpcionesAsync(int idProceso)
+        public async Task<ConfirmacionVotoVM?> EmitirVotoAsync(string cedula, int idOpcion)
         {
-            return await _http.GetFromJsonAsync<List<dynamic>>($"{_baseUrl}/api/votacion/opciones/{idProceso}");
-        }
+            var res = await _http.PostAsJsonAsync($"{_baseUrl}/api/votacion/emitir",
+                new { Cedula = cedula, IdOpcion = idOpcion });
 
-        // ESCRITURA
-        public async Task<dynamic?> EmitirAsync(string cedula, int idProceso, int idOpcion, string? token)
-        {
-            SetBearer(token);
-            var res = await _http.PostAsJsonAsync($"{_baseUrl}/api/votacion/emitir", new
-            {
-                cedula,
-                idProceso,
-                idOpcion
-            });
-
-            var json = await res.Content.ReadFromJsonAsync<dynamic>();
-            return json;
+            if (!res.IsSuccessStatusCode) return null;
+            return await res.Content.ReadFromJsonAsync<ConfirmacionVotoVM>();
         }
     }
 }

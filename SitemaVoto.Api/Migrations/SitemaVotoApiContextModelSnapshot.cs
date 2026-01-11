@@ -122,7 +122,7 @@ namespace SitemaVoto.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("IdCandidato")
+                    b.Property<int?>("IdCandidato")
                         .HasColumnType("integer");
 
                     b.Property<int>("IdProcesoElectoral")

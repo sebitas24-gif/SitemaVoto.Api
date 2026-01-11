@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using SitemaVoto.Api.Services;
 using System;
 using VotoMVC.Services;
 namespace VotoMVC
@@ -27,6 +28,7 @@ namespace VotoMVC
             builder.Services.AddHttpClient<VotoMVC.Services.AdminApiService>();
             builder.Services.AddScoped<VotoMVC.Services.OpcionApiService>();
             builder.Services.AddScoped<VotoMVC.Services.ProcesoApiService>();
+            builder.Services.AddHttpClient<VotoMVC.Services.VotacionApiService>();
             builder.Services.AddScoped<VotoMVC.Services.AuthApiService>();
             builder.Services.AddSession(options =>
             {
