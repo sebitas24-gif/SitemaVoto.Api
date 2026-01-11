@@ -36,7 +36,7 @@ namespace VotoMVC.Services
                 PropertyNameCaseInsensitive = true
             }) ?? new List<OpcionElectoral>();
 
-            return all.Where(o => o.IdProceso == idProceso).ToList();
+            return all.Where(o => o.Id == idProceso).ToList();
         }
 
         public async Task<bool> CreateAsync(OpcionElectoral model, string? token)

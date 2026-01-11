@@ -1,7 +1,33 @@
-﻿
-@{
-    ViewData["Title"] = "Index";
+﻿@model VotoMVC.ViewModelos.Votacion.VotacionIndexVM
+
+<h2>Votación</h2>
+
+@if (TempData["msg"] != null)
+{
+    <div class="alert alert-warning">@TempData["msg"]</div>
 }
 
-<h1>Index</h1>
+<p><b>Proceso:</b> @Model.NombreProceso</p>
+<p><b>Tipo:</b> @Model.TipoEleccion</p>
 
+<form asp-action="Confirmar" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="IdProceso" />
+
+    <h4>Seleccione una opción</h4>
+
+    @foreach (var o in Model.Opciones)
+    {
+        <div class="form-check">
+            <input class="form-check-input"
+                   type="radio"
+                   name="OpcionSeleccionadaId"
+                   value="@o.IdOpcion" />
+            <label class="form-check-label">
+                <b>@o.NombreOpcion</b> (@o.Tipo) - @o.Cargo
+            </label>
+        </div>
+    }
+
+    <button class="btn btn-primary mt-3" type="submit">Continuar</button>
+</form>

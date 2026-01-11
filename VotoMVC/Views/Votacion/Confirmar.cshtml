@@ -1,0 +1,19 @@
+﻿@model VotoMVC.ViewModelos.Votacion.ConfirmarVotoVM
+
+<h2>Confirmar voto</h2>
+
+<p>Vas a confirmar tu voto. Después no podrás cambiarlo.</p>
+
+<div class="alert alert-info">
+    <b>Opción:</b> @Model.NombreOpcion <br />
+    <b>Cargo:</b> @Model.Cargo
+</div>
+
+<form asp-action="Emitir" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="IdProceso" />
+    <input type="hidden" asp-for="IdOpcion" />
+
+    <button class="btn btn-success" type="submit">Confirmar y votar</button>
+    <a class="btn btn-secondary" asp-action="Index">Volver</a>
+</form>

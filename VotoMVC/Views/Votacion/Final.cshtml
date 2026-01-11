@@ -1,0 +1,15 @@
+﻿@model VotoMVC.ViewModelos.Votacion.FinalVM
+
+<h2>Voto registrado</h2>
+
+<div class="alert alert-success">
+    @Model.Message
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.CodigoVerificacion))
+{
+    <p><b>Código de verificación:</b> @Model.CodigoVerificacion</p>
+    <p><small>Guarda este código como constancia. No revela tu opción.</small></p>
+}
+
+<a asp-controller="Auth" asp-action="Login">Salir</a>
