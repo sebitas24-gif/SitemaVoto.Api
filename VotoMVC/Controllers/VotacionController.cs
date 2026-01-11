@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VotoMVC.Services;
 using VotoMVC.ViewModelos;
+using VotoMVC.ViewModelos.Votacion;
 
 namespace VotoMVC.Controllers
 {

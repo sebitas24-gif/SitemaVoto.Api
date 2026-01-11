@@ -19,6 +19,7 @@ namespace VotoMVC
             builder.Services.AddHttpClient<VotoMVC.Services.AdminApiService>();
             builder.Services.AddScoped<VotoMVC.Services.OpcionApiService>();
             builder.Services.AddScoped<VotoMVC.Services.ProcesoApiService>();
+            builder.Services.AddScoped<VotoMVC.Services.AuthApiService>();
             builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -41,8 +42,9 @@ namespace VotoMVC
             app.UseStaticFiles();
 
             app.UseRouting();
-            app.UseSession();
 
+            app.UseSession();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(

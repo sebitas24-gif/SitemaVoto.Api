@@ -1,5 +1,5 @@
 ﻿using System.Net.Http.Headers;
-
+using VotoMVC.ViewModelos.Votacion;
 namespace VotoMVC.Services
 {
     public class VotacionApiService

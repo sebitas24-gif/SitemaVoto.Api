@@ -16,6 +16,7 @@ namespace VotoMVC.Controllers
         [HttpGet]
         public IActionResult Login() => View(new LoginCedulaVM());
 
+
         [HttpPost]
         public async Task<IActionResult> Login(LoginCedulaVM vm)
         {
