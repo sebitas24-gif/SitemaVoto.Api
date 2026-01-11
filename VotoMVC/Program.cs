@@ -14,8 +14,16 @@ namespace VotoMVC
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-           
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
             builder.Services.AddHttpClient();
+
             builder.Services.AddHttpClient<VotoMVC.Services.AdminApiService>();
             builder.Services.AddScoped<VotoMVC.Services.OpcionApiService>();
             builder.Services.AddScoped<VotoMVC.Services.ProcesoApiService>();

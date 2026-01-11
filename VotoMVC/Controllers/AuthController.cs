@@ -26,15 +26,17 @@ namespace VotoMVC.Controllers
                 return View(vm);
             }
 
-            var ok = await _auth.SolicitarCodigoAsync(vm.Cedula.Trim());
-            if (!ok)
+            var perfil = await _auth.ObtenerPerfilAsync(vm.Cedula.Trim());
+            if (perfil == null)
             {
-                ModelState.AddModelError("", "No se pudo enviar el código. Verifica la cédula y el correo.");
+                ModelState.AddModelError("", "La cédula no existe en el padrón.");
                 return View(vm);
             }
 
-            return RedirectToAction(nameof(Verificar), new { cedula = vm.Cedula.Trim() });
+            // Mostrar datos para confirmar/editar correo
+            return View("Perfil", perfil);
         }
+
 
         [HttpGet]
         public IActionResult Verificar(string cedula)
@@ -58,23 +60,60 @@ namespace VotoMVC.Controllers
                 return View(vm);
             }
 
-            // Guardar en sesión
             HttpContext.Session.SetString("cedula", vm.Cedula.Trim());
+            HttpContext.Session.SetString("token", token ?? "");
             HttpContext.Session.SetString("roles", string.Join(",", roles));
-            if (!string.IsNullOrWhiteSpace(token))
-                HttpContext.Session.SetString("token", token);
 
-            // Redirección según rol
-            if (roles.Contains("ADMIN"))
-                return RedirectToAction("Index", "Admin");
+            // ✅ si tiene varios roles, elige
+            if (roles.Count > 1)
+                return View("ElegirRol", roles);
 
+            return RedirigirPorRol(roles[0]);
+        }
+
+        private IActionResult RedirigirPorRol(string rol)
+        {
+            rol = rol.ToUpperInvariant();
+            if (rol == "ADMIN") return RedirectToAction("Index", "Admin");
+            if (rol == "CANDIDATO") return RedirectToAction("Index", "Candidato"); // si tienes
             return RedirectToAction("Index", "Votacion");
         }
+        [HttpPost]
+        public IActionResult ElegirRol(string rol)
+        {
+            HttpContext.Session.SetString("rolActivo", rol);
+            return RedirigirPorRol(rol);
+        }
+
 
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction(nameof(Login));
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EnviarCodigo(PerfilVM vm)
+        {
+            if (string.IsNullOrWhiteSpace(vm.Cedula))
+                return BadRequest();
+
+            // si escribió correo, lo actualizamos
+            if (!string.IsNullOrWhiteSpace(vm.Correo))
+                await _auth.ActualizarCorreoAsync(vm.Cedula.Trim(), vm.Correo.Trim());
+
+            // ahora sí: pedir OTP
+            var ok = await _auth.SolicitarCodigoAsync(vm.Cedula.Trim());
+            if (!ok)
+            {
+                ModelState.AddModelError("", "No se pudo enviar el código (verifica correo).");
+                return View("Perfil", vm);
+            }
+
+            // guardamos roles disponibles para luego elegir
+            TempData["rolesDisponibles"] = string.Join(",", vm.RolesDisponibles ?? new());
+            return RedirectToAction(nameof(Verificar), new { cedula = vm.Cedula.Trim() });
+        }
+
     }
 }

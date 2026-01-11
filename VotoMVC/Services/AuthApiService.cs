@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text;
+using VotoMVC.ViewModelos;
 
 namespace VotoMVC.Services
 {
@@ -11,48 +12,55 @@ namespace VotoMVC.Services
         public AuthApiService(HttpClient http, IConfiguration config)
         {
             _http = http;
-            _baseUrl = config["ApiSettings:BaseUrl"]!.TrimEnd('/');
+            _baseUrl = config["ApiSettings:BaseUrl"]!;
         }
 
         public async Task<bool> SolicitarCodigoAsync(string cedula)
         {
-            var payload = JsonSerializer.Serialize(new { cedula });
-            var resp = await _http.PostAsync(
-                $"{_baseUrl}/api/auth/solicitar-codigo",
-                new StringContent(payload, Encoding.UTF8, "application/json"));
+            var res = await _http.PostAsJsonAsync($"{_baseUrl}/api/auth/solicitar-codigo",
+                new { Cedula = cedula });
 
-            return resp.IsSuccessStatusCode;
+            return res.IsSuccessStatusCode;
         }
 
         public async Task<(bool ok, List<string> roles, string? token)> VerificarCodigoAsync(string cedula, string codigo)
         {
-            var payload = JsonSerializer.Serialize(new { cedula, codigo });
-            var resp = await _http.PostAsync(
-                $"{_baseUrl}/api/auth/verificar-codigo",
-                new StringContent(payload, Encoding.UTF8, "application/json"));
+            var res = await _http.PostAsJsonAsync($"{_baseUrl}/api/auth/verificar-codigo",
+                new { Cedula = cedula, Codigo = codigo });
 
-            if (!resp.IsSuccessStatusCode)
+            if (!res.IsSuccessStatusCode)
                 return (false, new List<string>(), null);
 
-            var json = await resp.Content.ReadAsStringAsync();
-            using var doc = JsonDocument.Parse(json);
-
-            // ✅ tu API ya devuelve roles (según lo que hicimos)
+            // tu API devuelve { roles = [...] }
+            var json = await res.Content.ReadFromJsonAsync<dynamic>();
             var roles = new List<string>();
-            if (doc.RootElement.TryGetProperty("roles", out var rolesEl) && rolesEl.ValueKind == JsonValueKind.Array)
+
+            if (json?.roles != null)
             {
-                roles = rolesEl.EnumerateArray()
-                    .Select(x => x.GetString() ?? "")
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
-                    .ToList();
+                foreach (var r in json.roles)
+                    roles.Add((string)r);
             }
 
-            // ✅ opcional: si tu API devuelve token, lo guardamos
-            string? token = null;
-            if (doc.RootElement.TryGetProperty("token", out var tokenEl))
-                token = tokenEl.GetString();
+            // si luego metes JWT, aquí lo recibes. Por ahora null.
+            return (true, roles, null);
+        }
 
-            return (true, roles, token);
+        // ✅ NUEVO: traer perfil por cédula
+        public async Task<PerfilVM?> ObtenerPerfilAsync(string cedula)
+        {
+            var res = await _http.GetAsync($"{_baseUrl}/api/auth/perfil/{cedula}");
+            if (!res.IsSuccessStatusCode) return null;
+
+            return await res.Content.ReadFromJsonAsync<PerfilVM>();
+        }
+
+        // ✅ NUEVO: actualizar correo
+        public async Task<bool> ActualizarCorreoAsync(string cedula, string correo)
+        {
+            var res = await _http.PutAsJsonAsync($"{_baseUrl}/api/auth/correo",
+                new { Cedula = cedula, Correo = correo });
+
+            return res.IsSuccessStatusCode;
         }
     }
 }
