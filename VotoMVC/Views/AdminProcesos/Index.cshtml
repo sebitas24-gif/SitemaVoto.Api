@@ -1,0 +1,52 @@
+﻿@model IEnumerable<VotoModelos.ProcesoElectoral>
+
+@{
+    ViewData["Title"] = "Procesos Electorales";
+}
+
+<h2>Procesos Electorales</h2>
+
+@if (TempData["msg"] != null)
+{
+    <div class="alert alert-info">@TempData["msg"]</div>
+}
+
+<p>
+    <a class="btn btn-primary" asp-action="Create">Crear Proceso</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td>@p.Nombre</td>
+                <td>@p.TipoEleccion</td>
+                <td>@p.FechaInicio</td>
+                <td>@p.FechaFin</td>
+                <td>@(p.Estado ? "ACTIVO" : "CERRADO")</td>
+                <td>
+                    <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@p.Id">Editar</a>
+
+                    @if (p.Estado)
+                    {
+                        <form asp-action="Cerrar" asp-route-id="@p.Id" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-danger">Cerrar</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

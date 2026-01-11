@@ -14,7 +14,7 @@ namespace VotoModelos
 
         public int IdProcesoElectoral{ get; set; }
 
-        public int IdCandidato {  get; set; }
+        public int? IdCandidato {  get; set; }
         public string NombreOpcion { get; set; }   // Nombre del candidato
         public string Tipo { get; set; }  // Partido político
 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using VotoMVC.Services;
 namespace VotoMVC
 {
     public class Program
@@ -13,8 +14,11 @@ namespace VotoMVC
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            builder.Services.AddHttpClient<VotoMVC.Services.AdminApiService>();
+           
             builder.Services.AddHttpClient();
+            builder.Services.AddHttpClient<VotoMVC.Services.AdminApiService>();
+            builder.Services.AddScoped<VotoMVC.Services.OpcionApiService>();
+            builder.Services.AddScoped<VotoMVC.Services.ProcesoApiService>();
             builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);

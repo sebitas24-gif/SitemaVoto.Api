@@ -3,12 +3,48 @@
 }
 
 <h2>Panel Administrador</h2>
+<p>Desde aquí puedes administrar roles y procesos electorales.</p>
 
-<p>Desde aquí puedes:</p>
+@if (TempData["msg"] != null)
+{
+    <div class="alert alert-info">@TempData["msg"]</div>
+}
 
-<ul>
-    <li>Asignar roles a votantes</li>
-    <li>Crear y cerrar procesos electorales</li>
-    <li>Gestionar candidatos</li>
-</ul>
+<hr />
+
+<div class="d-flex flex-column gap-2">
+
+    <!--Gestión de roles -->
+    <a class="btn btn-primary"
+       asp-controller="Admin"
+       asp-action="AsignarRoles">
+        👤 Asignar / Quitar Roles (ADMIN - CANDIDATO)
+    </a>
+
+    <!-- Gestión de procesos electorales -->
+    <a class="btn btn-outline-primary"
+       asp-controller="AdminProcesos"
+       asp-action="Index">
+        🗳️ Gestionar Procesos Electorales
+    </a>
+
+    <!-- (Opcional) más módulos después -->
+    <!--
+    <a class="btn btn-outline-secondary"
+       asp-controller="AdminOpciones"
+       asp-action="Index">
+        ✅ Gestionar Opciones Electorales
+    </a>
+    -->
+
+    <hr />
+
+    <!-- ✅ Cerrar sesión -->
+    <a class="btn btn-danger"
+       asp-controller="Auth"
+       asp-action="Logout">
+        🚪 Cerrar sesión
+    </a>
+
+</div>
 
