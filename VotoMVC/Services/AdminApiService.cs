@@ -49,6 +49,6 @@ namespace VotoMVC.Services
             AttachJwt(token);
             var res = await _http.DeleteAsync($"{_baseUrl}/api/admin/roles/quitar-candidato/{idVotante}");
             return res.IsSuccessStatusCode;
-        }
+        }   
     }
 }

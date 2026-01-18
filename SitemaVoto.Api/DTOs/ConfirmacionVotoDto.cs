@@ -1,10 +1,11 @@
 ﻿namespace SitemaVoto.Api.DTOs
 {
-    public class ConfirmacionVotoDto
+    public class ConfirmacionVotoDTO
     {
-        public int IdProceso { get; set; }
-        public string CodigoVerificacion { get; set; } = null!;
-        public DateTime FechaEmision { get; set; }
-        public string Mensaje { get; set; } = "Voto registrado correctamente.";
+        public bool Exitoso { get; set; }
+        public string Mensaje { get; set; }
+        public string CodigoConfirmacion { get; set; }
+        public DateTime FechaHora { get; set; }
+        public bool ComprobanteEnviado { get; set; }
     }
 }

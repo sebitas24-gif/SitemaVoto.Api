@@ -1,8 +1,12 @@
 ﻿namespace SitemaVoto.Api.DTOs
 {
-    public class EmitirVotoDto
+    public class EmitirVotoDTO
     {
-        public string Cedula { get; set; } = null!;
-        public int IdOpcion { get; set; }
+     
+        public int ProcesoElectoralId { get; set; }
+
+        public int? CandidatoId { get; set; }
+
+        public bool EsVotoBlanco { get; set; }
     }
 }

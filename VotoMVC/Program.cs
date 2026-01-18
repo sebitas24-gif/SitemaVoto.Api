@@ -22,13 +22,14 @@ namespace VotoMVC
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
-
+            builder.Services.AddSession();
             builder.Services.AddHttpClient();
 
             builder.Services.AddHttpClient<VotoMVC.Services.AdminApiService>();
             builder.Services.AddScoped<VotoMVC.Services.OpcionApiService>();
             builder.Services.AddScoped<VotoMVC.Services.ProcesoApiService>();
             builder.Services.AddHttpClient<VotoMVC.Services.VotacionApiService>();
+            builder.Services.AddHttpClient<VotoMVC.Services.AdminProcesosApiService>();
             builder.Services.AddScoped<VotoMVC.Services.AuthApiService>();
             builder.Services.AddSession(options =>
             {

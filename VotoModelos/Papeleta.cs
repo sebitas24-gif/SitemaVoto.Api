@@ -11,11 +11,17 @@ namespace VotoModelos
     {
         [Key]
         public int Id { get; set; }
-        public int IdVotante { get; set; }
-        public int IdProcesoElectoral { get; set; }
-        public string? CodigoConfirmacion { get; set; } = Guid.NewGuid().ToString(); // Genera un código único automático
-        public DateTime FechaEmision { get; set; }
+        public string OpcionElegida { get; set; } // Candidato elegido o "voto en blanco"
+
+        // Relación con el votante
+        public int VotanteId { get; set; }
         public Votante Votante { get; set; }
+
+        // Relación con el proceso electoral
+        public int ProcesoElectoralId { get; set; }
         public ProcesoElectoral ProcesoElectoral { get; set; }
+
+        // Fecha de registro del voto
+        public DateTime FechaVoto { get; set; }
     }
 }
