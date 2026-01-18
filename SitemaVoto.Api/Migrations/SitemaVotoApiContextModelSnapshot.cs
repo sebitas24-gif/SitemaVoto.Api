@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace SitemaVoto.Api.Migrations
 {
-    [DbContext(typeof(SitemaVotoApiContext))]
+  
     partial class SitemaVotoApiContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

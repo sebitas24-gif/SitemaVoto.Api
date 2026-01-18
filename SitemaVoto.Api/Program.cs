@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using SitemaVoto.Api.Services;
+
 using VotoModelos;
 namespace SitemaVoto.Api
 {
@@ -13,8 +13,8 @@ namespace SitemaVoto.Api
             var builder = WebApplication.CreateBuilder(args);
             builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
-            builder.Services.AddDbContext<SitemaVotoApiContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("SitemaVotoApiContext") ?? throw new InvalidOperationException("Connection string 'SitemaVotoApiContext' not found.")));
+            //builder.Services.AddDbContext<SitemaVotoApiContext>(options =>
+              //  options.UseNpgsql(builder.Configuration.GetConnectionString("SitemaVotoApiContext") ?? throw new InvalidOperationException("Connection string 'SitemaVotoApiContext' not found.")));
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             // Add services to the container.
             builder.Services.AddCors(options => {
@@ -22,7 +22,7 @@ namespace SitemaVoto.Api
             });
 
         
-            builder.Services.AddScoped<AuthService>();
+        
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

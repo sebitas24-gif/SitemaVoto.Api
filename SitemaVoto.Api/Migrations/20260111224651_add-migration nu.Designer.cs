@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace SitemaVoto.Api.Migrations
 {
-    [DbContext(typeof(SitemaVotoApiContext))]
+ 
     [Migration("20260111224651_add-migration nu")]
     partial class addmigrationnu
     {

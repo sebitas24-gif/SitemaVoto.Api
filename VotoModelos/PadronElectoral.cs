@@ -27,7 +27,7 @@ namespace VotoModelos
 
         [Required]
         [StringLength(20)]
-        [Index(IsUnique = true)]
+       
         public string CodigoAcceso { get; set; } // Código único generado (PAD-XXXXXX)
 
         [Required]

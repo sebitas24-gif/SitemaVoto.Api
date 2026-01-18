@@ -75,5 +75,5 @@ namespace VotoModelos
         DHondt = 2,    // Método D'Hondt
         HareNiemeyer = 3  // Método Hare-Niemeyer
     }
-}
+
 }

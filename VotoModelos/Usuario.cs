@@ -14,7 +14,7 @@ namespace VotoModelos
 
         [Required]
         [StringLength(10)]
-        [Index(IsUnique = true)]
+      
         public string NumeroCedula { get; set; }
 
         [Required]
@@ -65,5 +65,5 @@ namespace VotoModelos
         JefeJunta = 3,
         Candidato = 4
     }
-}
+
 }
