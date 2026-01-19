@@ -12,9 +12,11 @@ namespace SitemaVoto.Api
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Host.UseSerilog((context, configuration) =>
-    configuration.ReadFrom.Configuration(context.Configuration));
-            //builder.Services.AddDbContext<SitemaVotoApiContext>(options =>
-              //  options.UseNpgsql(builder.Configuration.GetConnectionString("SitemaVotoApiContext") ?? throw new InvalidOperationException("Connection string 'SitemaVotoApiContext' not found.")));
+        configuration.ReadFrom.Configuration(context.Configuration));
+            builder.Services.AddDbContext<SitemaVotoApiContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("SitemaVotoApiContext")
+    ?? throw new InvalidOperationException("Connection string 'SitemaVotoApiContext' not found.")));
+
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             // Add services to the container.
             builder.Services.AddCors(options => {
