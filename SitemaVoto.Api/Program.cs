@@ -2,6 +2,12 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using SitemaVoto.Api.Services.Email;
+using SitemaVoto.Api.Services.Otp;
+using SitemaVoto.Api.Services.Padron;
+using SitemaVoto.Api.Services.Procesos;
+using SitemaVoto.Api.Services.Resultados;
+using SitemaVoto.Api.Services.Votacion;
 
 using VotoModelos;
 namespace SitemaVoto.Api
@@ -22,9 +28,17 @@ namespace SitemaVoto.Api
             builder.Services.AddCors(options => {
                 options.AddPolicy("AllowAll", b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
+            builder.Services.AddSingleton<IEmailSender, ConsoleEmailSender>();
 
-        
-        
+            // Servicios negocio
+            builder.Services.AddScoped<IProcesoService, ProcesoService>();
+            builder.Services.AddScoped<IPadronService, PadronService>();
+            builder.Services.AddScoped<IVotacionService, VotacionService>();
+            builder.Services.AddScoped<IResultadosService, ResultadosService>();
+            builder.Services.AddScoped<IOtpService, OtpService>();
+
+
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

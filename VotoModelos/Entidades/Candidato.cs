@@ -9,21 +9,21 @@ namespace VotoModelos.Entidades
 {
     public class Candidato
     {
-       [Key] public int Id { get; set; }
+        [Key] public int Id { get; set; }
 
         public int ProcesoElectoralId { get; set; }
-        public ProcesoElectoral ProcesoElectoral { get; set; } = null!;
+        public ProcesoElectoral ProcesoElectoral { get; set; } = default!;
+
+        [Required, MaxLength(160)]
+        public string NombreCompleto { get; set; } = default!;
 
         [Required, MaxLength(120)]
-        public string NombreCompleto { get; set; } = null!;
+        public string Partido { get; set; } = default!;
 
-        [MaxLength(120)]
-        public string? Partido { get; set; }
+        [MaxLength(160)]
+        public string? Binomio { get; set; }  // si aplica
 
-        public int? NumeroLista { get; set; }
-
-        [MaxLength(120)]
-        public string? NombreBinomio { get; set; }
+        public int NumeroLista { get; set; }
 
         public bool Activo { get; set; } = true;
     }

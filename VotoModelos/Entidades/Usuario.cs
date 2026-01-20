@@ -10,27 +10,37 @@ namespace VotoModelos.Entidades
 {
     public class Usuario
     {
-       [Key] public int Id { get; set; }
+        [Key] public int Id { get; set; }
 
         [Required, MaxLength(10)]
-        public string Cedula { get; set; } = null!;
+        public string Cedula { get; set; } = default!;
 
-        [MaxLength(120)]
-        public string? Nombres { get; set; }
+        [Required, MaxLength(120)]
+        public string Nombres { get; set; } = default!;
 
-        [MaxLength(120)]
-        public string? Apellidos { get; set; }
+        [Required, MaxLength(120)]
+        public string Apellidos { get; set; } = default!;
 
-        [MaxLength(120)]
+        [MaxLength(160)]
         public string? Correo { get; set; }
 
         [MaxLength(30)]
         public string? Telefono { get; set; }
 
-        public RolUsuario Rol { get; set; }
+        public RolUsuario Rol { get; set; } = RolUsuario.Votante;
 
-        public bool Activo { get; set; } = true;
+        // Geografía / Junta asignada (importante para verificación)
+        [MaxLength(80)] public string Provincia { get; set; } = default!;
+        [MaxLength(80)] public string Canton { get; set; } = default!;
+        [MaxLength(80)] public string? Parroquia { get; set; }
 
-        public PerfilVotante? PerfilVotante { get; set; }
+        public int? JuntaId { get; set; }
+        public Junta? Junta { get; set; }
+
+        // Imagen (para RU-13 / RS-15)
+        public string? ImagenUrl { get; set; }
+
+        // Estado legal (RU-05 / RS-06)
+        public bool HabilitadoLegalmente { get; set; } = true;
     }
 }

@@ -9,16 +9,23 @@ namespace VotoModelos.Entidades
 {
     public class ParticipacionVotante
     {
-       [Key] public int Id { get; set; }
+        [Key] public int Id { get; set; }
 
         public int ProcesoElectoralId { get; set; }
-        public ProcesoElectoral ProcesoElectoral { get; set; } = null!;
+        public ProcesoElectoral ProcesoElectoral { get; set; } = default!;
 
-        public int VotanteUsuarioId { get; set; }
-        public Usuario VotanteUsuario { get; set; } = null!;
+        public int UsuarioId { get; set; }
+        public Usuario Usuario { get; set; } = default!;
 
-        public DateTime VotoEn { get; set; } = DateTime.UtcNow;
+        // Comprobante (receipt) sin voto
+        [Required, MaxLength(40)]
+        public string CodigoComprobante { get; set; } = default!; // Ej: CONF-XXXX
 
-        public string CodigoComprobante { get; set; } = null!;
+        public DateTime EmitidoUtc { get; set; }
+
+        // Para auditoría simple (opcional)
+        [MaxLength(80)] public string Provincia { get; set; } = default!;
+        [MaxLength(80)] public string Canton { get; set; } = default!;
+        [MaxLength(50)] public string? CodigoMesa { get; set; }
     }
 }

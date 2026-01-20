@@ -10,23 +10,20 @@ namespace VotoModelos.Entidades
 {
     public class ProcesoElectoral
     {
-        public int Id { get; set; }
+        [Key] public int Id { get; set; }
 
         [Required, MaxLength(150)]
-        public string Nombre { get; set; } = null!;
+        public string Nombre { get; set; } = default!;
 
-        [MaxLength(600)]
+        [MaxLength(400)]
         public string? Descripcion { get; set; }
 
         public TipoEleccion Tipo { get; set; }
+        public EstadoProceso Estado { get; set; } = EstadoProceso.Configuracion;
 
-        public DateTime FechaInicio { get; set; }
-        public DateTime FechaFin { get; set; }
+        public DateTime InicioLocal { get; set; }
+        public DateTime FinLocal { get; set; }
 
-        public bool PermitirVotoEnBlanco { get; set; } = true;
-
-        public bool CerradoManual { get; set; } = false;
-
-        public List<Candidato> Candidatos { get; set; } = new();
+        public ICollection<Candidato> Candidatos { get; set; } = new List<Candidato>();
     }
 }

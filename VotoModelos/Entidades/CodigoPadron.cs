@@ -14,8 +14,8 @@ namespace VotoModelos.Entidades
         public int ProcesoElectoralId { get; set; }
         public ProcesoElectoral ProcesoElectoral { get; set; } = null!;
 
-        public int VotanteUsuarioId { get; set; }
-        public Usuario VotanteUsuario { get; set; } = null!;
+        public int UsuarioId { get; set; }
+        public Usuario Usuario { get; set; } = null!;
 
         public int? EmitidoPorUsuarioId { get; set; }
         public Usuario? EmitidoPorUsuario { get; set; }
@@ -24,6 +24,6 @@ namespace VotoModelos.Entidades
         public string Codigo { get; set; } = null!; // PAD-123456
 
         public DateTime EmitidoEn { get; set; } = DateTime.UtcNow;
-        public DateTime? UsadoEn { get; set; }
+        public bool Usado { get; set; }
     }
 }

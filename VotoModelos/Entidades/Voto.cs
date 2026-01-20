@@ -9,20 +9,23 @@ namespace VotoModelos.Entidades
 {
     public class Voto
     {
-        [Key]public int Id { get; set; }
+        [Key] public long Id { get; set; }
 
         public int ProcesoElectoralId { get; set; }
-        public ProcesoElectoral ProcesoElectoral { get; set; } = null!;
+        public ProcesoElectoral ProcesoElectoral { get; set; } = default!;
 
-        public int? CandidatoId { get; set; } // null = blanco
+        // NULL cuando es voto en blanco
+        public int? CandidatoId { get; set; }
         public Candidato? Candidato { get; set; }
 
-        public DateTime EmitidoEn { get; set; } = DateTime.UtcNow;
+        // Para resultados por provincia/cantón SIN identificar votante
+        [Required, MaxLength(80)] public string Provincia { get; set; } = default!;
+        [Required, MaxLength(80)] public string Canton { get; set; } = default!;
 
-        public string? Provincia { get; set; }
-        public string? Canton { get; set; }
+        public DateTime EmitidoUtc { get; set; }
 
-        public string? HashAnterior { get; set; }
+        // Integridad (opcional recomendado): hash del registro
+        [MaxLength(120)]
         public string? HashIntegridad { get; set; }
     }
 }
