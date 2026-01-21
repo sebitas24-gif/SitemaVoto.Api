@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SitemaVoto.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class nue : Migration
+    public partial class ini : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -37,7 +37,6 @@ namespace SitemaVoto.Api.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ProcesoElectoralId = table.Column<int>(type: "integer", nullable: false),
-                    ProcesoElectoralId1 = table.Column<int>(type: "integer", nullable: false),
                     NombreCompleto = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
                     Partido = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
                     Binomio = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: true),
@@ -53,12 +52,6 @@ namespace SitemaVoto.Api.Migrations
                         principalTable: "ProcesoElectorales",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Candidatos_ProcesoElectorales_ProcesoElectoralId1",
-                        column: x => x.ProcesoElectoralId1,
-                        principalTable: "ProcesoElectorales",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -68,9 +61,7 @@ namespace SitemaVoto.Api.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ProcesoElectoralId = table.Column<int>(type: "integer", nullable: false),
-                    ProcesoElectoralId1 = table.Column<int>(type: "integer", nullable: false),
                     CandidatoId = table.Column<int>(type: "integer", nullable: true),
-                    CandidatoId1 = table.Column<int>(type: "integer", nullable: true),
                     Provincia = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
                     Canton = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
                     EmitidoUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
@@ -86,19 +77,8 @@ namespace SitemaVoto.Api.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
-                        name: "FK_Votos_Candidatos_CandidatoId1",
-                        column: x => x.CandidatoId1,
-                        principalTable: "Candidatos",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_Votos_ProcesoElectorales_ProcesoElectoralId",
                         column: x => x.ProcesoElectoralId,
-                        principalTable: "ProcesoElectorales",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Votos_ProcesoElectorales_ProcesoElectoralId1",
-                        column: x => x.ProcesoElectoralId1,
                         principalTable: "ProcesoElectorales",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -129,13 +109,11 @@ namespace SitemaVoto.Api.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ProcesoElectoralId = table.Column<int>(type: "integer", nullable: false),
-                    ProcesoElectoralId1 = table.Column<int>(type: "integer", nullable: false),
                     UsuarioId = table.Column<int>(type: "integer", nullable: false),
-                    UsuarioId1 = table.Column<int>(type: "integer", nullable: false),
                     EmitidoPorUsuarioId = table.Column<int>(type: "integer", nullable: true),
                     Codigo = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     EmitidoEn = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    UsadoEn = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
+                    Usado = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -143,12 +121,6 @@ namespace SitemaVoto.Api.Migrations
                     table.ForeignKey(
                         name: "FK_CodigoPadrones_ProcesoElectorales_ProcesoElectoralId",
                         column: x => x.ProcesoElectoralId,
-                        principalTable: "ProcesoElectorales",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CodigoPadrones_ProcesoElectorales_ProcesoElectoralId1",
-                        column: x => x.ProcesoElectoralId1,
                         principalTable: "ProcesoElectorales",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -206,7 +178,6 @@ namespace SitemaVoto.Api.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UsuarioId = table.Column<int>(type: "integer", nullable: false),
-                    UsuarioId1 = table.Column<int>(type: "integer", nullable: true),
                     Codigo = table.Column<string>(type: "character varying(6)", maxLength: 6, nullable: false),
                     Metodo = table.Column<int>(type: "integer", nullable: false),
                     ExpiraUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
@@ -223,11 +194,6 @@ namespace SitemaVoto.Api.Migrations
                         principalTable: "Usuarios",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_OtpSesiones_Usuarios_UsuarioId1",
-                        column: x => x.UsuarioId1,
-                        principalTable: "Usuarios",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -237,9 +203,7 @@ namespace SitemaVoto.Api.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ProcesoElectoralId = table.Column<int>(type: "integer", nullable: false),
-                    ProcesoElectoralId1 = table.Column<int>(type: "integer", nullable: false),
                     UsuarioId = table.Column<int>(type: "integer", nullable: false),
-                    UsuarioId1 = table.Column<int>(type: "integer", nullable: false),
                     CodigoComprobante = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     EmitidoUtc = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Provincia = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
@@ -256,20 +220,8 @@ namespace SitemaVoto.Api.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ParticipacionVotantes_ProcesoElectorales_ProcesoElectoralId1",
-                        column: x => x.ProcesoElectoralId1,
-                        principalTable: "ProcesoElectorales",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_ParticipacionVotantes_Usuarios_UsuarioId",
                         column: x => x.UsuarioId,
-                        principalTable: "Usuarios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ParticipacionVotantes_Usuarios_UsuarioId1",
-                        column: x => x.UsuarioId1,
                         principalTable: "Usuarios",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -282,7 +234,6 @@ namespace SitemaVoto.Api.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UsuarioId = table.Column<int>(type: "integer", nullable: false),
-                    UsuarioId1 = table.Column<int>(type: "integer", nullable: false),
                     Provincia = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: true),
                     Canton = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: true),
                     Mesa = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
@@ -293,12 +244,6 @@ namespace SitemaVoto.Api.Migrations
                     table.ForeignKey(
                         name: "FK_PerfilVotantes_Usuarios_UsuarioId",
                         column: x => x.UsuarioId,
-                        principalTable: "Usuarios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PerfilVotantes_Usuarios_UsuarioId1",
-                        column: x => x.UsuarioId1,
                         principalTable: "Usuarios",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -315,11 +260,6 @@ namespace SitemaVoto.Api.Migrations
                 column: "ProcesoElectoralId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Candidatos_ProcesoElectoralId1",
-                table: "Candidatos",
-                column: "ProcesoElectoralId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_CodigoPadrones_EmitidoPorUsuarioId",
                 table: "CodigoPadrones",
                 column: "EmitidoPorUsuarioId");
@@ -330,20 +270,10 @@ namespace SitemaVoto.Api.Migrations
                 column: "ProcesoElectoralId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CodigoPadrones_ProcesoElectoralId1",
-                table: "CodigoPadrones",
-                column: "ProcesoElectoralId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_CodigoPadrones_UsuarioId_ProcesoElectoralId",
                 table: "CodigoPadrones",
                 columns: new[] { "UsuarioId", "ProcesoElectoralId" },
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CodigoPadrones_UsuarioId1",
-                table: "CodigoPadrones",
-                column: "UsuarioId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Juntas_JefeJuntaUsuarioId",
@@ -356,19 +286,9 @@ namespace SitemaVoto.Api.Migrations
                 column: "UsuarioId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OtpSesiones_UsuarioId1",
-                table: "OtpSesiones",
-                column: "UsuarioId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ParticipacionVotantes_ProcesoElectoralId",
                 table: "ParticipacionVotantes",
                 column: "ProcesoElectoralId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ParticipacionVotantes_ProcesoElectoralId1",
-                table: "ParticipacionVotantes",
-                column: "ProcesoElectoralId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ParticipacionVotantes_UsuarioId_ProcesoElectoralId",
@@ -377,20 +297,9 @@ namespace SitemaVoto.Api.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ParticipacionVotantes_UsuarioId1",
-                table: "ParticipacionVotantes",
-                column: "UsuarioId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_PerfilVotantes_UsuarioId",
                 table: "PerfilVotantes",
-                column: "UsuarioId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PerfilVotantes_UsuarioId1",
-                table: "PerfilVotantes",
-                column: "UsuarioId1");
+                column: "UsuarioId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Usuarios_JuntaId",
@@ -403,19 +312,9 @@ namespace SitemaVoto.Api.Migrations
                 column: "CandidatoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Votos_CandidatoId1",
-                table: "Votos",
-                column: "CandidatoId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Votos_ProcesoElectoralId",
                 table: "Votos",
                 column: "ProcesoElectoralId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Votos_ProcesoElectoralId1",
-                table: "Votos",
-                column: "ProcesoElectoralId1");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Auditorias_Usuarios_ActorUsuarioId",
@@ -429,20 +328,13 @@ namespace SitemaVoto.Api.Migrations
                 table: "CodigoPadrones",
                 column: "EmitidoPorUsuarioId",
                 principalTable: "Usuarios",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_CodigoPadrones_Usuarios_UsuarioId",
                 table: "CodigoPadrones",
                 column: "UsuarioId",
-                principalTable: "Usuarios",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_CodigoPadrones_Usuarios_UsuarioId1",
-                table: "CodigoPadrones",
-                column: "UsuarioId1",
                 principalTable: "Usuarios",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);

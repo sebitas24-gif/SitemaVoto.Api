@@ -90,14 +90,9 @@ namespace SitemaVoto.Api.Migrations
                     b.Property<int>("ProcesoElectoralId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ProcesoElectoralId1")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ProcesoElectoralId");
-
-                    b.HasIndex("ProcesoElectoralId1");
 
                     b.ToTable("Candidatos");
                 });
@@ -124,16 +119,10 @@ namespace SitemaVoto.Api.Migrations
                     b.Property<int>("ProcesoElectoralId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ProcesoElectoralId1")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("UsadoEn")
-                        .HasColumnType("timestamp without time zone");
+                    b.Property<bool>("Usado")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("UsuarioId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UsuarioId1")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -141,10 +130,6 @@ namespace SitemaVoto.Api.Migrations
                     b.HasIndex("EmitidoPorUsuarioId");
 
                     b.HasIndex("ProcesoElectoralId");
-
-                    b.HasIndex("ProcesoElectoralId1");
-
-                    b.HasIndex("UsuarioId1");
 
                     b.HasIndex("UsuarioId", "ProcesoElectoralId")
                         .IsUnique();
@@ -214,14 +199,9 @@ namespace SitemaVoto.Api.Migrations
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("UsuarioId1")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("UsuarioId");
-
-                    b.HasIndex("UsuarioId1");
 
                     b.ToTable("OtpSesiones");
                 });
@@ -254,9 +234,6 @@ namespace SitemaVoto.Api.Migrations
                     b.Property<int>("ProcesoElectoralId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ProcesoElectoralId1")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Provincia")
                         .IsRequired()
                         .HasMaxLength(80)
@@ -265,16 +242,9 @@ namespace SitemaVoto.Api.Migrations
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("UsuarioId1")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ProcesoElectoralId");
-
-                    b.HasIndex("ProcesoElectoralId1");
-
-                    b.HasIndex("UsuarioId1");
 
                     b.HasIndex("UsuarioId", "ProcesoElectoralId")
                         .IsUnique();
@@ -305,15 +275,9 @@ namespace SitemaVoto.Api.Migrations
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("UsuarioId1")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UsuarioId")
-                        .IsUnique();
-
-                    b.HasIndex("UsuarioId1");
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("PerfilVotantes");
                 });
@@ -427,9 +391,6 @@ namespace SitemaVoto.Api.Migrations
                     b.Property<int?>("CandidatoId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("CandidatoId1")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Canton")
                         .IsRequired()
                         .HasMaxLength(80)
@@ -445,9 +406,6 @@ namespace SitemaVoto.Api.Migrations
                     b.Property<int>("ProcesoElectoralId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ProcesoElectoralId1")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Provincia")
                         .IsRequired()
                         .HasMaxLength(80)
@@ -457,11 +415,7 @@ namespace SitemaVoto.Api.Migrations
 
                     b.HasIndex("CandidatoId");
 
-                    b.HasIndex("CandidatoId1");
-
                     b.HasIndex("ProcesoElectoralId");
-
-                    b.HasIndex("ProcesoElectoralId1");
 
                     b.ToTable("Votos");
                 });
@@ -477,15 +431,9 @@ namespace SitemaVoto.Api.Migrations
 
             modelBuilder.Entity("VotoModelos.Entidades.Candidato", b =>
                 {
-                    b.HasOne("VotoModelos.Entidades.ProcesoElectoral", null)
-                        .WithMany()
-                        .HasForeignKey("ProcesoElectoralId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("VotoModelos.Entidades.ProcesoElectoral", "ProcesoElectoral")
                         .WithMany("Candidatos")
-                        .HasForeignKey("ProcesoElectoralId1")
+                        .HasForeignKey("ProcesoElectoralId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -496,29 +444,18 @@ namespace SitemaVoto.Api.Migrations
                 {
                     b.HasOne("VotoModelos.Entidades.Usuario", "EmitidoPorUsuario")
                         .WithMany()
-                        .HasForeignKey("EmitidoPorUsuarioId");
+                        .HasForeignKey("EmitidoPorUsuarioId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("VotoModelos.Entidades.ProcesoElectoral", null)
+                    b.HasOne("VotoModelos.Entidades.ProcesoElectoral", "ProcesoElectoral")
                         .WithMany()
                         .HasForeignKey("ProcesoElectoralId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("VotoModelos.Entidades.ProcesoElectoral", "ProcesoElectoral")
-                        .WithMany()
-                        .HasForeignKey("ProcesoElectoralId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("VotoModelos.Entidades.Usuario", null)
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("VotoModelos.Entidades.Usuario", "Usuario")
                         .WithMany()
-                        .HasForeignKey("UsuarioId1")
+                        .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -541,42 +478,26 @@ namespace SitemaVoto.Api.Migrations
 
             modelBuilder.Entity("VotoModelos.Entidades.OtpSesion", b =>
                 {
-                    b.HasOne("VotoModelos.Entidades.Usuario", null)
+                    b.HasOne("VotoModelos.Entidades.Usuario", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("VotoModelos.Entidades.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId1");
 
                     b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("VotoModelos.Entidades.ParticipacionVotante", b =>
                 {
-                    b.HasOne("VotoModelos.Entidades.ProcesoElectoral", null)
+                    b.HasOne("VotoModelos.Entidades.ProcesoElectoral", "ProcesoElectoral")
                         .WithMany()
                         .HasForeignKey("ProcesoElectoralId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("VotoModelos.Entidades.ProcesoElectoral", "ProcesoElectoral")
-                        .WithMany()
-                        .HasForeignKey("ProcesoElectoralId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("VotoModelos.Entidades.Usuario", null)
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("VotoModelos.Entidades.Usuario", "Usuario")
                         .WithMany()
-                        .HasForeignKey("UsuarioId1")
+                        .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -587,15 +508,9 @@ namespace SitemaVoto.Api.Migrations
 
             modelBuilder.Entity("VotoModelos.Entidades.PerfilVotante", b =>
                 {
-                    b.HasOne("VotoModelos.Entidades.Usuario", null)
-                        .WithOne()
-                        .HasForeignKey("VotoModelos.Entidades.PerfilVotante", "UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("VotoModelos.Entidades.Usuario", "Usuario")
                         .WithMany()
-                        .HasForeignKey("UsuarioId1")
+                        .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -614,24 +529,14 @@ namespace SitemaVoto.Api.Migrations
 
             modelBuilder.Entity("VotoModelos.Entidades.Voto", b =>
                 {
-                    b.HasOne("VotoModelos.Entidades.Candidato", null)
+                    b.HasOne("VotoModelos.Entidades.Candidato", "Candidato")
                         .WithMany()
                         .HasForeignKey("CandidatoId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("VotoModelos.Entidades.Candidato", "Candidato")
-                        .WithMany()
-                        .HasForeignKey("CandidatoId1");
-
-                    b.HasOne("VotoModelos.Entidades.ProcesoElectoral", null)
-                        .WithMany()
-                        .HasForeignKey("ProcesoElectoralId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("VotoModelos.Entidades.ProcesoElectoral", "ProcesoElectoral")
                         .WithMany()
-                        .HasForeignKey("ProcesoElectoralId1")
+                        .HasForeignKey("ProcesoElectoralId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
