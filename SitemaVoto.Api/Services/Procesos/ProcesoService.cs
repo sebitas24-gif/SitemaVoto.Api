@@ -43,4 +43,4 @@ namespace SitemaVoto.Api.Services.Procesos
             return EstadoProceso.Activo;
         }
     }
-    }
+}

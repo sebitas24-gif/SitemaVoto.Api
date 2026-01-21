@@ -103,7 +103,7 @@ namespace SitemaVoto.Api.Services.Votacion
                 HashIntegridad = null
             };
 
-            //_db.Participaciones.Add(participacion);
+            _db.ParticipacionVotantes.Add(participacion);
             _db.Votos.Add(voto);
 
             pad.Usado = true;
