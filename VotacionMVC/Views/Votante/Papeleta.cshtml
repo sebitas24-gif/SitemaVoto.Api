@@ -1,0 +1,65 @@
+﻿@model List<VotacionMVC.Models.DTOs.CandidatoDto>
+@{
+    ViewData["Title"] = "Papeleta";
+    var msg = TempData["Msg"] as string;
+}
+
+<div class="container mt-4">
+    <h3 class="fw-bold mb-2">Ejercicio del Voto</h3>
+    <div class="alert alert-info">
+        <b>Importante:</b> Seleccione un candidato o voto en blanco. Su voto es secreto.
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(msg))
+    {
+        <div class="alert alert-danger">@msg</div>
+    }
+
+    <form method="post" asp-action="Emitir">
+        @Html.AntiForgeryToken()
+
+        <h5 class="mt-4 mb-3 fw-bold">Candidatos</h5>
+
+        <div class="row g-3">
+            @foreach (var c in Model)
+            {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <label class="card h-100 p-3" style="cursor:pointer;">
+                        <div class="d-flex align-items-start gap-2">
+                            <input type="radio" name="candidatoId" value="@c.id" class="form-check-input mt-1" />
+                            <div>
+                                <div class="fw-bold">@c.nombreCompleto</div>
+                                @if (!string.IsNullOrWhiteSpace(c.partido))
+                                {
+                                    <div class="text-muted">@c.partido</div>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(c.binomio))
+                                {
+                                    <div class="small text-muted">@c.binomio</div>
+                                }
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            }
+
+            <!-- Voto en blanco -->
+            <div class="col-12 col-md-4 col-lg-3">
+                <label class="card h-100 p-3 border-secondary" style="cursor:pointer;">
+                    <div class="d-flex align-items-start gap-2">
+                        <input type="radio" name="candidatoId" value="999999" class="form-check-input mt-1" />
+                        <div>
+                            <div class="fw-bold">Voto en Blanco</div>
+                            <div class="text-muted">No seleccionar ningún candidato</div>
+                        </div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2">
+            <button class="btn btn-success px-4" type="submit">Confirmar Voto</button>
+            <a class="btn btn-outline-secondary" asp-controller="Acceso" asp-action="Index">Cancelar</a>
+        </div>
+    </form>
+</div>

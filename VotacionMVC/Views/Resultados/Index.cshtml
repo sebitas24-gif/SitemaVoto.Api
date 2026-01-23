@@ -1,0 +1,30 @@
+﻿@model VotacionMVC.Models.DTOs.ResultadosNacionalResponse
+@{
+    ViewData["Title"] = "Resultados";
+}
+
+<h2>Resultados Nacionales</h2>
+<p>Estado del proceso: <b>@Model.estadoProceso</b></p>
+
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Candidato</th>
+            <th>Votos</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var r in Model.porCandidato)
+        {
+            <tr>
+                <td>@r.nombre</td>
+                <td>@r.votos</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div style="margin-top:15px;">
+    <a href="/Votacion">Ir a votar</a>
+</div>
+

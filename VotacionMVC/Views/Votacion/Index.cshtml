@@ -1,0 +1,55 @@
+﻿@model VotacionMVC.Models.DTOs.VotarViewModel
+@{
+    ViewData["Title"] = "Votar";
+}
+
+<h2>Votación</h2>
+
+<form method="post">
+    @Html.AntiForgeryToken()
+
+    <div>
+        <label>Cédula</label><br />
+        <input name="cedula" value="@Model.cedula" maxlength="10" />
+    </div>
+
+    <div style="margin-top:10px;">
+        <label>Código PAD</label><br />
+        <input name="codigoPad" value="@Model.codigoPad" />
+    </div>
+
+    <div style="margin-top:10px;">
+        <label>Candidato</label><br />
+        <select name="candidatoId">
+            <option value="">Voto en blanco</option>
+            @foreach (var c in Model.candidatos)
+            {
+                <option value="@c.id" selected="@(Model.CandidatoId == c.id)">
+                    @c.numeroLista - @c.nombreCompleto (@c.partido)
+                </option>
+            }
+        </select>
+    </div>
+
+    <div style="margin-top:15px;">
+        <button type="submit">Emitir voto</button>
+        <a href="/Resultados">Ver resultados</a>
+    </div>
+</form>
+
+@if (Model.ok.HasValue)
+{
+    if (Model.ok.Value)
+    {
+        <div style="margin-top:15px; padding:10px; border:1px solid green;">
+            ✅ Voto registrado. Comprobante: <b>@Model.comprobante</b>
+        </div>
+    }
+    else
+    {
+        <div style="margin-top:15px; padding:10px; border:1px solid red;">
+            ❌ @Model.error
+        </div>
+    }
+}
+

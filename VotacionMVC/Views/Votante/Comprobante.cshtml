@@ -1,0 +1,72 @@
+﻿@{
+    ViewData["Title"] = "Comprobante";
+
+    var cedula = Context.Session.GetString("cedula") ?? "";
+    var nombre = Context.Session.GetString("nombreCompleto") ?? "";
+    var provincia = Context.Session.GetString("provincia") ?? "";
+    var canton = Context.Session.GetString("canton") ?? "";
+    var comprobante = Context.Session.GetString("comprobante") ?? "";
+    var correo = Context.Session.GetString("correo") ?? "";
+    var correoMsg = TempData["CorreoMsg"] as string;
+}
+
+<div class="container mt-4" style="max-width:1000px;">
+    <h3 class="fw-bold mb-3">Comprobante de Votación (no revela su elección)</h3>
+
+    <div class="card p-4">
+        <h5 class="text-center mb-4">REPÚBLICA DEL ECUADOR</h5>
+
+        <div class="row mb-2">
+            <div class="col-6 text-muted">Cédula:</div>
+            <div class="col-6 fw-bold text-end">@cedula</div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-6 text-muted">Nombre:</div>
+            <div class="col-6 fw-bold text-end">@nombre</div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-6 text-muted">Provincia:</div>
+            <div class="col-6 fw-bold text-end">@provincia</div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-6 text-muted">Cantón:</div>
+            <div class="col-6 fw-bold text-end">@canton</div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-6 text-muted">Fecha y hora:</div>
+            <div class="col-6 fw-bold text-end">@DateTime.Now.ToString("dd/MM/yyyy, h:mm:ss tt")</div>
+        </div>
+
+        <hr />
+
+        <div class="row mb-2">
+            <div class="col-6 text-muted">Código de comprobante:</div>
+            <div class="col-6 fw-bold text-end text-primary">@comprobante</div>
+        </div>
+
+        <div class="text-center text-muted mt-3">
+            Nota: Este comprobante certifica que usted votó. No incluye su elección.
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(correoMsg))
+    {
+        <div class="alert alert-info mt-3">
+            <b>Comprobante enviado por correo</b><br />
+            Se envió a: <b>@correo</b>
+        </div>
+    }
+
+    <div class="mt-4 d-flex gap-2 justify-content-center">
+        <a class="btn btn-outline-primary px-4" asp-controller="Resultados" asp-action="Nacional">Ver Resultados</a>
+
+        <form method="post" asp-action="Salir">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-secondary px-4" type="submit">Salir</button>
+        </form>
+    </div>
+</div>
