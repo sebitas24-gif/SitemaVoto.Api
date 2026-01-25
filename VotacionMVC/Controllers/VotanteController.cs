@@ -24,9 +24,7 @@ namespace VotacionMVC.Controllers
 
             // Endpoint candidatos (ajusta si el tuyo es diferente)
             // ejemplo: "api/Candidatos"
-            var candidatos = await _api.GetAsync<List<CandidatoDto>>("api/Candidatos", ct) ?? new List<CandidatoDto>();
-
-
+            var candidatos = await _api.GetCandidatosAsync() ?? new List<CandidatoDto>();
             return View(candidatos);
         }
 

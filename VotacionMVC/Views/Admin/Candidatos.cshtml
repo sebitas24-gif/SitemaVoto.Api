@@ -1,0 +1,43 @@
+﻿@model List<VotacionMVC.Models.DTOs.CandidatoDto>
+@{
+    ViewData["Title"] = "Gestionar Candidatos";
+}
+
+<div class="container py-4">
+    <h3>👥 Gestionar Candidatos</h3>
+    <p class="text-muted">Lista desde la API (si está disponible).</p>
+
+    <div class="card p-3 mb-3">
+        <h5 class="mb-3">Candidatos registrados (@Model.Count)</h5>
+
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Partido</th>
+                        <th>Binomio</th>
+                        <th>Activo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@Model[i].nombreCompleto</td>
+                            <td>@Model[i].partido</td>
+                            <td>@Model[i].binomio</td>
+                            <td>
+                                <span class="badge bg-success">@(Model[i].activo ? "Activo" : "Inactivo")</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <a class="btn btn-secondary" asp-controller="Acceso" asp-action="Admin">Volver</a>
+</div>

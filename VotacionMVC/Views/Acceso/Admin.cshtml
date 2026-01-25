@@ -1,7 +1,149 @@
-﻿
+﻿@model VotacionMVC.Models.ViewModels.AdminDashboardVm
 @{
-    ViewData["Title"] = "Admin";
+    ViewData["Title"] = "Administrador";
+    var p = Model.Proceso;
 }
 
-<h1>Admin</h1>
+<div class="admin-hero">
+    <div class="container py-4 text-white">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+                <h2 class="m-0">🗳️ Sistema de Voto Electrónico</h2>
+                <div class="opacity-75">Panel de Administración</div>
+            </div>
 
+            <div class="d-flex gap-2 flex-wrap">
+                <a class="btn btn-outline-light btn-sm" asp-controller="Resultados" asp-action="Index">📊 Resultados en Vivo</a>
+                <a class="btn btn-outline-light btn-sm" asp-controller="Acceso" asp-action="Votante">👤 Votante</a>
+                <a class="btn btn-outline-light btn-sm" asp-controller="Acceso" asp-action="Jefe">🧑‍⚖️ Jefe de Junta</a>
+                <a class="btn btn-light btn-sm fw-bold" asp-controller="Acceso" asp-action="Admin">⚙️ Administrador</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+
+    <h3 class="mb-1">Panel de Administración</h3>
+    <div class="text-muted mb-3">Gestión del proceso (el monitoreo en vivo lo ve el público)</div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6 col-lg-3">
+            <a class="admin-card card h-100 text-decoration-none" asp-controller="Admin" asp-action="Procesos">
+                <div class="card-body text-center">
+                    <div class="icon">📋</div>
+                    <div class="title">Crear Proceso Electoral</div>
+                    <div class="sub">Configurar nueva elección</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+            <a class="admin-card card h-100 text-decoration-none" asp-controller="Admin" asp-action="Candidatos">
+                <div class="card-body text-center">
+                    <div class="icon">👥</div>
+                    <div class="title">Gestionar Candidatos</div>
+                    <div class="sub">Agregar y editar candidatos</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+            <a class="admin-card card h-100 text-decoration-none" asp-controller="Admin" asp-action="Padron">
+                <div class="card-body text-center">
+                    <div class="icon">🧾</div>
+                    <div class="title">Padrón Electoral</div>
+                    <div class="sub">Imprimir y descargar (CSV)</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+            <a class="admin-card card h-100 text-decoration-none" asp-controller="Admin" asp-action="Exportar">
+                <div class="card-body text-center">
+                    <div class="icon">🧮</div>
+                    <div class="title">Exportar Resultados</div>
+                    <div class="sub">PDF + filtro por provincia</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-light fw-bold">📌 Proceso Electoral</div>
+        <div class="card-body">
+
+            @if (p == null)
+            {
+                <div class="alert alert-warning m-0">
+                    No hay proceso activo (o no se pudo obtener desde la API).
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Inicio</th>
+                                <th>Cierre</th>
+                                <th class="text-end">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>@p.Nombre</td>
+                                <td>@p.Tipo</td>
+                                <td>@(p.Inicio?.ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
+                                <td>@(p.Cierre?.ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
+                                <td class="text-end">
+                                    <span class="badge rounded-pill bg-success">@p.Estado</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <div class="mt-3">
+                <a class="btn btn-secondary" asp-controller="Acceso" asp-action="Salir">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-hero {
+        background: linear-gradient(180deg, #0f172a, #1f2937);
+    }
+
+    .admin-card {
+        background: linear-gradient(135deg, #6b7cff, #6a4bc6);
+        color: #fff;
+        border: 0;
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.12);
+        transition: .15s;
+    }
+
+        .admin-card:hover {
+            transform: translateY(-2px);
+            color: #fff;
+        }
+
+        .admin-card .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .admin-card .title {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .admin-card .sub {
+            opacity: .9;
+        }
+</style>

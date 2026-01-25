@@ -1,0 +1,38 @@
+﻿@{
+    ViewData["Title"] = "Exportar Resultados";
+    var msg = TempData["Msg"] as string;
+}
+
+<div class="container py-4">
+    <h3>🧮 Exportar Resultados (Admin)</h3>
+    <p class="text-muted">Simple: seleccionar provincia y descargar/enviar. (Funciona aunque la API no tenga PDF: usa dummy).</p>
+
+    @if (!string.IsNullOrWhiteSpace(msg))
+    {
+        <div class="alert alert-success">@msg</div>
+    }
+
+    <div class="card p-3 mb-3">
+        <form method="post" asp-controller="Admin" asp-action="DescargarPdf" class="row g-2 align-items-end">
+            <div class="col-md-8">
+                <label class="form-label">Provincia</label>
+                <select name="provincia" class="form-select">
+                    <option value="Nacional">Todas (Nacional)</option>
+                    <option value="Azuay">Azuay</option>
+                    <option value="Pichincha">Pichincha</option>
+                    <option value="Guayas">Guayas</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button class="btn btn-primary w-100" type="submit">⬇️ Descargar PDF</button>
+        </form>
+
+        <form method="post" asp-controller="Admin" asp-action="EnviarPdf" class="w-100">
+            <input type="hidden" name="provincia" value="Nacional" />
+            <button class="btn btn-success w-100" type="submit">📩 Enviar PDF (simulado)</button>
+        </form>
+    </div>
+</div>
+
+<a class="btn btn-secondary" asp-controller="Acceso" asp-action="Admin">Volver</a>
+</div>
