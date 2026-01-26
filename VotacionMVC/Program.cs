@@ -24,7 +24,7 @@ namespace VotacionMVC
             var baseUrl = builder.Configuration["Api:BaseUrl"] ?? "https://sitemavoto-api.onrender.com/";
             builder.Services.AddHttpClient("Api", client =>
             {
-                client.BaseAddress = new Uri(baseUrl);
+                client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"]!);
             });
 
             // ApiService (para inyectarlo en Controllers)

@@ -112,6 +112,30 @@ namespace VotacionMVC.Service
         }
         public Task<CandidatoCrearApiResponse?> CrearCandidatoAsync(CandidatoCrearApiRequest req, CancellationToken ct = default)
            => PostAsync<CandidatoCrearApiRequest, CandidatoCrearApiResponse>("api/Candidatos", req, ct);
+        public async Task<List<PadronItemDto>> GetPadronAsync()
+        {
+            var client = Client();
+
+            // 👇 Esto te muestra la URL final real
+            var reqUri = new Uri(client.BaseAddress!, "api/Padron");
+            Console.WriteLine("PADRON FINAL URL => " + reqUri);
+
+            var resp = await client.GetAsync("api/Padron");
+            var body = await resp.Content.ReadAsStringAsync();
+
+            if (!resp.IsSuccessStatusCode)
+                throw new Exception($"API Padron fallo: {(int)resp.StatusCode} {resp.ReasonPhrase} - {body}");
+
+            var data = System.Text.Json.JsonSerializer.Deserialize<List<PadronItemDto>>(
+                body,
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+
+            return data ?? new List<PadronItemDto>();
+        }
+
+
+
 
     }
 }

@@ -17,11 +17,21 @@ namespace VotacionMVC.Controllers
      
 
         [HttpGet]
-        public async Task<IActionResult> Padron(CancellationToken ct)
+        public async Task<IActionResult> Padron()
         {
-            var lista = await _api.GetPadronAsync(ct);
-            return View(lista);
+            try
+            {
+                var data = await _api.GetPadronAsync();
+                ViewBag.Debug = $"Count={data.Count}";
+                return View(data);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Debug = ex.Message;
+                return View(new List<PadronItemDto>());
+            }
         }
+
 
         [HttpGet]
         public IActionResult Exportar() => View();
