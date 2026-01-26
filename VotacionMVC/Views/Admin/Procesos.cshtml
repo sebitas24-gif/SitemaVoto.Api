@@ -1,91 +1,90 @@
 ﻿@model VotacionMVC.Models.DTOs.ProcesoCrearRequest
-
 @{
     ViewData["Title"] = "Crear Proceso Electoral";
+    string? error = ViewBag.Error as string;
 }
 
 <div class="container py-4">
+    <h2 class="mb-3">📋 Crear Proceso Electoral</h2>
 
-    <div class="d-flex align-items-center gap-2 mb-2">
-        <span style="font-size:28px;">📋</span>
-        <h2 class="m-0">Crear Proceso Electoral</h2>
-    </div>
-
-    <p class="text-muted">Configure un nuevo proceso de votación</p>
-
-    @* Mensajes *@
-    @if (TempData["Error"] != null)
+    @if (TempData["Ok"] != null)
     {
-        <div class="alert alert-warning">@TempData["Error"]</div>
+        <div class="alert alert-success">@TempData["Ok"]</div>
     }
-    @if (ViewBag.ErrorApi != null)
+    @if (!string.IsNullOrWhiteSpace(error))
     {
-        <div class="alert alert-warning">@ViewBag.ErrorApi</div>
+        <div class="alert alert-warning">@error</div>
     }
-
-    @* (Opcional) Debug: ver JSON enviado *@
-    @if (ViewBag.JsonEnviado != null)
+    @if (!ViewData.ModelState.IsValid)
     {
-        <pre class="mt-2" style="white-space:pre-wrap; background:#111; color:#0f0; padding:10px; border-radius:8px;">
-            @ViewBag.JsonEnviado
-            </pre>
-    }
-
-    <div class="card">
-        <div class="card-body">
-
-            <form asp-action="Procesos" asp-controller="Admin" method="post" class="row g-3">
-
-                <div class="col-12">
-                    <label class="form-label">Nombre del Proceso</label>
-                    <input asp-for="Nombre" class="form-control" placeholder="Ej: Elecciones Presidenciales 2026" />
-                    <span asp-validation-for="Nombre" class="text-danger"></span>
-                </div>
-
-                <div class="col-12">
-                    <label class="form-label">Descripción</label>
-                    <textarea asp-for="Descripcion" class="form-control" rows="4" placeholder="Descripción del proceso"></textarea>
-                    <span asp-validation-for="Descripcion" class="text-danger"></span>
-                </div>
-
-                <div class="col-12">
-                    <label class="form-label">Tipo</label>
-                    <select asp-for="Tipo" class="form-select">
-                        <option value="1">Nominal (1 candidato)</option>
-                        <option value="2" selected>Plancha (binomio)</option>
-                        <option value="3">Plurinominal</option>
-                    </select>
-                    <span asp-validation-for="Tipo" class="text-danger"></span>
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Fecha Inicio</label>
-
-                    @* IMPORTANTE: datetime-local para que mande ISO (yyyy-MM-ddTHH:mm) *@
-                    <input asp-for="InicioLocal" type="datetime-local" class="form-control" />
-                    <span asp-validation-for="InicioLocal" class="text-danger"></span>
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Fecha Fin</label>
-
-                    @* IMPORTANTE: datetime-local para que mande ISO *@
-                    <input asp-for="FinLocal" type="datetime-local" class="form-control" />
-                    <span asp-validation-for="FinLocal" class="text-danger"></span>
-                </div>
-
-             
-
-                <div class="col-12 d-flex gap-2">
-                    <button type="submit" class="btn btn-success">Crear</button>
-                    <a asp-action="Index" asp-controller="Admin" class="btn btn-secondary">Volver</a>
-                </div>
-
-            </form>
+        <div class="alert alert-warning">
+            Revisa los campos. Hay datos inválidos.
         </div>
-    </div>
+    }
+
+    <form asp-action="Procesos" method="post" class="card p-4">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label class="form-label">Nombre del Proceso</label>
+            <input asp-for="Nombre" class="form-control" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <textarea asp-for="Descripcion" class="form-control" rows="4"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Tipo</label>
+            <select asp-for="Tipo" class="form-select">
+                <option value="1">Nominal</option>
+                <option value="2" selected>Plancha (binomio)</option>
+                <option value="3">Plurinominal</option>
+            </select>
+            <small class="text-muted">IMPORTANTE: esto manda un INT a la API.</small>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <select asp-for="Estado" class="form-select">
+                <option value="1" selected>Configuración</option>
+                <option value="2">Activo</option>
+                <option value="3">Cerrado</option>
+            </select>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Fecha Inicio</label>
+                <input asp-for="InicioLocal" type="datetime-local" class="form-control"
+                       value="@Model.InicioLocal.ToString("yyyy-MM-ddTHH:mm")" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Fecha Fin</label>
+                <input asp-for="FinLocal" type="datetime-local" class="form-control"
+                       value="@Model.FinLocal.ToString("yyyy-MM-ddTHH:mm")" />
+            </div>
+        </div>
+
+        <div class="form-check mb-3">
+            <!-- SOLO UI (tu API no tiene este campo) -->
+            <input class="form-check-input" type="checkbox" checked disabled />
+            <label class="form-check-label">Voto nulo (simulado)</label>
+            <div class="text-muted" style="font-size: .9rem;">
+                Nota: Tu enum en API tiene TipoVoto.Blanco, no “Nulo”. Esto es solo texto por ahora.
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-success" type="submit">Crear</button>
+            <a class="btn btn-secondary" asp-action="Index">Volver</a>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+

@@ -8,6 +8,15 @@
         public string partido { get; set; } = "";
         public string binomio { get; set; } = "";
         public int numeroLista { get; set; }
-        public bool activo { get; set; }
     }
+    public class CandidatoCrearApiRequest
+    {
+       public int ProcesoElectoralId { get; set; }
+       public string NombreCompleto { get; set; } = "";
+    public string Partido { get; set; } = "";
+        public string? Binomio { get; set; }
+        public int NumeroLista { get; set; }
+    }
+
+    public class CandidatoCrearApiResponse : ApiResponse<int> { }
 }

@@ -53,36 +53,29 @@ namespace VotacionMVC.Service
 
         public async Task<TResponse?> PostAsync<TRequest, TResponse>(string url, TRequest body, CancellationToken ct = default)
         {
-            LastError = null;
+            using var res = await Client().PostAsJsonAsync(url, body, _jsonOptions, ct);
+
+            // Si el servidor respondió (aunque no mande JSON), NO es "API no respondió"
+            var raw = await res.Content.ReadAsStringAsync(ct);
+
+            if (!res.IsSuccessStatusCode)
+                throw new HttpRequestException($"POST {url} falló: HTTP {(int)res.StatusCode} {res.StatusCode} - {raw}");
+
+            // ✅ Si está vacío, igual consideramos éxito y devolvemos default
+            if (string.IsNullOrWhiteSpace(raw))
+                return default;
 
             try
             {
-                // ✅ Guarda el JSON que se envía
-                LastJsonSent = JsonSerializer.Serialize(body);
-                LastRawResponse = null;
-
-                var res = await Client().PostAsJsonAsync(url, body, ct);
-
-                var raw = await res.Content.ReadAsStringAsync(ct);
-                LastRawResponse = raw;
-
-                if (!res.IsSuccessStatusCode)
-                {
-                    LastError = $"HTTP {(int)res.StatusCode} {res.StatusCode}. {raw}";
-                    return default;
-                }
-
-                if (string.IsNullOrWhiteSpace(raw))
-                    return default;
-
                 return JsonSerializer.Deserialize<TResponse>(raw, _jsonOptions);
             }
-            catch (Exception ex)
+            catch
             {
-                LastError = ex.Message;
+                // ✅ Si no coincide el JSON con TResponse, igual no lo tratamos como error
                 return default;
             }
         }
+
 
         // ✅ IMPORTANTE: tu API es POST api/Proceso/crear
         public Task<ProcesoCrearResponse?> CrearProcesoAsync(ProcesoCrearRequest req, CancellationToken ct = default)
@@ -117,7 +110,8 @@ namespace VotacionMVC.Service
 
             return await res.Content.ReadFromJsonAsync<JefeVerificacionDto>(_jsonOptions, ct);
         }
-
+        public Task<CandidatoCrearApiResponse?> CrearCandidatoAsync(CandidatoCrearApiRequest req, CancellationToken ct = default)
+           => PostAsync<CandidatoCrearApiRequest, CandidatoCrearApiResponse>("api/Candidatos", req, ct);
 
     }
 }

@@ -16,7 +16,6 @@ namespace VotacionMVC.Controllers
 
             var vm = new VotarViewModel
             {
-                candidatos = candidatos.Where(c => c.activo).OrderBy(c => c.numeroLista).ToList()
             };
             return View(vm);
         }
@@ -26,7 +25,6 @@ namespace VotacionMVC.Controllers
         public async Task<IActionResult> Index(VotarViewModel vm)
         {
             var candidatos = await _api.GetCandidatosAsync() ?? new List<CandidatoDto>();
-            vm.candidatos = candidatos.Where(c => c.activo).OrderBy(c => c.numeroLista).ToList();
 
             if (string.IsNullOrWhiteSpace(vm.cedula) || vm.cedula.Length != 10)
             {

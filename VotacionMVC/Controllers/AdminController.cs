@@ -14,12 +14,7 @@ namespace VotacionMVC.Controllers
 
        
 
-        [HttpGet]
-        public async Task<IActionResult> Candidatos(CancellationToken ct)
-        {
-            var lista = await _api.GetCandidatosAsync(ct) ;
-            return View(lista);
-        }
+     
 
         [HttpGet]
         public async Task<IActionResult> Padron(CancellationToken ct)
@@ -156,6 +151,67 @@ startxref
             return RedirectToAction(nameof(Procesos));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Candidatos(CancellationToken ct)
+        {
+            // Necesitamos el proceso activo para saber ProcesoElectoralId
+            var proc = await _api.GetProcesoActivoAsync(ct);
 
+            var procesoId = proc?.data?.id ?? 0;
+
+            var lista = await _api.GetCandidatosAsync(ct) ?? new List<CandidatoDto>();
+
+            var vm = new CandidatosVm
+            {
+                ProcesoElectoralId = procesoId,
+                Lista = lista,
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Candidatos(CandidatosVm vm, CancellationToken ct)
+        {
+            if (vm.Nuevo == null)
+            {
+                TempData["Err"] = "Formulario vacío.";
+                return RedirectToAction(nameof(Candidatos));
+            }
+
+            if (vm.Nuevo.ProcesoElectoralId <= 0)
+            {
+                TempData["Err"] = "No hay proceso activo. Crea/activa un proceso primero.";
+                return RedirectToAction(nameof(Candidatos));
+            }
+
+            if (string.IsNullOrWhiteSpace(vm.Nuevo.NombreCompleto) || string.IsNullOrWhiteSpace(vm.Nuevo.Partido))
+            {
+                TempData["Err"] = "NombreCompleto y Partido son obligatorios.";
+                return RedirectToAction(nameof(Candidatos));
+            }
+
+            try
+            {
+                await _api.CrearCandidatoAsync(vm.Nuevo, ct);
+
+                TempData["Ok"] = "Candidato creado correctamente.";
+                return RedirectToAction(nameof(Candidatos));
+            }
+            catch (Exception ex)
+            {
+                TempData["Err"] = ex.Message;
+                return RedirectToAction(nameof(Candidatos));
+            }
+        }
+
+
+        public class CandidatosVm
+        {
+            public int ProcesoElectoralId { get; set; }
+            public List<CandidatoDto> Lista { get; set; } = new();
+            public CandidatoCrearApiRequest Nuevo { get; set; } = new();
+        }
     }
 }
