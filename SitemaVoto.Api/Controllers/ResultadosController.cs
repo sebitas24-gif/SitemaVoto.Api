@@ -31,5 +31,12 @@ namespace SitemaVoto.Api.Controllers
             var r = await _resultados.GetPorProvinciaAsync(provincia, ct);
             return Ok(r);
         }
+        [HttpGet("final")]
+        public async Task<IActionResult> Final(CancellationToken ct)
+        {
+            // Por ahora devuelve lo mismo que nacional
+            var data = await _resultados.GetNacionalAsync(ct);
+            return Ok(data);
+        }
     }
 }

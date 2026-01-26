@@ -133,6 +133,27 @@ namespace VotacionMVC.Service
 
             return data ?? new List<PadronItemDto>();
         }
+        public Task<ResultadosNacionalDto?> GetResultadosEnVivoAsync()
+    => Client().GetFromJsonAsync<ResultadosNacionalDto>("api/Resultados/en-vivo");
+
+        public Task<ResultadosNacionalDto?> GetResultadosFinalesAsync()
+            => Client().GetFromJsonAsync<ResultadosNacionalDto>("api/Resultados/finales");
+        public async Task<ResultadosNacionalDto?> TryGetResultadosAsync(string path, CancellationToken ct)
+        {
+            var resp = await Client().GetAsync(path, ct);
+            var body = await resp.Content.ReadAsStringAsync(ct);
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                LastError = $"Resultados falló: {(int)resp.StatusCode} {resp.ReasonPhrase} - {body}";
+                return null;
+            }
+
+            return System.Text.Json.JsonSerializer.Deserialize<ResultadosNacionalDto>(
+                body,
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+        }
 
 
 
