@@ -5,6 +5,7 @@ using SitemaVoto.Api.DTOs.Proceso;
 using SitemaVoto.Api.Services.Procesos;
 using VotoModelos.Enums;
 
+
 namespace SitemaVoto.Api.Controllers
 {
     [Route("api/[controller]")]
@@ -47,14 +48,16 @@ namespace SitemaVoto.Api.Controllers
             if (string.IsNullOrWhiteSpace(req.Nombre)) return ApiResponseDto<int>.Fail("Nombre requerido.");
             if (req.FinLocal <= req.InicioLocal) return ApiResponseDto<int>.Fail("FinLocal debe ser mayor a InicioLocal.");
 
-            // ✅ Validación SIN reventar Swagger por tipos raros
-            // (usa nombre completo del enum si existe en otro proyecto)
-            if (!Enum.IsDefined(typeof(VotoModelos.Enums.TipoEleccion), req.Tipo))
+            if (!Enum.IsDefined(typeof(TipoEleccion), req.Tipo))
                 return ApiResponseDto<int>.Fail("Tipo inválido.");
+
+            if (!Enum.IsDefined(typeof(EstadoProceso), req.Estado))
+                return ApiResponseDto<int>.Fail("Estado inválido.");
 
             var id = await _proceso.CrearAsync(req, ct);
             return ApiResponseDto<int>.Success(id);
         }
+
 
     }
 }

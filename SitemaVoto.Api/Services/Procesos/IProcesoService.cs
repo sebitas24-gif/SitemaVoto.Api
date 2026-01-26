@@ -7,11 +7,10 @@ namespace SitemaVoto.Api.Services.Procesos
 {
     public interface IProcesoService
     {
+        Task<EstadoProceso> GetEstadoActualAsync(CancellationToken ct = default);
+        Task<ProcesoElectoral?> GetProcesoActivoAsync(CancellationToken ct = default);
 
-        Task<ProcesoElectoral?> GetProcesoActivoAsync(CancellationToken ct);
-        Task<EstadoProceso> GetEstadoActualAsync(CancellationToken ct);
-
-        Task<int> CrearAsync(ProcesoCreateDto req, CancellationToken ct);
-
+        // ✅ AGREGA ESTO (si no existe o si la firma no coincide)
+        Task<int> CrearAsync(ProcesoCreateDto req, CancellationToken ct = default);
     }
 }
