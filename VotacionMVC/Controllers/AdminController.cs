@@ -3,6 +3,7 @@ using System.Text;
 using VotacionMVC.Service;
 using System.Text;
 using VotacionMVC.Models.DTOs;
+using VotoModelos.Enums;
 
 namespace VotacionMVC.Controllers
 {
@@ -11,8 +12,7 @@ namespace VotacionMVC.Controllers
         private readonly ApiService _api;
         public AdminController(ApiService api) => _api = api;
 
-        [HttpGet]
-        public IActionResult Procesos() => View(); // vista simple (form)
+       
 
         [HttpGet]
         public async Task<IActionResult> Candidatos(CancellationToken ct)
@@ -90,25 +90,70 @@ startxref
 
 
 
+        [HttpGet]
+        public IActionResult Procesos()
+        {
+            return View(new ProcesoCrearRequest
+            {
+                Tipo = TipoEleccion.Plancha,
+                Estado = EstadoProceso.Configuracion,
+                InicioLocal = DateTime.Now,
+                FinLocal = DateTime.Now.AddDays(1)
+            });
+        }
+
+        // POST: /Admin/Procesos
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Procesos(ProcesoCrearRequest model, CancellationToken ct)
         {
+            // Validación básica
+            if (string.IsNullOrWhiteSpace(model.Nombre))
+            {
+                TempData["Error"] = "El nombre del proceso es obligatorio.";
+                return View(model);
+            }
+
+            if (model.FinLocal <= model.InicioLocal)
+            {
+                TempData["Error"] = "La fecha fin debe ser mayor que la fecha inicio.";
+                return View(model);
+            }
+
+            // Por seguridad: asegura estado por defecto
+            if (model.Estado == 0)
+                model.Estado = EstadoProceso.Configuracion;
+
+            // Llamada API
             var resp = await _api.CrearProcesoAsync(model, ct);
 
+            // Si falló (resp null o error HTTP)
             if (resp == null)
             {
-                ViewBag.Msg = "No se pudo crear el proceso. " + (_api.LastError ?? "");
+                TempData["Error"] = _api.LastError ?? "No se pudo crear el proceso.";
+                ViewBag.JsonEnviado = _api.LastJsonSent;  // (opcional debug)
                 return View(model);
             }
 
-            if (resp.ok == false)
+            // ✅ Ajusta estas 3 líneas si tu response tiene otros nombres:
+            // Por ejemplo: resp.Ok, resp.Error, resp.Data
+            var okProp = resp.GetType().GetProperty("ok") ?? resp.GetType().GetProperty("Ok");
+            var errProp = resp.GetType().GetProperty("error") ?? resp.GetType().GetProperty("Error");
+            var dataProp = resp.GetType().GetProperty("data") ?? resp.GetType().GetProperty("Data");
+
+            bool ok = okProp != null && (bool)(okProp.GetValue(resp) ?? false);
+            string? err = errProp?.GetValue(resp)?.ToString();
+            var data = dataProp?.GetValue(resp);
+
+            if (!ok)
             {
-                ViewBag.Msg = "No se pudo crear el proceso: " + (resp.error ?? _api.LastError ?? "Error desconocido");
+                TempData["Error"] = err ?? _api.LastError ?? "No se pudo crear el proceso.";
+                ViewBag.JsonEnviado = _api.LastJsonSent; // (opcional debug)
                 return View(model);
             }
 
-            TempData["Msg"] = "✅ Proceso creado correctamente.";
-            return RedirectToAction("Procesos");
+            TempData["Ok"] = $"✅ Proceso creado. ID: {data}";
+            return RedirectToAction(nameof(Procesos));
         }
 
 

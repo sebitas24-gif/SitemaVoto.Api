@@ -15,10 +15,7 @@ namespace VotacionMVC.Service
             PropertyNameCaseInsensitive = true
         };
 
-        public ApiService(IHttpClientFactory factory)
-        {
-            _factory = factory;
-        }
+        public ApiService(IHttpClientFactory factory) => _factory = factory;
 
         private HttpClient Client() => _factory.CreateClient("Api");
 
@@ -32,23 +29,14 @@ namespace VotacionMVC.Service
         public Task<ResultadosNacionalResponse?> GetResultadosNacionalAsync(CancellationToken ct = default)
             => Client().GetFromJsonAsync<ResultadosNacionalResponse>("api/Resultados/nacional", _jsonOptions, ct);
 
-        // ✅ PADRÓN (ya NO depende de AdminController)
         public async Task<List<PadronItemDto>> GetPadronAsync(CancellationToken ct = default)
         {
-            // 👇 OJO: aquí está la ruta que estás intentando.
-            // Si tu API usa otra, cámbiala aquí.
             var res = await Client().GetAsync("api/Padron", ct);
-
-            if (res.StatusCode == System.Net.HttpStatusCode.NotFound)
-                return new List<PadronItemDto>(); // ✅ no explota, solo vacío
-
-            if (!res.IsSuccessStatusCode)
-                return new List<PadronItemDto>(); // ✅ simple: no explota
+            if (!res.IsSuccessStatusCode) return new List<PadronItemDto>();
 
             var data = await res.Content.ReadFromJsonAsync<List<PadronItemDto>>(_jsonOptions, ct);
             return data ?? new List<PadronItemDto>();
         }
-
 
         // ========= POSTs =========
         public async Task<VotacionEmitirResponse?> EmitirVotoAsync(VotacionEmitirRequest req, CancellationToken ct = default)
@@ -59,33 +47,64 @@ namespace VotacionMVC.Service
             return await res.Content.ReadFromJsonAsync<VotacionEmitirResponse>(_jsonOptions, ct);
         }
 
-        // POST genérico (el que estás usando en AccesoController)
         public string? LastError { get; private set; }
+        public string? LastJsonSent { get; private set; }
+        public string? LastRawResponse { get; private set; }
 
         public async Task<TResponse?> PostAsync<TRequest, TResponse>(string url, TRequest body, CancellationToken ct = default)
         {
+            LastError = null;
+
             try
             {
+                // ✅ Guarda el JSON que se envía
+                LastJsonSent = JsonSerializer.Serialize(body);
+                LastRawResponse = null;
+
                 var res = await Client().PostAsJsonAsync(url, body, ct);
 
+                var raw = await res.Content.ReadAsStringAsync(ct);
+                LastRawResponse = raw;
+
                 if (!res.IsSuccessStatusCode)
+                {
+                    LastError = $"HTTP {(int)res.StatusCode} {res.StatusCode}. {raw}";
+                    return default;
+                }
+
+                if (string.IsNullOrWhiteSpace(raw))
                     return default;
 
-                return await res.Content.ReadFromJsonAsync<TResponse>(_jsonOptions, ct);
+                return JsonSerializer.Deserialize<TResponse>(raw, _jsonOptions);
             }
-            catch
+            catch (Exception ex)
             {
+                LastError = ex.Message;
                 return default;
             }
         }
 
+        // ✅ IMPORTANTE: tu API es POST api/Proceso/crear
+        public Task<ProcesoCrearResponse?> CrearProcesoAsync(ProcesoCrearRequest req, CancellationToken ct = default)
+            => PostAsync<ProcesoCrearRequest, ProcesoCrearResponse>("api/Proceso/crear", req, ct);
 
+        public async Task<JsonElement?> GetResultadosRawAsync(string modo, CancellationToken ct = default)
+        {
+            var url = (modo ?? "vivo").ToLower() == "final"
+                ? "api/Resultados/final"
+                : "api/Resultados/nacional";
+
+            using var res = await Client().GetAsync(url, ct);
+            if (!res.IsSuccessStatusCode) return null;
+
+            await using var stream = await res.Content.ReadAsStreamAsync(ct);
+            using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct);
+            return doc.RootElement.Clone();
+        }
 
         public async Task<byte[]?> TryDownloadResultadosPdfAsync(string provincia, CancellationToken ct = default)
         {
-            // Cambia la ruta según tu API real
             var url = $"api/Resultados/pdf?provincia={Uri.EscapeDataString(provincia)}";
-
             var res = await Client().GetAsync(url, ct);
             if (!res.IsSuccessStatusCode) return null;
 
@@ -98,25 +117,6 @@ namespace VotacionMVC.Service
 
             return await res.Content.ReadFromJsonAsync<JefeVerificacionDto>(_jsonOptions, ct);
         }
-        public async Task<JsonElement?> GetResultadosRawAsync(string modo, CancellationToken ct = default)
-        {
-            // ✅ CAMBIA estas rutas si tu API usa otras
-            var url = (modo ?? "vivo").ToLower() == "final"
-                ? "api/Resultados/final"
-                : "api/Resultados/nacional";
-
-            using var res = await Client().GetAsync(url, ct);
-            if (!res.IsSuccessStatusCode) return null;
-
-            await using var stream = await res.Content.ReadAsStreamAsync(ct);
-            using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct);
-            return doc.RootElement.Clone();
-        }
-        public async Task<ProcesoCrearResponse?> CrearProcesoAsync(ProcesoCrearRequest req, CancellationToken ct = default)
-        {
-            return await PostAsync<ProcesoCrearRequest, ProcesoCrearResponse>("api/Proceso", req, ct);
-        }
-
 
 
     }

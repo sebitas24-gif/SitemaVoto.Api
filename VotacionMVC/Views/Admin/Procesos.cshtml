@@ -1,52 +1,91 @@
 ﻿@model VotacionMVC.Models.DTOs.ProcesoCrearRequest
 
+@{
+    ViewData["Title"] = "Crear Proceso Electoral";
+}
+
 <div class="container py-4">
-    <h2 class="mb-1">📋 Crear Proceso Electoral</h2>
 
-    @if (TempData["Msg"] != null)
+    <div class="d-flex align-items-center gap-2 mb-2">
+        <span style="font-size:28px;">📋</span>
+        <h2 class="m-0">Crear Proceso Electoral</h2>
+    </div>
+
+    <p class="text-muted">Configure un nuevo proceso de votación</p>
+
+    @* Mensajes *@
+    @if (TempData["Error"] != null)
     {
-        <div class="alert alert-success">@TempData["Msg"]</div>
+        <div class="alert alert-warning">@TempData["Error"]</div>
     }
-    @if (ViewBag.Msg != null)
+    @if (ViewBag.ErrorApi != null)
     {
-        <div class="alert alert-warning">@ViewBag.Msg</div>
+        <div class="alert alert-warning">@ViewBag.ErrorApi</div>
     }
 
-    <form asp-action="Procesos" method="post" class="card p-4">
-        <div class="mb-3">
-            <label class="form-label">Nombre del Proceso</label>
-            <input asp-for="nombre" class="form-control" placeholder="Ej: Elecciones Presidenciales 2026" />
-        </div>
+    @* (Opcional) Debug: ver JSON enviado *@
+    @if (ViewBag.JsonEnviado != null)
+    {
+        <pre class="mt-2" style="white-space:pre-wrap; background:#111; color:#0f0; padding:10px; border-radius:8px;">
+            @ViewBag.JsonEnviado
+            </pre>
+    }
 
-        <div class="mb-3">
-            <label class="form-label">Descripción</label>
-            <textarea asp-for="descripcion" class="form-control" rows="3"></textarea>
-        </div>
+    <div class="card">
+        <div class="card-body">
 
-        <div class="mb-3">
-            <label class="form-label">Tipo</label>
-            <input asp-for="tipo" class="form-control" placeholder="Plancha (binomio)" />
-        </div>
+            <form asp-action="Procesos" asp-controller="Admin" method="post" class="row g-3">
 
-        <div class="row g-3 mb-3">
-            <div class="col-md-6">
-                <label class="form-label">Fecha Inicio</label>
-                <input asp-for="inicio" type="datetime-local" class="form-control" />
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Fecha Fin</label>
-                <input asp-for="cierre" type="datetime-local" class="form-control" />
-            </div>
-        </div>
+                <div class="col-12">
+                    <label class="form-label">Nombre del Proceso</label>
+                    <input asp-for="Nombre" class="form-control" placeholder="Ej: Elecciones Presidenciales 2026" />
+                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                </div>
 
-        <div class="form-check mb-3">
-            <input asp-for="permitirBlanco" class="form-check-input" />
-            <label class="form-check-label">Permitir voto en blanco</label>
-        </div>
+                <div class="col-12">
+                    <label class="form-label">Descripción</label>
+                    <textarea asp-for="Descripcion" class="form-control" rows="4" placeholder="Descripción del proceso"></textarea>
+                    <span asp-validation-for="Descripcion" class="text-danger"></span>
+                </div>
 
-        <div class="d-flex gap-2">
-            <button class="btn btn-success" type="submit">Crear</button>
-            <a class="btn btn-secondary" asp-controller="Acceso" asp-action="Admin">Volver</a>
+                <div class="col-12">
+                    <label class="form-label">Tipo</label>
+                    <select asp-for="Tipo" class="form-select">
+                        <option value="1">Nominal (1 candidato)</option>
+                        <option value="2" selected>Plancha (binomio)</option>
+                        <option value="3">Plurinominal</option>
+                    </select>
+                    <span asp-validation-for="Tipo" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Fecha Inicio</label>
+
+                    @* IMPORTANTE: datetime-local para que mande ISO (yyyy-MM-ddTHH:mm) *@
+                    <input asp-for="InicioLocal" type="datetime-local" class="form-control" />
+                    <span asp-validation-for="InicioLocal" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Fecha Fin</label>
+
+                    @* IMPORTANTE: datetime-local para que mande ISO *@
+                    <input asp-for="FinLocal" type="datetime-local" class="form-control" />
+                    <span asp-validation-for="FinLocal" class="text-danger"></span>
+                </div>
+
+             
+
+                <div class="col-12 d-flex gap-2">
+                    <button type="submit" class="btn btn-success">Crear</button>
+                    <a asp-action="Index" asp-controller="Admin" class="btn btn-secondary">Volver</a>
+                </div>
+
+            </form>
         </div>
-    </form>
+    </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

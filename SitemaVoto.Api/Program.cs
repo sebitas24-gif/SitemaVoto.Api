@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.HttpOverrides;
+﻿using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -47,6 +47,13 @@ namespace SitemaVoto.Api
                 options.SerializerSettings.ReferenceLoopHandling
                 = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                // ✅ evita choque de nombres de DTOs (CandidatoCreateDto repetido, etc.)
+                c.CustomSchemaIds(t => t.FullName);
+            });
+
 
             var app = builder.Build();
 
@@ -65,7 +72,8 @@ namespace SitemaVoto.Api
             {
                 ForwardedHeaders = ForwardedHeaders.All
             });
-
+            
+            
           
             //app.UseHttpsRedirection();
 
