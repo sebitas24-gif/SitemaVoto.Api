@@ -10,6 +10,7 @@ namespace SitemaVoto.Api.Services.Procesos
 
         Task<ProcesoElectoral?> GetProcesoActivoAsync(CancellationToken ct);
         Task<EstadoProceso> GetEstadoActualAsync(CancellationToken ct);
+
         Task<int> CrearAsync(ProcesoCreateDto req, CancellationToken ct);
 
     }
