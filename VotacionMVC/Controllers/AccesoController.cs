@@ -19,6 +19,16 @@ namespace VotacionMVC.Controllers
             // Menú con 4 botones (como tu simulación)
             return View();
         }
+        
+        [HttpGet]
+        public IActionResult Votante()
+        {
+            // 🔥 Temporal: valores de prueba (pon una cédula/pad que exista en tu API)
+            HttpContext.Session.SetString("cedula", "0102030405");
+            HttpContext.Session.SetString("codigoPad", "PAD-123456");
+
+            return RedirectToAction("Papeleta", "Votante");
+        }
         [HttpPost]
         public async Task<IActionResult> Votante(string cedula, string codigoPad, CancellationToken ct)
         {
@@ -107,9 +117,33 @@ namespace VotacionMVC.Controllers
 
 
         [HttpGet]
-        public IActionResult Jefe() => View();
+        public IActionResult Jefe() => View(model: null);
+
+        [HttpPost]
+        public async Task<IActionResult> Jefe(string cedula, CancellationToken ct)
+        {
+            cedula = (cedula ?? "").Trim();
+
+            if (string.IsNullOrWhiteSpace(cedula))
+            {
+                ViewBag.Msg = "Ingrese una cédula.";
+                return View(model: null);
+            }
+
+            var data = await _api.GetVotantePorCedulaAsync(cedula, ct);
+
+            if (data == null)
+            {
+                ViewBag.Msg = "❌ No existe un votante con esa cédula en el padrón.";
+                return View(model: null);
+            }
+
+            ViewBag.Msg = "✅ Verificación: Si coincide, puede entregar el código PAD para votar.";
+            return View(data);
+        }
 
 
-        
+
+
     }
 }

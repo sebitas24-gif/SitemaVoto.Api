@@ -77,6 +77,15 @@ namespace VotacionMVC.Service
 
             return await res.Content.ReadAsByteArrayAsync(ct);
         }
+        public async Task<JefeVerificacionDto?> GetVotantePorCedulaAsync(string cedula, CancellationToken ct = default)
+        {
+            var res = await Client().GetAsync($"api/Padron/cedula/{cedula}", ct);
+            if (!res.IsSuccessStatusCode) return null;
+
+            return await res.Content.ReadFromJsonAsync<JefeVerificacionDto>(_jsonOptions, ct);
+        }
+
+
 
     }
 }
