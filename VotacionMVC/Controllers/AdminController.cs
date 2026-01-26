@@ -2,6 +2,7 @@
 using System.Text;
 using VotacionMVC.Service;
 using System.Text;
+using VotacionMVC.Models.DTOs;
 
 namespace VotacionMVC.Controllers
 {
@@ -86,6 +87,30 @@ startxref
 %%EOF";
             return Encoding.ASCII.GetBytes(contenido);
         }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> Procesos(ProcesoCrearRequest model, CancellationToken ct)
+        {
+            var resp = await _api.CrearProcesoAsync(model, ct);
+
+            if (resp == null)
+            {
+                ViewBag.Msg = "No se pudo crear el proceso. " + (_api.LastError ?? "");
+                return View(model);
+            }
+
+            if (resp.ok == false)
+            {
+                ViewBag.Msg = "No se pudo crear el proceso: " + (resp.error ?? _api.LastError ?? "Error desconocido");
+                return View(model);
+            }
+
+            TempData["Msg"] = "✅ Proceso creado correctamente.";
+            return RedirectToAction("Procesos");
+        }
+
 
     }
 }

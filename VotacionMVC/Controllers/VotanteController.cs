@@ -72,24 +72,13 @@ namespace VotacionMVC.Controllers
             if (string.IsNullOrWhiteSpace(cedula) || string.IsNullOrWhiteSpace(codigoPad))
                 return RedirectToAction("Index", "Acceso");
 
-            var candidatoIdRaw = (HttpContext.Session.GetString("voto_candidatoId") ?? "").Trim();
+            var candidatoIdRaw = HttpContext.Session.GetString("voto_candidatoId") ?? "";
 
-            // ✅ Si no eligió nada, volver
-            
-        if (string.IsNullOrWhiteSpace(candidatoIdRaw))
-            {
-                TempData["Msg"] = "❌ Debe seleccionar un candidato o Voto en Blanco.";
-                return RedirectToAction("Papeleta");
-            }
+            // ✅ Si no eligió nada => voto nulo (0)
+            int candidatoId = 0;
+            if (!string.IsNullOrWhiteSpace(candidatoIdRaw) && int.TryParse(candidatoIdRaw, out var parsed))
+                candidatoId = parsed;
 
-            // ✅ Convertir a int (0 = blanco)
-            if (!int.TryParse(candidatoIdRaw, out var candidatoId))
-            {
-                TempData["Msg"] = "❌ Selección inválida. Vuelva a elegir.";
-                return RedirectToAction("Papeleta");
-            }
-
-            // ✅ Request real según TU DTO
             var req = new VotacionEmitirRequest
             {
                 cedula = cedula,
@@ -101,16 +90,16 @@ namespace VotacionMVC.Controllers
 
             if (resp == null)
             {
-                TempData["Msg"] = "❌ No se pudo emitir el voto (API no respondió o falló).";
+                TempData["Msg"] = "❌ No se pudo emitir el voto.";
                 return RedirectToAction("Papeleta");
             }
 
-            // Limpieza para que no vuelva a emitir por refresh
             HttpContext.Session.Remove("voto_candidatoId");
 
             TempData["Msg"] = "✅ Voto registrado correctamente.";
             return RedirectToAction("Comprobante");
         }
+
 
         [HttpGet]
         public IActionResult Comprobante()

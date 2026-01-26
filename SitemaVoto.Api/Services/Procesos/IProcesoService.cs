@@ -1,5 +1,7 @@
 ﻿using VotoModelos.Entidades;
 using VotoModelos.Enums;
+using SitemaVoto.Api.DTOs.Proceso;
+
 
 namespace SitemaVoto.Api.Services.Procesos
 {
@@ -8,5 +10,7 @@ namespace SitemaVoto.Api.Services.Procesos
 
         Task<ProcesoElectoral?> GetProcesoActivoAsync(CancellationToken ct);
         Task<EstadoProceso> GetEstadoActualAsync(CancellationToken ct);
+        Task<int> CrearAsync(ProcesoCreateDto req, CancellationToken ct);
+
     }
 }

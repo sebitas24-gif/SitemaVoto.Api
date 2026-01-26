@@ -60,13 +60,27 @@ namespace VotacionMVC.Service
         }
 
         // POST genérico (el que estás usando en AccesoController)
+        public string? LastError { get; private set; }
+
         public async Task<TResponse?> PostAsync<TRequest, TResponse>(string url, TRequest body, CancellationToken ct = default)
         {
-            var res = await Client().PostAsJsonAsync(url, body, ct);
-            if (!res.IsSuccessStatusCode) return default;
+            try
+            {
+                var res = await Client().PostAsJsonAsync(url, body, ct);
 
-            return await res.Content.ReadFromJsonAsync<TResponse>(_jsonOptions, ct);
+                if (!res.IsSuccessStatusCode)
+                    return default;
+
+                return await res.Content.ReadFromJsonAsync<TResponse>(_jsonOptions, ct);
+            }
+            catch
+            {
+                return default;
+            }
         }
+
+
+
         public async Task<byte[]?> TryDownloadResultadosPdfAsync(string provincia, CancellationToken ct = default)
         {
             // Cambia la ruta según tu API real
@@ -83,6 +97,24 @@ namespace VotacionMVC.Service
             if (!res.IsSuccessStatusCode) return null;
 
             return await res.Content.ReadFromJsonAsync<JefeVerificacionDto>(_jsonOptions, ct);
+        }
+        public async Task<JsonElement?> GetResultadosRawAsync(string modo, CancellationToken ct = default)
+        {
+            // ✅ CAMBIA estas rutas si tu API usa otras
+            var url = (modo ?? "vivo").ToLower() == "final"
+                ? "api/Resultados/final"
+                : "api/Resultados/nacional";
+
+            using var res = await Client().GetAsync(url, ct);
+            if (!res.IsSuccessStatusCode) return null;
+
+            await using var stream = await res.Content.ReadAsStreamAsync(ct);
+            using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct);
+            return doc.RootElement.Clone();
+        }
+        public async Task<ProcesoCrearResponse?> CrearProcesoAsync(ProcesoCrearRequest req, CancellationToken ct = default)
+        {
+            return await PostAsync<ProcesoCrearRequest, ProcesoCrearResponse>("api/Proceso", req, ct);
         }
 
 

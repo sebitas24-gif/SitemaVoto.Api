@@ -39,5 +39,15 @@ namespace SitemaVoto.Api.Controllers
 
             return ApiResponseDto<ProcesoDto>.Success(dto);
         }
+        [HttpPost("crear")]
+        public async Task<ApiResponseDto<int>> Crear([FromBody] ProcesoCreateDto req, CancellationToken ct)
+        {
+            if (req == null) return ApiResponseDto<int>.Fail("Body vacío.");
+            if (string.IsNullOrWhiteSpace(req.Nombre)) return ApiResponseDto<int>.Fail("Nombre requerido.");
+            if (req.FinLocal <= req.InicioLocal) return ApiResponseDto<int>.Fail("FinLocal debe ser mayor a InicioLocal.");
+
+            var id = await _proceso.CrearAsync(req, ct);
+            return ApiResponseDto<int>.Success(id);
+        }
     }
 }

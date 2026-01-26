@@ -1,6 +1,7 @@
 ﻿using VotoModelos.Entidades;
 using VotoModelos.Enums;
 using Microsoft.EntityFrameworkCore;
+using SitemaVoto.Api.DTOs.Proceso;
 
 namespace SitemaVoto.Api.Services.Procesos
 {
@@ -41,6 +42,36 @@ namespace SitemaVoto.Api.Services.Procesos
             if (ahora > p.FinLocal) return EstadoProceso.Cerrado;
 
             return EstadoProceso.Activo;
+        }
+        public async Task<int> CrearAsync(ProcesoCreateDto req, CancellationToken ct)
+        {
+            // ✅ Ajusta a tu entidad real
+            var proceso = new ProcesoElectoral
+            {
+                Nombre = req.Nombre,
+                Descripcion = req.Descripcion,
+
+                // ✅ CAST EXPLÍCITO
+                Tipo = (TipoEleccion)req.Tipo,
+
+                Estado = (EstadoProceso)req.Estado,
+                InicioLocal = req.InicioLocal,
+                FinLocal = req.FinLocal,
+
+                Candidatos = req.Candidatos.Select(c => new Candidato
+                {
+                    NombreCompleto = c.NombreCompleto,
+                    Partido = c.Partido,
+                    Binomio = c.Binomio,
+                    NumeroLista = c.NumeroLista,
+                    Activo = c.Activo
+                }).ToList()
+            };
+
+            _db.ProcesoElectorales.Add(proceso);
+            await _db.SaveChangesAsync(ct);
+
+            return proceso.Id;
         }
     }
 }
