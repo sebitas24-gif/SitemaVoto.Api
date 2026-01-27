@@ -142,6 +142,41 @@ namespace VotacionMVC.Controllers
             return View(data);
         }
 
+        [HttpGet]
+        public IActionResult Bridge(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return RedirectToAction("Index");
+
+            string data;
+            try
+            {
+                data = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(token));
+            }
+            catch
+            {
+                return RedirectToAction("Index");
+            }
+
+            // data: "cedula|rol|fecha"
+            var parts = data.Split('|');
+            if (parts.Length < 2) return RedirectToAction("Index");
+
+            var cedula = parts[0];
+            var rol = parts[1];
+
+            // Guardamos en sesión para el resto del sistema
+            HttpContext.Session.SetString("cedula", cedula);
+            HttpContext.Session.SetString("rol", rol);
+
+            // Redirigir según rol
+            return rol switch
+            {
+                "Admin" => RedirectToAction("Admin", "Acceso"),
+                "JefeJunta" => RedirectToAction("Index", "Jefe"),   // ajusta a tu controlador real
+                _ => RedirectToAction("Papeleta", "Votante"),
+            };
+        }
 
 
 

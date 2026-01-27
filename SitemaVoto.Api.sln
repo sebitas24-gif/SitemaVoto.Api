@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiTest", "ApiTest\ApiTest.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VotacionMVC", "VotacionMVC\VotacionMVC.csproj", "{41FC8D79-16B8-4725-9A91-484957C0D780}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VotoMVC_Login", "VotoMVC_Login\VotoMVC_Login.csproj", "{C9D783DF-24A4-4BC9-A9AD-724C2ECE229B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{41FC8D79-16B8-4725-9A91-484957C0D780}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41FC8D79-16B8-4725-9A91-484957C0D780}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41FC8D79-16B8-4725-9A91-484957C0D780}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9D783DF-24A4-4BC9-A9AD-724C2ECE229B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9D783DF-24A4-4BC9-A9AD-724C2ECE229B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9D783DF-24A4-4BC9-A9AD-724C2ECE229B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9D783DF-24A4-4BC9-A9AD-724C2ECE229B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
