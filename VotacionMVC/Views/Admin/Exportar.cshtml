@@ -4,35 +4,90 @@
 }
 
 <div class="container py-4">
-    <h3>🧮 Exportar Resultados (Admin)</h3>
-    <p class="text-muted">Simple: seleccionar provincia y descargar/enviar. (Funciona aunque la API no tenga PDF: usa dummy).</p>
+
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h2 class="fw-bold mb-1">Exportar Resultados</h2>
+            <div class="text-muted">PDF + filtro por provincia (solo cuando el proceso esté cerrado)</div>
+        </div>
+
+        <a class="btn btn-outline-secondary" asp-controller="Acceso" asp-action="Admin">
+            ← Volver al Panel
+        </a>
+    </div>
 
     @if (!string.IsNullOrWhiteSpace(msg))
     {
-        <div class="alert alert-success">@msg</div>
+        <div class="alert alert-warning">
+            @msg
+        </div>
     }
 
-    <div class="card p-3 mb-3">
-        <form method="post" asp-controller="Admin" asp-action="DescargarPdf" class="row g-2 align-items-end">
-            <div class="col-md-8">
-                <label class="form-label">Provincia</label>
-                <select name="provincia" class="form-select">
-                    <option value="Nacional">Todas (Nacional)</option>
-                    <option value="Azuay">Azuay</option>
-                    <option value="Pichincha">Pichincha</option>
-                    <option value="Guayas">Guayas</option>
-                </select>
-            </div>
-            <div class="col-md-4 d-flex gap-2">
-                <button class="btn btn-primary w-100" type="submit">⬇️ Descargar PDF</button>
-        </form>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
 
-        <form method="post" asp-controller="Admin" asp-action="EnviarPdf" class="w-100">
-            <input type="hidden" name="provincia" value="Nacional" />
-            <button class="btn btn-success w-100" type="submit">📩 Enviar PDF (simulado)</button>
-        </form>
+            <form method="post" class="row g-3 align-items-end">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Provincia</label>
+                    <select name="provincia" class="form-select">
+                        <option value="Nacional">Todas (Nacional)</option>
+                        <option value="Azuay">Azuay</option>
+                        <option value="Bolívar">Bolívar</option>
+                        <option value="Cañar">Cañar</option>
+                        <option value="Carchi">Carchi</option>
+                        <option value="Chimborazo">Chimborazo</option>
+                        <option value="Cotopaxi">Cotopaxi</option>
+                        <option value="El Oro">El Oro</option>
+                        <option value="Esmeraldas">Esmeraldas</option>
+                        <option value="Galápagos">Galápagos</option>
+                        <option value="Guayas">Guayas</option>
+                        <option value="Imbabura">Imbabura</option>
+                        <option value="Loja">Loja</option>
+                        <option value="Los Ríos">Los Ríos</option>
+                        <option value="Manabí">Manabí</option>
+                        <option value="Morona Santiago">Morona Santiago</option>
+                        <option value="Napo">Napo</option>
+                        <option value="Orellana">Orellana</option>
+                        <option value="Pastaza">Pastaza</option>
+                        <option value="Pichincha">Pichincha</option>
+                        <option value="Santa Elena">Santa Elena</option>
+                        <option value="Santo Domingo de los Tsáchilas">Santo Domingo de los Tsáchilas</option>
+                        <option value="Sucumbíos">Sucumbíos</option>
+                        <option value="Tungurahua">Tungurahua</option>
+                        <option value="Zamora Chinchipe">Zamora Chinchipe</option>
+                    </select>
+                    <div class="form-text">
+                        Selecciona una provincia o “Nacional” para todo el país.
+                    </div>
+                </div>
+
+                <div class="col-md-6 d-flex gap-2">
+                    <!-- DESCARGAR PDF -->
+                    <button type="submit"
+                            class="btn btn-primary w-100"
+                            asp-controller="Admin"
+                            asp-action="DescargarPdf">
+                        ⬇️ Descargar PDF
+                    </button>
+
+                    <!-- ENVIAR PDF (SIMULADO) -->
+                    <button type="submit"
+                            class="btn btn-success w-100"
+                            asp-controller="Admin"
+                            asp-action="EnviarPdf">
+                        📩 Enviar (simulado)
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
     </div>
-</div>
 
-<a class="btn btn-secondary" asp-controller="Acceso" asp-action="Admin">Volver</a>
+    <div class="alert alert-info">
+        <strong>Nota:</strong> La exportación solo está permitida cuando el proceso electoral está en estado <strong>CERRADO</strong>.
+        Si el proceso aún está activo, el sistema mostrará un aviso.
+    </div>
+
 </div>

@@ -154,6 +154,17 @@ namespace VotacionMVC.Service
                 new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
             );
         }
+        public Task<List<ResultadosNacionalResponse.PorCandidato>?> GetResultadosPorProvinciaAsync(string provincia, CancellationToken ct = default)
+            => Client().GetFromJsonAsync<List<ResultadosNacionalResponse.PorCandidato>>(
+                $"api/Resultados/provincia/{Uri.EscapeDataString(provincia)}",
+                _jsonOptions,
+                ct
+            );
+        public async Task<bool> GenerarCodigosPadDemoAsync(CancellationToken ct = default)
+        {
+            var res = await Client().PostAsync("api/Padron/generar-demo", content: null, ct);
+            return res.IsSuccessStatusCode;
+        }
 
 
     }

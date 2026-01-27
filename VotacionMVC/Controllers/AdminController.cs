@@ -40,14 +40,147 @@ namespace VotacionMVC.Controllers
         [HttpPost]
         public async Task<IActionResult> DescargarPdf(string provincia, CancellationToken ct)
         {
-            var prov = string.IsNullOrWhiteSpace(provincia) ? "Nacional" : provincia;
+            var prov = string.IsNullOrWhiteSpace(provincia) ? "Nacional" : provincia.Trim();
 
-            var bytes = await _api.TryDownloadResultadosPdfAsync(prov, ct)
-                        ?? PdfDummy(prov); // ✅ aquí se llama al método privado del controller
+            // 1) Solo permitir exportar si el proceso ya terminó (CERRADO)
+            var proc = await _api.GetProcesoActivoAsync(ct);
+            var estado = proc?.data?.estado ?? 0;
+
+            if (estado != (int)EstadoProceso.Cerrado)
+            {
+                TempData["Msg"] = "⚠️ No se puede exportar todavía. El proceso debe estar CERRADO.";
+                return RedirectToAction("Exportar");
+            }
+
+            // 2) Traer resultados reales
+            string estadoProcesoTexto = "CERRADO";
+            List<(string nombre, long votos)> filas = new();
+
+            if (prov.Equals("Nacional", StringComparison.OrdinalIgnoreCase))
+            {
+                var r = await _api.GetResultadosNacionalAsync(ct);
+                estadoProcesoTexto = r?.estadoProceso ?? "CERRADO";
+
+                foreach (var it in (r?.porCandidato ?? new List<ResultadosNacionalResponse.PorCandidato>()))
+                    filas.Add((it.nombre ?? "", it.votos));
+            }
+            else
+            {
+                var rProv = await _api.GetResultadosPorProvinciaAsync(prov, ct)
+                            ?? new List<ResultadosNacionalResponse.PorCandidato>();
+
+                foreach (var it in rProv)
+                    filas.Add((it.nombre ?? "", it.votos));
+            }
+
+            // 3) Generar PDF simple (pero real) en el MVC (sin depender de API/pdf)
+            var bytes = PdfResultadosSimple(prov, estadoProcesoTexto, filas);
 
             var fileName = $"Resultados_{prov}.pdf";
             return File(bytes, "application/pdf", fileName);
         }
+        private static byte[] PdfResultadosSimple(string provincia, string estadoProceso, List<(string nombre, long votos)> filas)
+        {
+            static string Esc(string s) => (s ?? "").Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
+
+            var fecha = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+
+            // ---- Contenido del PDF (texto)
+            var lines = new List<string>
+    {
+        $"Resultados - {provincia}",
+        $"Estado: {estadoProceso}",
+        $"Generado: {fecha}",
+        "----------------------------------------"
+    };
+
+            if (filas.Count == 0)
+                lines.Add("Sin datos de resultados.");
+            else
+            {
+                foreach (var (nombre, votos) in filas.OrderByDescending(x => x.votos))
+                    lines.Add($"{nombre}  -  {votos:N0} votos");
+            }
+
+            var sb = new StringBuilder();
+            sb.AppendLine("BT");
+            sb.AppendLine("/F1 14 Tf");
+            sb.AppendLine("72 760 Td");
+            sb.AppendLine($"({Esc(lines[0])}) Tj");
+
+            sb.AppendLine("/F1 11 Tf");
+            for (int i = 1; i < lines.Count; i++)
+            {
+                sb.AppendLine("0 -16 Td");
+                sb.AppendLine($"({Esc(lines[i])}) Tj");
+            }
+            sb.AppendLine("ET");
+
+            var contentBytes = Encoding.ASCII.GetBytes(sb.ToString());
+
+            // ---- Objetos PDF
+            var objs = new List<byte[]>();
+
+            byte[] Obj(string s) => Encoding.ASCII.GetBytes(s);
+
+            objs.Add(Obj("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"));
+            objs.Add(Obj("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"));
+            objs.Add(Obj("3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>\nendobj\n"));
+
+            // Obj 4 (stream)
+            var obj4Header = Obj($"4 0 obj\n<< /Length {contentBytes.Length} >>\nstream\n");
+            var obj4Footer = Obj("\nendstream\nendobj\n");
+
+            // Obj 5 (font)
+            objs.Add(Obj("5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n"));
+
+            // ---- Armar PDF con xref real
+            using var ms = new MemoryStream();
+            ms.Write(Obj("%PDF-1.4\n"));
+
+            var offsets = new List<int> { 0 }; // xref necesita obj 0
+            int pos;
+
+            // 1..3
+            for (int i = 0; i < 3; i++)
+            {
+                pos = (int)ms.Position;
+                offsets.Add(pos);
+                ms.Write(objs[i]);
+            }
+
+            // 4
+            pos = (int)ms.Position;
+            offsets.Add(pos);
+            ms.Write(obj4Header);
+            ms.Write(contentBytes);
+            ms.Write(obj4Footer);
+
+            // 5
+            pos = (int)ms.Position;
+            offsets.Add(pos);
+            ms.Write(objs[3]); // ojo: objs[3] es el obj 5 (porque metimos 1..3 y luego 5)
+
+            // xref
+            var xrefPos = (int)ms.Position;
+            ms.Write(Obj($"xref\n0 {offsets.Count}\n"));
+            ms.Write(Obj("0000000000 65535 f \n"));
+
+            for (int i = 1; i < offsets.Count; i++)
+                ms.Write(Obj($"{offsets[i]:D10} 00000 n \n"));
+
+            ms.Write(Obj($"trailer\n<< /Size {offsets.Count} /Root 1 0 R >>\nstartxref\n{xrefPos}\n%%EOF"));
+
+            return ms.ToArray();
+        }
+        [HttpPost]
+        public async Task<IActionResult> GenerarCodigosPad(CancellationToken ct)
+        {
+            var ok = await _api.GenerarCodigosPadDemoAsync(ct);
+            TempData["Msg"] = ok ? "✅ Códigos PAD generados (demo)." : "❌ No se pudo generar códigos.";
+            return RedirectToAction("Padron");
+        }
+
 
         // Botón enviar (simulado)
         [HttpPost]

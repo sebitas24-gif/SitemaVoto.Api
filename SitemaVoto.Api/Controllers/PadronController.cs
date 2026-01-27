@@ -139,6 +139,63 @@ namespace SitemaVoto.Api.Controllers
                 CodigoPad = r.CodigoPad
             });
         }
+        [HttpPost("generar-demo")]
+        public async Task<IActionResult> GenerarCodigosDemo(CancellationToken ct)
+        {
+            // Proceso activo (o último)
+            var procesoId = await _db.ProcesoElectorales
+                .AsNoTracking()
+                .Where(p => p.Estado == EstadoProceso.Activo)
+                .OrderByDescending(p => p.Id)
+                .Select(p => p.Id)
+                .FirstOrDefaultAsync(ct);
+
+            if (procesoId == 0)
+            {
+                procesoId = await _db.ProcesoElectorales
+                    .AsNoTracking()
+                    .OrderByDescending(p => p.Id)
+                    .Select(p => p.Id)
+                    .FirstOrDefaultAsync(ct);
+            }
+
+            if (procesoId == 0) return BadRequest("No existe proceso electoral.");
+
+            var votantes = await _db.Usuarios
+                .Where(u => u.Rol == RolUsuario.Votante)
+                .Select(u => u.Id)
+                .ToListAsync(ct);
+
+            // ids que YA tienen código para ese proceso
+            var yaTienen = await _db.CodigoPadrones
+                .Where(x => x.ProcesoElectoralId == procesoId)
+                .Select(x => x.UsuarioId)
+                .ToListAsync(ct);
+
+            var nuevos = 0;
+            var rnd = new Random();
+
+            foreach (var userId in votantes)
+            {
+                if (yaTienen.Contains(userId)) continue;
+
+                _db.CodigoPadrones.Add(new VotoModelos.Entidades.CodigoPadron
+                {
+                    ProcesoElectoralId = procesoId,
+                    UsuarioId = userId,
+                    EmitidoPorUsuarioId = null,
+                    Codigo = $"PAD-{rnd.Next(100000, 999999)}",
+                    EmitidoEn = DateTime.UtcNow,
+                    Usado = false
+                });
+
+                nuevos++;
+            }
+
+            await _db.SaveChangesAsync(ct);
+            return Ok(new { ok = true, procesoId, generados = nuevos });
+        }
+
 
     }
 }
