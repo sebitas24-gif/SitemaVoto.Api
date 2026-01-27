@@ -20,11 +20,14 @@ namespace SitemaVoto.Api.Controllers
             _db = db;
         }
 
-        // ✅ GET: api/Padron  (lo usa Admin/Padrón en el MVC)
-     
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<PadronItemDto>>> GetPadron(CancellationToken ct)
+        /// <summary>
+        /// Devuelve el proceso activo; si no hay, el último.
+        /// Y si ese proceso NO tiene códigos PAD generados, entonces usa el último proceso que SÍ tenga códigos.
+        /// (Esto es ideal para que el Admin/Padrón muestre códigos cuando ya existen en BD)
+        /// </summary>
+        private async Task<int> GetProcesoIdParaPadronAsync(CancellationToken ct)
         {
+            // 1) Proceso activo (o último)
             var procesoId = await _db.ProcesoElectorales
                 .AsNoTracking()
                 .Where(p => p.Estado == EstadoProceso.Activo)
@@ -40,6 +43,35 @@ namespace SitemaVoto.Api.Controllers
                     .Select(p => p.Id)
                     .FirstOrDefaultAsync(ct);
             }
+
+            if (procesoId == 0) return 0;
+
+            // 2) Si el proceso elegido no tiene códigos, usar el último proceso que sí tenga códigos
+            var tieneCodigos = await _db.CodigoPadrones
+                .AsNoTracking()
+                .AnyAsync(x => x.ProcesoElectoralId == procesoId, ct);
+
+            if (!tieneCodigos)
+            {
+                var procesoConCodigos = await _db.CodigoPadrones
+                    .AsNoTracking()
+                    .OrderByDescending(x => x.Id)
+                    .Select(x => x.ProcesoElectoralId)
+                    .FirstOrDefaultAsync(ct);
+
+                if (procesoConCodigos != 0)
+                    procesoId = procesoConCodigos;
+            }
+
+            return procesoId;
+        }
+
+        // ✅ GET: api/Padron  (lo usa Admin/Padrón en el MVC)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<PadronItemDto>>> GetPadron(CancellationToken ct)
+        {
+            var procesoId = await GetProcesoIdParaPadronAsync(ct);
+            if (procesoId == 0) return Ok(new List<PadronItemDto>());
 
             var list = await (
                 from u in _db.Usuarios.AsNoTracking()
@@ -61,30 +93,15 @@ namespace SitemaVoto.Api.Controllers
             return Ok(list);
         }
 
-
-        // ✅ GET: api/Padron/cedula/1234567890 (lo usa Jefe de Junta)
+        // ✅ GET: api/Padron/cedula(lo usa Jefe de Junta)
         [HttpGet("cedula/{cedula}")]
         public async Task<ActionResult<JefeVerificacionDto>> GetPorCedula(string cedula, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(cedula))
                 return BadRequest("Cédula requerida.");
 
-            // Proceso activo (o último)
-            var procesoId = await _db.ProcesoElectorales
-                .AsNoTracking()
-                .Where(p => p.Estado == EstadoProceso.Activo)
-                .OrderByDescending(p => p.Id)
-                .Select(p => p.Id)
-                .FirstOrDefaultAsync(ct);
-
-            if (procesoId == 0)
-            {
-                procesoId = await _db.ProcesoElectorales
-                    .AsNoTracking()
-                    .OrderByDescending(p => p.Id)
-                    .Select(p => p.Id)
-                    .FirstOrDefaultAsync(ct);
-            }
+            var procesoId = await GetProcesoIdParaPadronAsync(ct);
+            if (procesoId == 0) return BadRequest("No existe proceso electoral.");
 
             var user = await _db.Usuarios
                 .AsNoTracking()
@@ -116,7 +133,7 @@ namespace SitemaVoto.Api.Controllers
             return Ok(dto);
         }
 
-        // ✅ POST: api/Padron/validar (ya lo tenías)
+        // ✅ POST: api/Padron/validar
         [HttpPost("validar")]
         public async Task<ActionResult<ValidarPadResultDto>> Validar([FromBody] ValidarPadDto dto, CancellationToken ct)
         {
@@ -139,6 +156,8 @@ namespace SitemaVoto.Api.Controllers
                 CodigoPad = r.CodigoPad
             });
         }
+
+        // ✅ POST: api/Padron/generar-demo
         [HttpPost("generar-demo")]
         public async Task<IActionResult> GenerarCodigosDemo(CancellationToken ct)
         {
@@ -166,7 +185,6 @@ namespace SitemaVoto.Api.Controllers
                 .Select(u => u.Id)
                 .ToListAsync(ct);
 
-            // ids que YA tienen código para ese proceso
             var yaTienen = await _db.CodigoPadrones
                 .Where(x => x.ProcesoElectoralId == procesoId)
                 .Select(x => x.UsuarioId)
