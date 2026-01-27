@@ -1,4 +1,5 @@
 ﻿@model VotacionMVC.Models.ViewModels.VotantePapeletaVm
+
 @{
     ViewData["Title"] = "Ejercicio del Voto";
     var p = Model.Proceso;
@@ -6,7 +7,7 @@
 
 <div class="container py-4">
 
-    <h2 class="mb-2">🗳️ Ejercicio del Voto</h2>
+    <h2 class="mb-2">🗳️ Voto</h2>
 
     @if (!string.IsNullOrWhiteSpace(Model.Error))
     {

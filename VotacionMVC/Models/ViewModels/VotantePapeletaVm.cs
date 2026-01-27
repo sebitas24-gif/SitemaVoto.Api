@@ -4,14 +4,20 @@ namespace VotacionMVC.Models.ViewModels
 {
     public class VotantePapeletaVm
     {
-        public ProcesoActivoResponse? Proceso { get; set; }
-        public List<CandidatoDto> Candidatos { get; set; } = new();
+       
+            public string Cedula { get; set; } = "";
+            public string CodigoPad { get; set; } = "";
 
-        // selección
-        public string? CandidatoId { get; set; } 
-        public bool Blanco { get; set; }
+            // Proceso (lo trae tu ApiService)
+            public ProcesoActivoResponse? Proceso { get; set; }
 
-        public string? Msg { get; set; }
-        public string? Error { get; set; }
-    }
+            public List<CandidatoDto> Candidatos { get; set; } = new();
+
+            // Selección
+            public int CandidatoId { get; set; } = 0; // 0 = blanco
+
+            // Mensajes
+            public string? Error { get; set; }
+            public string? Info { get; set; }
+        }
 }
