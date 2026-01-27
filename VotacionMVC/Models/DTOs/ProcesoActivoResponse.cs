@@ -1,4 +1,6 @@
-﻿namespace VotacionMVC.Models.DTOs
+﻿using VotoModelos.Enums;
+
+namespace VotacionMVC.Models.DTOs
 {
     public class ProcesoActivoResponse
     {
@@ -11,15 +13,30 @@
             public int id { get; set; }
             public string? nombre { get; set; }
             public int estado { get; set; }
+
+            // 👇 estos 3 son los que te faltan (si la API los manda)
+            public int tipo { get; set; }
+            public DateTime? inicioLocal { get; set; }
+            public DateTime? finLocal { get; set; }
         }
+
         public string? Nombre => data?.nombre;
 
-        // Si quieres mostrar estado como texto (ACTIVO/CERRADO)
-        public string EstadoTexto => (data?.estado ?? 0) == 1 ? "ACTIVO" : "CERRADO";
+        public string EstadoTexto => (data?.estado ?? 0) switch
+        {
+            2 => "ACTIVO",
+            3 => "CERRADO",
+            1 => "CONFIGURACIÓN",
+            _ => "—"
+        };
 
-        // Si tu API aún no manda estos campos, déjalos null (no rompen la vista)
-        public string? Tipo => null;
-        public System.DateTime? Inicio => null;
-        public System.DateTime? Cierre => null;
+        public string Tipo =>
+            data == null ? "—" :
+            Enum.IsDefined(typeof(TipoEleccion), data.tipo)
+                ? ((TipoEleccion)data.tipo).ToString()
+                : data.tipo.ToString();
+
+        public DateTime? Inicio => data?.inicioLocal;
+        public DateTime? Cierre => data?.finLocal;
     }
 }
