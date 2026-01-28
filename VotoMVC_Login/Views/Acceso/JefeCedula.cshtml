@@ -1,14 +1,31 @@
-﻿<h2>Login Jefe de Junta</h2>
+﻿@{
+    ViewData["Title"] = "Login Jefe de Junta";
+}
+
+<h2 class="text-center">Login Jefe de Junta</h2>
 
 @if (ViewBag.Error != null)
 {
-    <div style="color:red;margin-bottom:10px;">@ViewBag.Error</div>
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+@if (ViewBag.Msg != null)
+{
+    <div class="alert alert-success">@ViewBag.Msg</div>
 }
 
-<form method="post">
-    <label>Cédula</label>
-    <input name="cedula" class="form-control" />
-    <button class="btn btn-warning" style="margin-top:12px;">Enviar OTP</button>
-</form>
+<form asp-action="JefeCedula" method="post" onsubmit="btn.disabled=true; btn.innerText='Enviando...';">
+    @Html.AntiForgeryToken()
 
-<a href="/Acceso" style="display:block;margin-top:12px;">Volver</a>
+    <div class="mb-3" style="max-width:420px;margin:0 auto;">
+        <label class="form-label">Cédula</label>
+        <input name="cedula" class="form-control" maxlength="10" />
+    </div>
+
+    <div class="text-center">
+        <button id="btn" name="btn" type="submit" class="btn btn-warning">Enviar OTP</button>
+    </div>
+
+    <div class="text-center mt-2">
+        <a asp-action="Index">Volver</a>
+    </div>
+</form>

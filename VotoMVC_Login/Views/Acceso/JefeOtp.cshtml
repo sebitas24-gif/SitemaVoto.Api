@@ -1,20 +1,29 @@
-﻿<h2>Verificación OTP (Jefe de Junta)</h2>
-
-@if (ViewBag.Msg != null)
-{
-    <div style="color:green;margin-bottom:10px;">@ViewBag.Msg</div>
+﻿@{
+    ViewData["Title"] = "Ingresar OTP";
 }
+
+<h2 class="text-center">Ingresar OTP</h2>
 
 @if (ViewBag.Error != null)
 {
-    <div style="color:red;margin-bottom:10px;">@ViewBag.Error</div>
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+@if (ViewBag.Msg != null)
+{
+    <div class="alert alert-success">@ViewBag.Msg</div>
 }
 
-<form method="post">
-    <label>OTP</label>
-    <input name="otp" class="form-control" />
-    <button class="btn btn-warning" style="margin-top:12px;">Ingresar</button>
-</form>
+<form asp-action="JefeOtp" method="post" style="max-width:420px;margin:0 auto;">
+    @Html.AntiForgeryToken()
 
-<p style="margin-top:10px;"><b>Demo OTP:</b> 123456</p>
-<a href="/Acceso/JefeCedula" style="display:block;margin-top:12px;">Volver</a>
+    <div class="mb-3">
+        <label class="form-label">Código OTP</label>
+        <input name="codigo" class="form-control" maxlength="6" />
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Verificar</button>
+
+    <div class="text-center mt-2">
+        <a asp-action="JefeCedula">Volver</a>
+    </div>
+</form>

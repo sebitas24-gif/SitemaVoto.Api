@@ -1,26 +1,28 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using VotoMVC_Login.Service;
 
 namespace VotoMVC_Login.Controllers
 {
     public class AccesoController : Controller
     {
+        private readonly ApiService _api;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
 
-        public AccesoController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        public AccesoController(ApiService api, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
         {
+            _api = api;
             _userManager = userManager;
             _signInManager = signInManager;
         }
 
-        // Menú
         [HttpGet]
         public IActionResult Index() => View();
 
-        // ----------------------------
-        // VOTANTE (1 paso): cédula + PAD
-        // ----------------------------
+        // =========================
+        // VOTANTE (solo PAD, NO OTP)
+        // =========================
         [HttpGet]
         public IActionResult Votante() => View();
 
@@ -33,165 +35,177 @@ namespace VotoMVC_Login.Controllers
                 return View();
             }
 
-            // TODO: aquí llamas tu API real:
-            // POST api/Padron/validar { cedula, codigoPad }
-            var ok = true; // <- reemplazar por resultado real
-            if (!ok)
-            {
-                ViewBag.Error = "PAD inválido.";
-                return View();
-            }
+            // TODO: aquí deberías validar PAD contra la API si ya tienes endpoint.
+            await LoginIdentityAsync(cedula.Trim(), "Votante");
 
-            await LoginIdentityAsync(cedula, "Votante");
-            return Redirect("http://localhost:5004/Acceso/Votante");
+            return Redirect("http://localhost:5004/Votante/Papeleta");
         }
 
-        // =========================================================
-        // JEFE (2 pasos): 1) cédula  2) OTP
-        // =========================================================
-
+        // =========================
+        // JEFE (OTP real por correo)
+        // =========================
         [HttpGet]
         public IActionResult JefeCedula() => View();
 
         [HttpPost]
-        public IActionResult JefeCedula(string cedula)
+        public async Task<IActionResult> JefeCedula(string cedula, CancellationToken ct)
         {
-            if (string.IsNullOrWhiteSpace(cedula))
+            if (string.IsNullOrWhiteSpace(cedula) || cedula.Trim().Length != 10)
             {
-                ViewBag.Error = "Ingresa la cédula.";
-                return View();
+                TempData["Error"] = "Ingresa una cédula válida (10 dígitos).";
+                return RedirectToAction(nameof(JefeCedula));
             }
 
-            // TODO: Validar que esa cédula sea JEFE en tu API
-            // y enviar OTP al correo/SMS (endpoint enviar-otp).
-            // Aquí dejamos demo:
-            var existe = true; // <- reemplazar
-            if (!existe)
+            cedula = cedula.Trim();
+
+            try
             {
-                ViewBag.Error = "Cédula no encontrada o no es Jefe de Junta.";
-                return View();
+                var r = await _api.SolicitarOtpCorreoAsync(cedula, ct);
+
+                if (r?.Ok != true)
+                {
+                    TempData["Error"] = r?.Error ?? "No se pudo enviar OTP.";
+                    return RedirectToAction(nameof(JefeCedula));
+                }
+
+                // ✅ guardamos para el siguiente paso
+                HttpContext.Session.SetString("cedula_jefe", cedula);
+                TempData["Msg"] = $"✅ OTP enviado a: {r.DestinoMasked ?? r.Destino}";
+
+                return RedirectToAction(nameof(JefeOtp));
             }
-
-            // Guardamos para el paso 2
-            TempData["cedula_jefe"] = cedula;
-
-            // (Demo) “enviar OTP”
-            TempData["msg"] = "Se envió el código OTP (demo: 123456).";
-
-            return RedirectToAction(nameof(JefeOtp));
+            catch (TaskCanceledException)
+            {
+                TempData["Error"] = "⏳ La API tardó demasiado (Render puede estar despertando). Intenta otra vez.";
+                return RedirectToAction(nameof(JefeCedula));
+            }
+            catch (HttpRequestException ex)
+            {
+                TempData["Error"] = "❌ No se pudo conectar con la API. Revisa Api:BaseUrl. " + ex.Message;
+                return RedirectToAction(nameof(JefeCedula));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "❌ Error inesperado: " + ex.Message;
+                return RedirectToAction(nameof(JefeCedula));
+            }
         }
 
         [HttpGet]
         public IActionResult JefeOtp()
         {
-            if (TempData["cedula_jefe"] == null && TempData.Peek("cedula_jefe") == null)
+            var cedula = HttpContext.Session.GetString("cedula_jefe");
+            if (string.IsNullOrWhiteSpace(cedula))
                 return RedirectToAction(nameof(JefeCedula));
 
-            ViewBag.Msg = TempData["msg"];
-            TempData.Keep("cedula_jefe");
+            ViewBag.Msg = TempData["Msg"];
+            ViewBag.Error = TempData["Error"];
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> JefeOtp(string otp)
+        public async Task<IActionResult> JefeOtp(string codigo, CancellationToken ct)
         {
-            var cedula = TempData.Peek("cedula_jefe")?.ToString();
+            var cedula = HttpContext.Session.GetString("cedula_jefe");
             if (string.IsNullOrWhiteSpace(cedula))
                 return RedirectToAction(nameof(JefeCedula));
 
-            if (string.IsNullOrWhiteSpace(otp))
+            if (string.IsNullOrWhiteSpace(codigo))
             {
-                ViewBag.Error = "Ingresa el OTP.";
-                TempData.Keep("cedula_jefe");
-                return View();
+                TempData["Error"] = "Ingresa el OTP.";
+                return RedirectToAction(nameof(JefeOtp));
             }
 
-            // TODO: Validar OTP real en tu API
-            // POST api/otp/validar { cedula, otp }
-            var ok = (otp == "123456"); // demo
-            if (!ok)
+            var r = await _api.VerificarOtpAsync(cedula, codigo.Trim(), ct);
+            if (r?.Ok != true)
             {
-                ViewBag.Error = "OTP inválido.";
-                TempData.Keep("cedula_jefe");
-                return View();
+                TempData["Error"] = r?.Error ?? "OTP inválido.";
+                return RedirectToAction(nameof(JefeOtp));
             }
 
-            // OTP válido → Login + rol
+            if (r.Rol != 2)
+            {
+                TempData["Error"] = "Esta cédula no corresponde a Jefe de Junta.";
+                return RedirectToAction(nameof(JefeOtp));
+            }
+
             await LoginIdentityAsync(cedula, "JefeJunta");
+            HttpContext.Session.Remove("cedula_jefe");
 
-            TempData.Remove("cedula_jefe");
-            return Redirect("http://localhost:5004/Acceso/Jefe");
+            return Redirect("http://localhost:5004/JefeJunta/Panel");
         }
 
-        // =========================================================
-        // ADMIN (2 pasos): 1) cédula  2) OTP
-        // =========================================================
-
+        // =========================
+        // ADMIN (OTP real por correo)
+        // =========================
         [HttpGet]
         public IActionResult AdminCedula() => View();
 
         [HttpPost]
-        public IActionResult AdminCedula(string cedula)
+        public async Task<IActionResult> AdminCedula(string cedula, CancellationToken ct)
         {
-            if (string.IsNullOrWhiteSpace(cedula))
+            if (string.IsNullOrWhiteSpace(cedula) || cedula.Trim().Length != 10)
             {
-                ViewBag.Error = "Ingresa la cédula.";
-                return View();
+                TempData["Error"] = "Ingresa una cédula válida (10 dígitos).";
+                return RedirectToAction(nameof(AdminCedula));
             }
 
-            // TODO: Validar que esa cédula sea ADMIN en tu API
-            // y enviar OTP al correo/SMS.
-            var existe = true; // <- reemplazar
-            if (!existe)
+            cedula = cedula.Trim();
+
+            var r = await _api.SolicitarOtpCorreoAsync(cedula, ct);
+            if (r?.Ok != true)
             {
-                ViewBag.Error = "Cédula no encontrada o no es Administrador.";
-                return View();
+                TempData["Error"] = r?.Error ?? "No se pudo enviar OTP.";
+                return RedirectToAction(nameof(AdminCedula));
             }
 
-            TempData["cedula_admin"] = cedula;
-            TempData["msg"] = "Se envió el código OTP (demo: 123456).";
-
+            HttpContext.Session.SetString("cedula_admin", cedula);
+            TempData["Msg"] = $"✅ OTP enviado a: {r.DestinoMasked ?? r.Destino}";
             return RedirectToAction(nameof(AdminOtp));
         }
 
         [HttpGet]
         public IActionResult AdminOtp()
         {
-            if (TempData["cedula_admin"] == null && TempData.Peek("cedula_admin") == null)
+            var cedula = HttpContext.Session.GetString("cedula_admin");
+            if (string.IsNullOrWhiteSpace(cedula))
                 return RedirectToAction(nameof(AdminCedula));
 
-            ViewBag.Msg = TempData["msg"];
-            TempData.Keep("cedula_admin");
+            ViewBag.Msg = TempData["Msg"];
+            ViewBag.Error = TempData["Error"];
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> AdminOtp(string otp)
+        public async Task<IActionResult> AdminOtp(string codigo, CancellationToken ct)
         {
-            var cedula = TempData.Peek("cedula_admin")?.ToString();
+            var cedula = HttpContext.Session.GetString("cedula_admin");
             if (string.IsNullOrWhiteSpace(cedula))
                 return RedirectToAction(nameof(AdminCedula));
 
-            if (string.IsNullOrWhiteSpace(otp))
+            if (string.IsNullOrWhiteSpace(codigo))
             {
-                ViewBag.Error = "Ingresa el OTP.";
-                TempData.Keep("cedula_admin");
-                return View();
+                TempData["Error"] = "Ingresa el OTP.";
+                return RedirectToAction(nameof(AdminOtp));
             }
 
-            // TODO: Validar OTP real en tu API
-            var ok = (otp == "123456"); // demo
-            if (!ok)
+            var r = await _api.VerificarOtpAsync(cedula, codigo.Trim(), ct);
+            if (r?.Ok != true)
             {
-                ViewBag.Error = "OTP inválido.";
-                TempData.Keep("cedula_admin");
-                return View();
+                TempData["Error"] = r?.Error ?? "OTP inválido.";
+                return RedirectToAction(nameof(AdminOtp));
+            }
+
+            if (r.Rol != 1)
+            {
+                TempData["Error"] = "Esta cédula no corresponde a Administrador.";
+                return RedirectToAction(nameof(AdminOtp));
             }
 
             await LoginIdentityAsync(cedula, "Admin");
+            HttpContext.Session.Remove("cedula_admin");
 
-            TempData.Remove("cedula_admin");
-            return Redirect("http://localhost:5004/Acceso/Admin");
+            return Redirect("http://localhost:5004/Admin/Index");
         }
 
         // Logout
@@ -201,7 +215,13 @@ namespace VotoMVC_Login.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // Helper: crea usuario Identity y lo loguea sin contraseña
+        // ✅ Menú: botones
+        [HttpGet] public IActionResult Resultados() => Redirect("http://localhost:5004/Resultados?tab=live");
+        [HttpGet] public IActionResult VotanteLogin() => RedirectToAction(nameof(Votante));
+        [HttpGet] public IActionResult JefeLogin() => RedirectToAction(nameof(JefeCedula));
+        [HttpGet] public IActionResult AdminLogin() => RedirectToAction(nameof(AdminCedula));
+
+        // Helper Identity
         private async Task LoginIdentityAsync(string cedula, string rol)
         {
             var user = await _userManager.FindByNameAsync(cedula);
@@ -226,5 +246,7 @@ namespace VotoMVC_Login.Controllers
 
             await _signInManager.SignInAsync(user, isPersistent: false);
         }
+
+
     }
 }

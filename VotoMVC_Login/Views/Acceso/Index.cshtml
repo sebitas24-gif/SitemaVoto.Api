@@ -1,30 +1,34 @@
 ﻿@{
-    ViewData["Title"] = "Acceso";
+    ViewData["Title"] = "VotoElectrónico - Acceso";
 }
-<div class="container py-5" style="max-width:520px;">
-    <h3 class="mb-3">Ingresar</h3>
 
-    @if (ViewBag.Error != null)
-    {
-        <div class="alert alert-danger">@ViewBag.Error</div>
-    }
+<div class="container py-4">
+    <div class="p-4 rounded-4 shadow-lg" style="background: linear-gradient(135deg,#111827,#1f2937); color:white;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h1 class="fw-bold m-0">Voto Electrónico</h1>
+                <div class="text-white-50 mt-1">
+                    • Administrador (gestión + PDF) • Resultados públicos
+                </div>
+            </div>
 
-    <form method="post">
-        @Html.AntiForgeryToken()
+            <div class="d-flex gap-2 flex-wrap">
+                <a class="btn btn-outline-light px-3" asp-controller="Acceso" asp-action="Resultados">
+                    📊 Resultados en Vivo
+                </a>
 
-        <div class="mb-3">
-            <label class="form-label">Cédula</label>
-            <input name="cedula" class="form-control" maxlength="10" />
+                <a class="btn btn-outline-light px-3" asp-controller="Acceso" asp-action="VotanteLogin">
+                    👤 Votante
+                </a>
+
+                <a class="btn btn-outline-light px-3" asp-controller="Acceso" asp-action="JefeLogin">
+                    👮‍♂️ Jefe de Junta
+                </a>
+
+                <a class="btn btn-outline-light px-3" asp-controller="Acceso" asp-action="AdminLogin">
+                    ⚙️ Administrador
+                </a>
+            </div>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label">Enviar código por</label>
-            <select name="metodo" class="form-select">
-                <option value="1">Correo</option>
-                <option value="2">SMS</option>
-            </select>
-        </div>
-
-        <button class="btn btn-primary w-100">Enviar código</button>
-    </form>
+    </div>
 </div>
