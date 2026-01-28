@@ -21,7 +21,6 @@ namespace SitemaVoto.Api.Services.Votacion
             _padron = padron;
             _email = email;
         }
-
         public async Task<IReadOnlyList<(int Id, string Nombre, string Partido)>> GetCandidatosAsync(CancellationToken ct)
         {
             var proc = await _proceso.GetProcesoActivoAsync(ct);
@@ -115,11 +114,11 @@ namespace SitemaVoto.Api.Services.Votacion
             if (!string.IsNullOrWhiteSpace(user.Correo))
             {
                 await _email.SendAsync(
-                    user.Correo!,
-                    "Comprobante de votación",
-                    $"Su voto fue registrado correctamente.\n\nCódigo: {comprobante}\nProceso: {proc.Nombre}\n\n(Este comprobante NO incluye por quién votó.)",
-                    ct
-                );
+       user.Correo!,
+       "Comprobante de votación",
+       $"Su voto fue registrado correctamente.\n\nCódigo: {comprobante}\nProceso: {proc.Nombre}\n\n(Este comprobante NO incluye por quién votó.)",
+       ct
+   );
             }
 
             return new(true, null, comprobante);

@@ -1,5 +1,4 @@
 ﻿@model VotacionMVC.Models.ViewModels.VotantePapeletaVm
-
 @{
     ViewData["Title"] = "Ejercicio del Voto";
     var p = Model.Proceso;
@@ -7,7 +6,7 @@
 
 <div class="container py-4">
 
-    <h2 class="mb-2">🗳️ Voto</h2>
+    <h2 class="mb-2">🗳️ Ejercicio del Voto</h2>
 
     @if (!string.IsNullOrWhiteSpace(Model.Error))
     {
@@ -27,10 +26,10 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6 text-muted">Proceso</div>
-                <div class="col-md-6 fw-bold text-end">@((p?.Nombre ?? "—"))</div>
+                <div class="col-md-6 fw-bold text-end">@((p?.data?.nombre) ?? "—")</div>
 
                 <div class="col-md-6 text-muted mt-2">Tipo</div>
-                <div class="col-md-6 fw-bold text-end mt-2">@((p?.Tipo ?? "—"))</div>
+                <div class="col-md-6 fw-bold text-end mt-2">@((p?.data?.tipo) ?? "—")</div>
 
                 <div class="col-md-6 text-muted mt-2">Normas</div>
                 <div class="col-md-6 fw-bold text-end mt-2">Seleccione 1 opción y confirme.</div>
@@ -38,36 +37,46 @@
         </div>
     </div>
 
-    <h4 class="mb-3">Candidatos</h4>
+    <h4 class="fw-bold">Candidatos</h4>
 
-    <form asp-action="Confirmar" method="post">
+    <form method="post" asp-controller="Votante" asp-action="Confirmar" class="mt-3">
         <div class="row g-3">
-
-            @foreach (var c in Model.Candidatos)
+            @foreach (var c in (Model.Candidatos ?? new List<VotacionMVC.Models.DTOs.CandidatoDto>()))
             {
-                <div class="col-12 col-md-6 col-lg-3">
-                    <label class="card h-100 p-3" style="cursor:pointer;">
-                        <input type="radio" name="candidatoId" value="@c.id" class="form-check-input me-2" />
-                        <div class="fw-bold">@c.nombreCompleto</div>
-                        <div class="text-muted">@c.partido</div>
-                        <div class="text-muted">@c.binomio</div>
+                <div class="col-md-3">
+                    <label class="card h-100" style="cursor:pointer;">
+                        <div class="card-body text-center">
+                            <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                 style="width:72px;height:72px;background:#e9ecef;font-weight:800;">
+                                @((c.nombre?.Length ?? 0) >= 2 ? c.nombre.Substring(0, 2).ToUpper() : "CV")
+                            </div>
+
+                            <div class="fw-bold">@c.nombre</div>
+                            <div class="text-muted">@c.partido</div>
+                            <input class="form-check-input mt-2" type="radio" name="candidatoId" value="@c.id" />
+                        </div>
                     </label>
                 </div>
             }
 
-            <div class="col-12 col-md-6 col-lg-3">
-                <label class="card h-100 p-3" style="cursor:pointer;">
-                    <input type="checkbox" name="blanco" value="true" class="form-check-input me-2" />
-                    <div class="fw-bold">Voto en Blanco</div>
-                    <div class="text-muted">No seleccionar ningún candidato</div>
+            <div class="col-md-3">
+                <label class="card h-100" style="cursor:pointer;">
+                    <div class="card-body text-center">
+                        <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                             style="width:72px;height:72px;background:#e9ecef;font-weight:800;">
+                            ⬜
+                        </div>
+                        <div class="fw-bold">Voto en Blanco</div>
+                        <div class="text-muted">No seleccionar ningún candidato</div>
+                        <input class="form-check-input mt-2" type="checkbox" name="blanco" value="true" />
+                    </div>
                 </label>
             </div>
-
         </div>
 
-        <div class="mt-4 d-flex gap-2">
+        <div class="mt-4">
             <button class="btn btn-success" type="submit">Confirmar Voto</button>
-            <button class="btn btn-light" type="reset">Cancelar Selección</button>
+            <a class="btn btn-secondary ms-2" href="@Url.Action("Papeleta","Votante")">Cancelar Selección</a>
         </div>
     </form>
 </div>

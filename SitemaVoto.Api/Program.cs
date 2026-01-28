@@ -2,8 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using SitemaVoto.Api.Services.Email;
 using SitemaVoto.Api.Services.Notificaciones;
+using SitemaVoto.Api.Services.Email;
 using SitemaVoto.Api.Services.Otp;
 using SitemaVoto.Api.Services.Padron;
 using SitemaVoto.Api.Services.Procesos;
@@ -24,7 +24,7 @@ namespace SitemaVoto.Api
 
             builder.Services.AddDbContext<SitemaVotoApiContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("SitemaVotoApiContext")
-                ?? throw new InvalidOperationException("Connection string 'SitemaVotoApiContext' not found.")));
+                    ?? throw new InvalidOperationException("Connection string 'SitemaVotoApiContext' not found.")));
 
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -35,27 +35,26 @@ namespace SitemaVoto.Api
 
             builder.Services.AddMemoryCache();
 
-            builder.Services.AddControllers().AddNewtonsoftJson(options =>
-                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+            builder.Services
+                .AddControllers()
+                .AddNewtonsoftJson(options =>
+                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-            // ✅ Swagger (evita choque de DTOs + soporta cancelToken en swagger)
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.CustomSchemaIds(t => t.FullName);
-            });
+            builder.Services.AddSwaggerGen(c => c.CustomSchemaIds(t => t.FullName));
 
-            // ✅ Options (leer appsettings.json)
+            // ✅ Options
             builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
-            builder.Services.Configure<TwilioOptions>(builder.Configuration.GetSection("Twilio"));
             builder.Services.Configure<OtpOptions>(builder.Configuration.GetSection("Otp"));
 
-            // ✅ Envío REAL: Email y SMS
+            // ✅ Email real (SMTP)
             builder.Services.AddTransient<IEmailSenderApp, SmtpEmailSender>();
-            builder.Services.AddTransient<ISmsSenderApp, TwilioSmsSender>();
 
-            // ✅ Notificadores que usa el OtpController
-            builder.Services.AddScoped<EmailNotificador>();
-            builder.Services.AddScoped<SmsNotificador>();
+            // ✅ SMS "Null" (NO lanza error)
+            builder.Services.AddSingleton<ISmsSenderApp, NullSmsSender>();
+
+            // ✅ Notificadores (OJO: aquí ya no hay ambigüedad)
+            builder.Services.AddScoped<SitemaVoto.Api.Services.Notificaciones.EmailNotificador>();
+            builder.Services.AddScoped<SitemaVoto.Api.Services.Notificaciones.SmsNotificador>();
 
             // ✅ Servicios negocio
             builder.Services.AddScoped<IProcesoService, ProcesoService>();
@@ -63,7 +62,7 @@ namespace SitemaVoto.Api
             builder.Services.AddScoped<IVotacionService, VotacionService>();
             builder.Services.AddScoped<IResultadosService, ResultadosService>();
 
-            // ✅ OTP (memoria)
+            // ✅ OTP
             builder.Services.AddSingleton<OtpService>();
 
             var app = builder.Build();
@@ -82,11 +81,8 @@ namespace SitemaVoto.Api
                 ForwardedHeaders = ForwardedHeaders.All
             });
 
-            // (si no usas auth todavía, no pasa nada)
             app.UseAuthorization();
-
             app.MapControllers();
-
             app.Run();
         }
     }

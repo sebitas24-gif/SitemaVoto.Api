@@ -16,7 +16,11 @@ namespace SitemaVoto.Api.Controllers
         private readonly SmsNotificador _sms;
         private readonly OtpService _otp;
 
-        public AccesoOtpController(SitemaVotoApiContext db, EmailNotificador email, SmsNotificador sms, OtpService otp)
+        public AccesoOtpController(
+            SitemaVotoApiContext db,
+            EmailNotificador email,
+            SmsNotificador sms,
+            OtpService otp)
         {
             _db = db;
             _email = email;
@@ -27,14 +31,16 @@ namespace SitemaVoto.Api.Controllers
         public class SolicitarOtpRequest
         {
             public string Cedula { get; set; } = "";
-            public MetodoOtp Metodo { get; set; } = MetodoOtp.Correo; // 1 correo, 2 sms
+            public MetodoOtp Metodo { get; set; } = MetodoOtp.Correo;
         }
 
         public class SolicitarOtpResponse
         {
             public bool Ok { get; set; }
             public string? Error { get; set; }
-            public string? DestinoMasked { get; set; }
+            public string? Destino { get; set; }        // para que NO te de CS0117
+            public string? DestinoMasked { get; set; }  // opcional
+            public string? Nota { get; set; }           // por si hubo fallback
         }
 
         [HttpPost("solicitar-otp")]
@@ -47,33 +53,54 @@ namespace SitemaVoto.Api.Controllers
             if (user == null)
                 return NotFound(new SolicitarOtpResponse { Ok = false, Error = "Usuario no existe." });
 
-            // ✅ OTP solo Admin/Jefe
-            if (user.Rol != RolUsuario.Admin && user.Rol != RolUsuario.JefeJunta)
-                return BadRequest(new SolicitarOtpResponse { Ok = false, Error = "OTP solo aplica para Admin/Jefe de Junta." });
+            var codigo = _otp.GenerarCodigo();
+            _otp.Guardar(req.Cedula, codigo); // usa ExpireMinutes configurado
 
-            var codigo = _otp.GenerarCodigo(6);
-            _otp.Guardar(req.Cedula, codigo, 5);
+            var msg = $"Tu código de verificación es: {codigo}. Válido por {_otp.ExpireMinutes} minutos.";
 
-            var msg = $"Tu código de verificación (OTP) es: {codigo}. Válido por 5 minutos.";
-
+            // ✅ CORREO
             if (req.Metodo == MetodoOtp.Correo)
             {
                 if (string.IsNullOrWhiteSpace(user.Correo))
                     return BadRequest(new SolicitarOtpResponse { Ok = false, Error = "El usuario no tiene correo registrado." });
 
-                await _email.EnviarOtpAsync(user.Correo!, msg, ct);
-
-                return Ok(new SolicitarOtpResponse { Ok = true, DestinoMasked = MaskEmail(user.Correo!) });
+                await _email.EnviarOtpAsync(user.Correo, msg, ct);
+                return Ok(new SolicitarOtpResponse
+                {
+                    Ok = true,
+                    Destino = user.Correo,
+                    DestinoMasked = MaskEmail(user.Correo)
+                });
             }
 
+            // ✅ SMS “visible” pero NO falla: fallback a correo si SMS no está configurado
             if (req.Metodo == MetodoOtp.Sms)
             {
+                if (!_sms.EstaConfigurado())
+                {
+                    if (string.IsNullOrWhiteSpace(user.Correo))
+                        return BadRequest(new SolicitarOtpResponse { Ok = false, Error = "SMS no disponible y el usuario no tiene correo registrado." });
+
+                    await _email.EnviarOtpAsync(user.Correo, msg, ct);
+                    return Ok(new SolicitarOtpResponse
+                    {
+                        Ok = true,
+                        Destino = user.Correo,
+                        DestinoMasked = MaskEmail(user.Correo),
+                        Nota = "SMS no configurado. Se envió OTP al correo."
+                    });
+                }
+
                 if (string.IsNullOrWhiteSpace(user.Telefono))
                     return BadRequest(new SolicitarOtpResponse { Ok = false, Error = "El usuario no tiene teléfono registrado." });
 
-                await _sms.EnviarAsync(user.Telefono!, msg, ct);
-
-                return Ok(new SolicitarOtpResponse { Ok = true, DestinoMasked = MaskPhone(user.Telefono!) });
+                await _sms.EnviarAsync(user.Telefono, msg, ct);
+                return Ok(new SolicitarOtpResponse
+                {
+                    Ok = true,
+                    Destino = user.Telefono,
+                    DestinoMasked = MaskPhone(user.Telefono)
+                });
             }
 
             return BadRequest(new SolicitarOtpResponse { Ok = false, Error = "Método no soportado." });
@@ -99,14 +126,12 @@ namespace SitemaVoto.Api.Controllers
                 return BadRequest(new VerificarOtpResponse { Ok = false, Error = "Datos incompletos." });
 
             var ok = _otp.Verificar(req.Cedula, req.Codigo);
-            if (!ok)
-                return Unauthorized(new VerificarOtpResponse { Ok = false, Error = "OTP incorrecto o expirado." });
+            if (!ok) return Unauthorized(new VerificarOtpResponse { Ok = false, Error = "OTP incorrecto o expirado." });
 
             _otp.Borrar(req.Cedula);
 
             var user = await _db.Usuarios.AsNoTracking().FirstOrDefaultAsync(x => x.Cedula == req.Cedula, ct);
-            if (user == null)
-                return NotFound(new VerificarOtpResponse { Ok = false, Error = "Usuario no existe." });
+            if (user == null) return NotFound(new VerificarOtpResponse { Ok = false, Error = "Usuario no existe." });
 
             return Ok(new VerificarOtpResponse { Ok = true, Rol = (int)user.Rol });
         }
@@ -114,14 +139,14 @@ namespace SitemaVoto.Api.Controllers
         private static string MaskEmail(string email)
         {
             var at = email.IndexOf('@');
-            if (at <= 1) return "***" + email.Substring(at);
+            if (at <= 1) return "***" + email;
             return email[0] + "***" + email.Substring(at);
         }
 
         private static string MaskPhone(string phone)
         {
-            if (phone.Length < 6) return "***";
-            return phone.Substring(0, 3) + "****" + phone.Substring(phone.Length - 2);
+            if (phone.Length <= 4) return "****";
+            return new string('*', phone.Length - 4) + phone[^4..];
         }
     }
 }
