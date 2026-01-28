@@ -12,9 +12,9 @@ namespace SitemaVoto.Api.Services.Votacion
         private readonly SitemaVotoApiContext _db;
         private readonly IProcesoService _proceso;
         private readonly IPadronService _padron;
-        private readonly IEmailSender _email;
+        private readonly IEmailSenderApp _email;
 
-        public VotacionService(SitemaVotoApiContext db, IProcesoService proceso, IPadronService padron, IEmailSender email)
+        public VotacionService(SitemaVotoApiContext db, IProcesoService proceso, IPadronService padron, IEmailSenderApp email)
         {
             _db = db;
             _proceso = proceso;

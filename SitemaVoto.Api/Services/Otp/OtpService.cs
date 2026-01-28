@@ -1,19 +1,12 @@
-﻿using VotoModelos.Entidades;
-using VotoModelos.Enums;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using SitemaVoto.Api.Services.Email;
-using static SitemaVoto.Api.Services.Otp.Models.OtpResult;
-using Microsoft.Extensions.Caching.Memory;
+using SitemaVoto.Api.Services.Notificaciones;
 using System.Security.Cryptography;
+using VotoModelos.Enums;
 
 namespace SitemaVoto.Api.Services.Otp
 {
-    public enum MetodoOtp
-    {
-        Correo = 1,
-        Sms = 2
-    }
-
     public class OtpService
     {
         private readonly IMemoryCache _cache;
@@ -25,23 +18,32 @@ namespace SitemaVoto.Api.Services.Otp
 
         public string GenerarCodigo(int length = 6)
         {
-            // 000000 - 999999
-            var max = (int)Math.Pow(10, length) - 1;
-            var n = RandomNumberGenerator.GetInt32(0, max + 1);
-            return n.ToString(new string('0', length));
+            if (length < 4) length = 4;
+            if (length > 10) length = 10;
+
+            var chars = new char[length];
+            for (int i = 0; i < length; i++)
+                chars[i] = (char)('0' + Random.Shared.Next(0, 10));
+
+            if (chars[0] == '0') chars[0] = (char)('1' + Random.Shared.Next(0, 9));
+
+            return new string(chars);
         }
 
-        public void Guardar(string cedula, string codigo, int expireMinutes)
+        public void Guardar(string cedula, string codigo, int expireMinutes = 5)
         {
-            _cache.Set($"otp:{cedula}", codigo, TimeSpan.FromMinutes(expireMinutes));
+            _cache.Set($"OTP:{cedula}", codigo, TimeSpan.FromMinutes(expireMinutes));
         }
 
         public bool Verificar(string cedula, string codigo)
         {
-            if (!_cache.TryGetValue($"otp:{cedula}", out string? guardado)) return false;
-            return string.Equals(guardado, codigo);
+            if (!_cache.TryGetValue<string>($"OTP:{cedula}", out var esperado)) return false;
+            return string.Equals(esperado, codigo, StringComparison.Ordinal);
         }
 
-        public void Borrar(string cedula) => _cache.Remove($"otp:{cedula}");
+        public void Borrar(string cedula)
+        {
+            _cache.Remove($"OTP:{cedula}");
+        }
     }
 }

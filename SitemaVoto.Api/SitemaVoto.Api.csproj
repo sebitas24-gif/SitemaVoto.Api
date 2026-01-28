@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.14.1" />
     <PackageReference Include="Microsoft.AspNetCore.mvc.NewtonsoftJson" Version="8.0.21" />
     <PackageReference Include="microsoft.EntityFrameworkCore.SqlServer" Version="8.0.23" />
     <PackageReference Include="microsoft.EntityFrameworkCore.Tools" Version="8.0.23">

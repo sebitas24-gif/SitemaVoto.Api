@@ -18,83 +18,74 @@ namespace SitemaVoto.Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
             builder.Host.UseSerilog((context, configuration) =>
-        configuration.ReadFrom.Configuration(context.Configuration));
+                configuration.ReadFrom.Configuration(context.Configuration));
+
             builder.Services.AddDbContext<SitemaVotoApiContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("SitemaVotoApiContext")
-    ?? throw new InvalidOperationException("Connection string 'SitemaVotoApiContext' not found.")));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("SitemaVotoApiContext")
+                ?? throw new InvalidOperationException("Connection string 'SitemaVotoApiContext' not found.")));
 
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-            // Add services to the container.
-            builder.Services.AddCors(options => {
+
+            builder.Services.AddCors(options =>
+            {
                 options.AddPolicy("AllowAll", b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
-            // Cache (OTP en memoria)
+
             builder.Services.AddMemoryCache();
 
-            // Config de Email/SMS (desde appsettings o env vars)
+            builder.Services.AddControllers().AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+            // ✅ Swagger (evita choque de DTOs + soporta cancelToken en swagger)
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.CustomSchemaIds(t => t.FullName);
+            });
+
+            // ✅ Options (leer appsettings.json)
             builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
             builder.Services.Configure<TwilioOptions>(builder.Configuration.GetSection("Twilio"));
+            builder.Services.Configure<OtpOptions>(builder.Configuration.GetSection("Otp"));
 
-            // Servicios de negocio
+            // ✅ Envío REAL: Email y SMS
+            builder.Services.AddTransient<IEmailSenderApp, SmtpEmailSender>();
+            builder.Services.AddTransient<ISmsSenderApp, TwilioSmsSender>();
+
+            // ✅ Notificadores que usa el OtpController
+            builder.Services.AddScoped<EmailNotificador>();
+            builder.Services.AddScoped<SmsNotificador>();
+
+            // ✅ Servicios negocio
             builder.Services.AddScoped<IProcesoService, ProcesoService>();
             builder.Services.AddScoped<IPadronService, PadronService>();
             builder.Services.AddScoped<IVotacionService, VotacionService>();
             builder.Services.AddScoped<IResultadosService, ResultadosService>();
 
-            // Notificadores reales
-            builder.Services.AddScoped<EmailNotificador>();
-            builder.Services.AddScoped<SmsNotificador>();
-
-            // OTP service (memoria)
+            // ✅ OTP (memoria)
             builder.Services.AddSingleton<OtpService>();
-
-
-
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            builder.Services.AddControllers().AddNewtonsoftJson(
-                options =>
-                options.SerializerSettings.ReferenceLoopHandling
-                = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-            );
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
-            {
-                // ✅ evita choque de nombres de DTOs (CandidatoCreateDto repetido, etc.)
-                c.CustomSchemaIds(t => t.FullName);
-            });
-
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            //if (app.Environment.IsDevelopment())
             app.UseCors("AllowAll");
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                // Usa la ruta absoluta para que ZeroTier no se confunda
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "SitemaVoto.Api v1");
                 c.RoutePrefix = "swagger";
             });
+
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.All
             });
-            
-            
-          
-            //app.UseHttpsRedirection();
 
-
+            // (si no usas auth todavía, no pasa nada)
             app.UseAuthorization();
 
-
             app.MapControllers();
-      
 
             app.Run();
         }
