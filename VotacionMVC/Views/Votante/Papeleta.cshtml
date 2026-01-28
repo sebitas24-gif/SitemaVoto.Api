@@ -29,7 +29,6 @@
                 <div class="col-md-6 fw-bold text-end">@((p?.data?.nombre) ?? "—")</div>
 
                 <div class="col-md-6 text-muted mt-2">Tipo</div>
-                <div class="col-md-6 fw-bold text-end mt-2">@((p?.data?.tipo) ?? "—")</div>
 
                 <div class="col-md-6 text-muted mt-2">Normas</div>
                 <div class="col-md-6 fw-bold text-end mt-2">Seleccione 1 opción y confirme.</div>
@@ -48,10 +47,10 @@
                         <div class="card-body text-center">
                             <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
                                  style="width:72px;height:72px;background:#e9ecef;font-weight:800;">
-                                @((c.nombre?.Length ?? 0) >= 2 ? c.nombre.Substring(0, 2).ToUpper() : "CV")
+                                @((c.nombreCompleto?.Length ?? 0) >= 2 ? c.nombreCompleto.Substring(0, 2).ToUpper() : "CV")
                             </div>
 
-                            <div class="fw-bold">@c.nombre</div>
+                            <div class="fw-bold">@c.nombreCompleto</div>
                             <div class="text-muted">@c.partido</div>
                             <input class="form-check-input mt-2" type="radio" name="candidatoId" value="@c.id" />
                         </div>

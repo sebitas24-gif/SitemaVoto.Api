@@ -11,7 +11,7 @@ namespace SitemaVoto.Api.Services.Email
             _sms = sms;
         }
 
-        public bool EstaConfigurado() => _sms.IsConfigured();
+        public bool EstaConfigurado() => _sms.IsConfigured;
 
         public Task EnviarAsync(string telefono, string mensaje, CancellationToken ct)
         {
