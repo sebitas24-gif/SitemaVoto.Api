@@ -1,0 +1,22 @@
+﻿<h2>Verificación OTP (Administrador)</h2>
+
+@if (ViewBag.Msg != null)
+{
+    <div style="color:green;margin-bottom:10px;">@ViewBag.Msg</div>
+}
+
+@if (ViewBag.Error != null)
+{
+    <div style="color:red;margin-bottom:10px;">@ViewBag.Error</div>
+}
+
+<form method="post">
+    <label>OTP</label>
+    <input name="otp" class="form-control" />
+    <button class="btn btn-secondary" style="margin-top:12px;">Ingresar</button>
+</form>
+
+<p style="margin-top:10px;"><b>Demo OTP:</b> 123456</p>
+<a href="/Acceso/AdminCedula" style="display:block;margin-top:12px;">Volver</a>
+
+

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using SitemaVoto.Api.Services.Email;
+using SitemaVoto.Api.Services.Notificaciones;
 using SitemaVoto.Api.Services.Otp;
 using SitemaVoto.Api.Services.Padron;
 using SitemaVoto.Api.Services.Procesos;
@@ -28,14 +29,25 @@ namespace SitemaVoto.Api
             builder.Services.AddCors(options => {
                 options.AddPolicy("AllowAll", b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
-            builder.Services.AddSingleton<IEmailSender, ConsoleEmailSender>();
+            // Cache (OTP en memoria)
+            builder.Services.AddMemoryCache();
 
-            // Servicios negocio
+            // Config de Email/SMS (desde appsettings o env vars)
+            builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
+            builder.Services.Configure<TwilioOptions>(builder.Configuration.GetSection("Twilio"));
+
+            // Servicios de negocio
             builder.Services.AddScoped<IProcesoService, ProcesoService>();
             builder.Services.AddScoped<IPadronService, PadronService>();
             builder.Services.AddScoped<IVotacionService, VotacionService>();
             builder.Services.AddScoped<IResultadosService, ResultadosService>();
-            builder.Services.AddScoped<IOtpService, OtpService>();
+
+            // Notificadores reales
+            builder.Services.AddScoped<EmailNotificador>();
+            builder.Services.AddScoped<SmsNotificador>();
+
+            // OTP service (memoria)
+            builder.Services.AddSingleton<OtpService>();
 
 
 

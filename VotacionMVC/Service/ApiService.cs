@@ -165,6 +165,48 @@ namespace VotacionMVC.Service
             var res = await Client().PostAsync("api/Padron/generar-demo", content: null, ct);
             return res.IsSuccessStatusCode;
         }
+ 
+
+public class SolicitarOtpRequest
+    {
+        public string Cedula { get; set; } = "";
+        public int Metodo { get; set; } = 1; // 1=Correo, 2=Sms
+    }
+    public class SolicitarOtpResponse
+    {
+        public bool Ok { get; set; }
+        public string? Error { get; set; }
+        public string? Destino { get; set; }
+    }
+
+    public class VerificarOtpRequest
+    {
+        public string Cedula { get; set; } = "";
+        public string Codigo { get; set; } = "";
+    }
+    public class VerificarOtpResponse
+    {
+        public bool Ok { get; set; }
+        public string? Error { get; set; }
+        public int Rol { get; set; }
+}
+
+// Métodos:
+public async Task<SolicitarOtpResponse?> SolicitarOtpAsync(string cedula, int metodo, CancellationToken ct = default)
+        {
+            var resp = await Client().PostAsJsonAsync("api/acceso/solicitar-otp",
+                new SolicitarOtpRequest { Cedula = cedula, Metodo = metodo }, ct);
+
+            return await resp.Content.ReadFromJsonAsync<SolicitarOtpResponse>(cancellationToken: ct);
+        }
+
+        public async Task<VerificarOtpResponse?> VerificarOtpAsync(string cedula, string codigo, CancellationToken ct = default)
+        {
+            var resp = await Client().PostAsJsonAsync("api/acceso/verificar-otp",
+                new VerificarOtpRequest { Cedula = cedula, Codigo = codigo }, ct);
+
+            return await resp.Content.ReadFromJsonAsync<VerificarOtpResponse>(cancellationToken: ct);
+        }
 
 
     }

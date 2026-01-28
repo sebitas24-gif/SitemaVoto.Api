@@ -3,73 +3,45 @@ using VotoModelos.Enums;
 using Microsoft.EntityFrameworkCore;
 using SitemaVoto.Api.Services.Email;
 using static SitemaVoto.Api.Services.Otp.Models.OtpResult;
+using Microsoft.Extensions.Caching.Memory;
+using System.Security.Cryptography;
 
 namespace SitemaVoto.Api.Services.Otp
 {
-    public class OtpService : IOtpService
+    public enum MetodoOtp
     {
-        private readonly SitemaVotoApiContext _db;
-        private readonly IEmailSender _email;
+        Correo = 1,
+        Sms = 2
+    }
 
-        public OtpService(SitemaVotoApiContext db, IEmailSender email)
+    public class OtpService
+    {
+        private readonly IMemoryCache _cache;
+
+        public OtpService(IMemoryCache cache)
         {
-            _db = db;
-            _email = email;
+            _cache = cache;
         }
 
-        public async Task<OtpRequestResult> SolicitarAsync(string cedula, MetodoOtp metodo, CancellationToken ct)
+        public string GenerarCodigo(int length = 6)
         {
-            var user = await _db.Usuarios.FirstOrDefaultAsync(u => u.Cedula == cedula, ct);
-            if (user == null) return new(false, "Usuario no encontrado.", null, null);
-
-            if (user.Rol == RolUsuario.Votante)
-                return new(false, "OTP no aplica para votante.", null, null);
-
-            var code = Random.Shared.Next(100000, 999999).ToString();
-            var ses = new OtpSesion
-            {
-                UsuarioId = user.Id,
-                Codigo = code,
-                Metodo = metodo,
-                ExpiraUtc = DateTime.UtcNow.AddMinutes(5),
-                Usado = false,
-                IntentosFallidos = 0
-            };
-
-            _db.OtpSesiones.Add(ses);
-            await _db.SaveChangesAsync(ct);
-
-            if (metodo == MetodoOtp.Correo)
-            {
-                if (string.IsNullOrWhiteSpace(user.Correo))
-                    return new(false, "El usuario no tiene correo registrado.", null, null);
-
-                await _email.SendAsync(user.Correo!, "Código de verificación", $"Su código OTP es: {code}", ct);
-            }
-
-            return new(true, null, ses.Id, ses.ExpiraUtc);
+            // 000000 - 999999
+            var max = (int)Math.Pow(10, length) - 1;
+            var n = RandomNumberGenerator.GetInt32(0, max + 1);
+            return n.ToString(new string('0', length));
         }
 
-        public async Task<OtpVerifyResult> VerificarAsync(Guid sessionId, string codigo, CancellationToken ct)
+        public void Guardar(string cedula, string codigo, int expireMinutes)
         {
-            var ses = await _db.OtpSesiones
-                .Include(x => x.Usuario)
-                .FirstOrDefaultAsync(x => x.Id == sessionId, ct);
-
-            if (ses == null) return new(false, "Sesión OTP no existe.");
-            if (ses.Usado) return new(false, "OTP ya fue usado.");
-            if (DateTime.UtcNow > ses.ExpiraUtc) return new(false, "OTP expiró.");
-
-            if (!string.Equals(ses.Codigo, codigo))
-            {
-                ses.IntentosFallidos++;
-                await _db.SaveChangesAsync(ct);
-                return new(false, "Código incorrecto.");
-            }
-
-            ses.Usado = true;
-            await _db.SaveChangesAsync(ct);
-            return new(true, null);
+            _cache.Set($"otp:{cedula}", codigo, TimeSpan.FromMinutes(expireMinutes));
         }
+
+        public bool Verificar(string cedula, string codigo)
+        {
+            if (!_cache.TryGetValue($"otp:{cedula}", out string? guardado)) return false;
+            return string.Equals(guardado, codigo);
+        }
+
+        public void Borrar(string cedula) => _cache.Remove($"otp:{cedula}");
     }
 }

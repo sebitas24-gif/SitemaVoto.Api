@@ -14,12 +14,56 @@ namespace VotacionMVC.Controllers
             _api = api;
         }
          [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string cedula, int metodo, CancellationToken ct)
         {
-            // Menú con 4 botones (como tu simulación)
+            var r = await _api.SolicitarOtpAsync(cedula, metodo, ct);
+            if (r == null || !r.Ok)
+            {
+                ViewBag.Error = r?.Error ?? "No se pudo solicitar OTP.";
+                return View();
+            }
+
+            HttpContext.Session.SetString("otp_cedula", cedula);
+            HttpContext.Session.SetInt32("otp_metodo", metodo);
+
+            return RedirectToAction(nameof(Verificar));
+        }
+        [HttpGet]
+        public IActionResult Verificar()
+        {
+            if (string.IsNullOrWhiteSpace(HttpContext.Session.GetString("otp_cedula")))
+                return RedirectToAction(nameof(Index));
             return View();
         }
-        
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Verificar(string codigo, CancellationToken ct)
+        {
+            var cedula = HttpContext.Session.GetString("otp_cedula");
+            if (string.IsNullOrWhiteSpace(cedula))
+                return RedirectToAction(nameof(Index));
+
+            var r = await _api.VerificarOtpAsync(cedula, codigo, ct);
+            if (r == null || !r.Ok)
+            {
+                ViewBag.Error = r?.Error ?? "OTP inválido.";
+                return View();
+            }
+
+            // guardamos sesión del usuario
+            HttpContext.Session.SetString("cedula", cedula);
+            HttpContext.Session.SetInt32("rol", r.Rol);
+
+            // limpiar flujo otp
+            HttpContext.Session.Remove("otp_cedula");
+
+            // redirección simple según rol (ajusta si tus roles son 1/2/3)
+            if (r.Rol == 1) return RedirectToAction("Procesos", "Admin");        // Admin
+            if (r.Rol == 2) return RedirectToAction("Panel", "JefeJunta");      // Jefe
+            return RedirectToAction("Index", "Home");                           // Votante (o acceso PAD)
+        }
+
         [HttpGet]
         public IActionResult Votante()
         {

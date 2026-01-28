@@ -1,0 +1,24 @@
+﻿@{
+    ViewData["Title"] = "Login Votante";
+}
+
+<h2>Login Votante</h2>
+
+@if (ViewBag.Error != null)
+{
+    <div style="color:red; margin-bottom:10px;">@ViewBag.Error</div>
+}
+
+<form method="post">
+    <label>Cédula</label>
+    <input name="cedula" class="form-control" />
+
+    <label style="margin-top:10px;">Código PAD</label>
+    <input name="pad" class="form-control" />
+
+    <button type="submit" class="btn btn-primary" style="margin-top:15px;">Ingresar</button>
+</form>
+
+<a href="/Acceso" style="display:block;margin-top:12px;">Volver</a>
+
+
