@@ -95,7 +95,7 @@ namespace VotoMVC_Login.Controllers
             cedula = cedula.Trim();
 
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            cts.CancelAfter(TimeSpan.FromSeconds(20));
+            cts.CancelAfter(TimeSpan.FromSeconds(180));
 
             try
             {
@@ -266,6 +266,25 @@ namespace VotoMVC_Login.Controllers
                 await _userManager.AddToRoleAsync(user, rol);
 
             await _signInManager.SignInAsync(user, isPersistent: false);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Ping(CancellationToken ct)
+        {
+            try
+            {
+                var client = HttpContext.RequestServices
+                    .GetRequiredService<IHttpClientFactory>()
+                    .CreateClient("Api");
+
+                using var resp = await client.GetAsync("swagger/index.html", ct);
+                var txt = await resp.Content.ReadAsStringAsync(ct);
+
+                return Content($"Status={(int)resp.StatusCode} {resp.ReasonPhrase}\nLen={txt.Length}");
+            }
+            catch (Exception ex)
+            {
+                return Content("Ping ERROR: " + ex.Message);
+            }
         }
 
     }

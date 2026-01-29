@@ -53,34 +53,57 @@ namespace VotoMVC_Login.Service
         public async Task<SolicitarOtpResponse> SolicitarOtpCorreoAsync(string cedula, CancellationToken ct)
         {
             var req = new SolicitarOtpRequest { Cedula = cedula, Metodo = 1 };
-
-            // 🔥 Request manual para controlar todo
             var json = JsonSerializer.Serialize(req);
-            var message = new HttpRequestMessage(HttpMethod.Post, SolicitarOtpPath)
+
+            for (int intento = 1; intento <= 3; intento++)
             {
-                Content = new StringContent(json, Encoding.UTF8, "application/json")
+                try
+                {
+                    // ✅ IMPORTANTÍSIMO: crear el request dentro del intento
+                    using var message = new HttpRequestMessage(HttpMethod.Post, SolicitarOtpPath)
+                    {
+                        Content = new StringContent(json, Encoding.UTF8, "application/json")
+                    };
+
+                    using var resp = await Client().SendAsync(message, ct);
+                    var raw = await resp.Content.ReadAsStringAsync(ct);
+
+                    try
+                    {
+                        var data = JsonSerializer.Deserialize<SolicitarOtpResponse>(raw, _jsonOpts);
+                        if (data == null)
+                            return new SolicitarOtpResponse { Ok = false, Error = $"HTTP {(int)resp.StatusCode} - {raw}" };
+
+                        if (!resp.IsSuccessStatusCode && string.IsNullOrWhiteSpace(data.Error))
+                            data.Error = $"HTTP {(int)resp.StatusCode} - {raw}";
+
+                        return data;
+                    }
+                    catch
+                    {
+                        return new SolicitarOtpResponse { Ok = false, Error = $"HTTP {(int)resp.StatusCode} - {raw}" };
+                    }
+                }
+                catch (TaskCanceledException) when (intento < 3)
+                {
+                    // ✅ Render cold start / timeout: esperar y reintentar
+                    await Task.Delay(1500 * intento, CancellationToken.None);
+                    continue;
+                }
+                catch (HttpRequestException) when (intento < 3)
+                {
+                    await Task.Delay(1500 * intento, CancellationToken.None);
+                    continue;
+                }
+            }
+
+            return new SolicitarOtpResponse
+            {
+                Ok = false,
+                Error = "⏳ La API está lenta (Render cold start) o no respondió. Intenta de nuevo."
             };
-
-            using var resp = await Client().SendAsync(message, ct);
-            var raw = await resp.Content.ReadAsStringAsync(ct);
-
-            // Si vino JSON tipo { ok, error, ... }
-            try
-            {
-                var data = JsonSerializer.Deserialize<SolicitarOtpResponse>(raw, _jsonOpts);
-                if (data == null)
-                    return new SolicitarOtpResponse { Ok = false, Error = $"HTTP {(int)resp.StatusCode} - {raw}" };
-
-                if (!resp.IsSuccessStatusCode && string.IsNullOrWhiteSpace(data.Error))
-                    data.Error = $"HTTP {(int)resp.StatusCode} - {raw}";
-
-                return data;
-            }
-            catch
-            {
-                return new SolicitarOtpResponse { Ok = false, Error = $"HTTP {(int)resp.StatusCode} - {raw}" };
-            }
         }
+
 
         public async Task<VerificarOtpResponse> VerificarOtpAsync(string cedula, string codigo, CancellationToken ct)
         {

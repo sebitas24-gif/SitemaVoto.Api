@@ -28,6 +28,9 @@ namespace SitemaVoto.Api.Controllers
             _otp = otp;
         }
 
+        // =========================
+        // DTOs
+        // =========================
         public class SolicitarOtpRequest
         {
             public string Cedula { get; set; } = "";
@@ -38,12 +41,17 @@ namespace SitemaVoto.Api.Controllers
         {
             public bool Ok { get; set; }
             public string? Error { get; set; }
-            public string? Destino { get; set; }        // para que NO te de CS0117
-            public string? DestinoMasked { get; set; }  // opcional
-            public string? Nota { get; set; }           // por si hubo fallback
+            public string? Destino { get; set; }
+            public string? DestinoMasked { get; set; }
+            public string? Nota { get; set; }
         }
 
+        // =========================
+        // POST /api/acceso/solicitar-otp
+        // =========================
         [HttpPost("solicitar-otp")]
+        [Consumes("application/json")]
+        [Produces("application/json")]
         public async Task<ActionResult<SolicitarOtpResponse>> SolicitarOtp([FromBody] SolicitarOtpRequest req, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(req.Cedula) || req.Cedula.Length != 10)
@@ -53,12 +61,15 @@ namespace SitemaVoto.Api.Controllers
             if (user == null)
                 return NotFound(new SolicitarOtpResponse { Ok = false, Error = "Usuario no existe." });
 
+            // generar OTP
             var codigo = _otp.GenerarCodigo();
-            _otp.Guardar(req.Cedula, codigo); // usa ExpireMinutes configurado
+            _otp.Guardar(req.Cedula, codigo);
 
             var msg = $"Tu código de verificación es: {codigo}. Válido por {_otp.ExpireMinutes} minutos.";
 
-            // ✅ CORREO
+            // =========================
+            // CORREO
+            // =========================
             if (req.Metodo == MetodoOtp.Correo)
             {
                 if (string.IsNullOrWhiteSpace(user.Correo))
@@ -66,7 +77,12 @@ namespace SitemaVoto.Api.Controllers
 
                 try
                 {
-                    await _email.EnviarOtpAsync(user.Correo, msg, ct);
+                    // ✅ Timeout fuerte SOLO para correo (evita cuelgues en Render)
+                    using var emailCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                    emailCts.CancelAfter(TimeSpan.FromSeconds(15));
+
+                    await _email.EnviarOtpAsync(user.Correo, msg, emailCts.Token);
+
                     return Ok(new SolicitarOtpResponse
                     {
                         Ok = true,
@@ -74,18 +90,27 @@ namespace SitemaVoto.Api.Controllers
                         DestinoMasked = MaskEmail(user.Correo)
                     });
                 }
+                catch (OperationCanceledException)
+                {
+                    return StatusCode(504, new SolicitarOtpResponse
+                    {
+                        Ok = false,
+                        Error = "⏳ Timeout enviando OTP por correo (SMTP lento/bloqueado en Render)."
+                    });
+                }
                 catch (Exception ex)
                 {
                     return StatusCode(503, new SolicitarOtpResponse
                     {
                         Ok = false,
-                        Error = "SMTP falló o fue bloqueado. Detalle: " + ex.Message
+                        Error = "❌ Error enviando OTP por correo: " + ex.Message
                     });
                 }
             }
 
-
-            // ✅ SMS “visible” pero NO falla: fallback a correo si SMS no está configurado
+            // =========================
+            // SMS (con fallback a correo si SMS no está configurado)
+            // =========================
             if (req.Metodo == MetodoOtp.Sms)
             {
                 if (!_sms.EstaConfigurado())
@@ -93,20 +118,44 @@ namespace SitemaVoto.Api.Controllers
                     if (string.IsNullOrWhiteSpace(user.Correo))
                         return BadRequest(new SolicitarOtpResponse { Ok = false, Error = "SMS no disponible y el usuario no tiene correo registrado." });
 
-                    await _email.EnviarOtpAsync(user.Correo, msg, ct);
-                    return Ok(new SolicitarOtpResponse
+                    try
                     {
-                        Ok = true,
-                        Destino = user.Correo,
-                        DestinoMasked = MaskEmail(user.Correo),
-                        Nota = "SMS no configurado. Se envió OTP al correo."
-                    });
+                        using var emailCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                        emailCts.CancelAfter(TimeSpan.FromSeconds(15));
+
+                        await _email.EnviarOtpAsync(user.Correo, msg, emailCts.Token);
+
+                        return Ok(new SolicitarOtpResponse
+                        {
+                            Ok = true,
+                            Destino = user.Correo,
+                            DestinoMasked = MaskEmail(user.Correo),
+                            Nota = "SMS no configurado. Se envió OTP al correo."
+                        });
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return StatusCode(504, new SolicitarOtpResponse
+                        {
+                            Ok = false,
+                            Error = "⏳ Timeout enviando OTP por correo (fallback)."
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(503, new SolicitarOtpResponse
+                        {
+                            Ok = false,
+                            Error = "❌ Error enviando OTP por correo (fallback): " + ex.Message
+                        });
+                    }
                 }
 
                 if (string.IsNullOrWhiteSpace(user.Telefono))
                     return BadRequest(new SolicitarOtpResponse { Ok = false, Error = "El usuario no tiene teléfono registrado." });
 
                 await _sms.EnviarAsync(user.Telefono, msg, ct);
+
                 return Ok(new SolicitarOtpResponse
                 {
                     Ok = true,
@@ -118,6 +167,9 @@ namespace SitemaVoto.Api.Controllers
             return BadRequest(new SolicitarOtpResponse { Ok = false, Error = "Método no soportado." });
         }
 
+        // =========================
+        // Verificar OTP
+        // =========================
         public class VerificarOtpRequest
         {
             public string Cedula { get; set; } = "";
@@ -132,6 +184,8 @@ namespace SitemaVoto.Api.Controllers
         }
 
         [HttpPost("verificar-otp")]
+        [Consumes("application/json")]
+        [Produces("application/json")]
         public async Task<ActionResult<VerificarOtpResponse>> VerificarOtp([FromBody] VerificarOtpRequest req, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(req.Cedula) || string.IsNullOrWhiteSpace(req.Codigo))
@@ -148,6 +202,9 @@ namespace SitemaVoto.Api.Controllers
             return Ok(new VerificarOtpResponse { Ok = true, Rol = (int)user.Rol });
         }
 
+        // =========================
+        // Helpers
+        // =========================
         private static string MaskEmail(string email)
         {
             var at = email.IndexOf('@');
