@@ -10,14 +10,22 @@ namespace VotoMVC_Login.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IConfiguration _cfg;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AccesoController(ApiService api, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration cfg)
+        public AccesoController(
+     ApiService api,
+     UserManager<IdentityUser> userManager,
+     SignInManager<IdentityUser> signInManager,
+     RoleManager<IdentityRole> roleManager,
+     IConfiguration cfg)
         {
             _api = api;
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
             _cfg = cfg;
         }
+
 
         [HttpGet]
         public IActionResult Index() => View();
@@ -52,27 +60,36 @@ namespace VotoMVC_Login.Controllers
 
             cedula = cedula.Trim();
 
-            // ✅ Evita “se queda enviando…” infinito
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            cts.CancelAfter(TimeSpan.FromSeconds(20)); // corta rápido y muestra error
+            cts.CancelAfter(TimeSpan.FromSeconds(60)); // solo validar rol, no debe tardar
 
             try
             {
-                var r = await _api.SolicitarOtpCorreoAsync(cedula, cts.Token);
+                var r = await _api.GetRolPorCedulaAsync(cedula, cts.Token);
 
                 if (r.Ok != true)
                 {
-                    TempData["Error"] = r.Error ?? "No se pudo enviar OTP.";
+                    TempData["Error"] = r.Error ?? "No se pudo validar la cédula.";
                     return RedirectToAction(nameof(JefeCedula));
                 }
 
-                HttpContext.Session.SetString("cedula_jefe", cedula);
-                TempData["Msg"] = $"✅ OTP enviado a: {r.DestinoMasked ?? r.Destino}";
-                return RedirectToAction(nameof(JefeOtp));
+                // ✅ Solo entra si es JefeJunta = 2
+                if (r.Rol != 2)
+                {
+                    TempData["Error"] = "Esta cédula no corresponde a un Jefe de Junta.";
+                    return RedirectToAction(nameof(JefeCedula));
+                }
+
+                // ✅ Login Identity directo
+                await LoginIdentityAsync(cedula, "JefeJunta");
+
+                // ✅ Redirigir al panel (según tu config)
+                var url = _cfg["Redirects:JefeUrl"] ?? "http://localhost:5004/JefeJunta/Panel";
+                return Redirect(url);
             }
             catch (TaskCanceledException)
             {
-                TempData["Error"] = "⏳ La API no respondió a tiempo (timeout). Abre Swagger una vez y reintenta.";
+                TempData["Error"] = "⏳ La API no respondió a tiempo (timeout).";
                 return RedirectToAction(nameof(JefeCedula));
             }
             catch (HttpRequestException ex)
@@ -81,6 +98,7 @@ namespace VotoMVC_Login.Controllers
                 return RedirectToAction(nameof(JefeCedula));
             }
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -245,6 +263,10 @@ namespace VotoMVC_Login.Controllers
         // =========================
         private async Task LoginIdentityAsync(string cedula, string rol)
         {
+            // crear rol si no existe
+            if (!await _roleManager.RoleExistsAsync(rol))
+                await _roleManager.CreateAsync(new IdentityRole(rol));
+
             var user = await _userManager.FindByNameAsync(cedula);
 
             if (user == null)
@@ -263,10 +285,15 @@ namespace VotoMVC_Login.Controllers
             }
 
             if (!await _userManager.IsInRoleAsync(user, rol))
-                await _userManager.AddToRoleAsync(user, rol);
+            {
+                var addRole = await _userManager.AddToRoleAsync(user, rol);
+                if (!addRole.Succeeded)
+                    throw new Exception(string.Join(" | ", addRole.Errors.Select(e => e.Description)));
+            }
 
             await _signInManager.SignInAsync(user, isPersistent: false);
         }
+
         [HttpGet]
         public async Task<IActionResult> Ping(CancellationToken ct)
         {
@@ -287,5 +314,9 @@ namespace VotoMVC_Login.Controllers
             }
         }
 
+     
+
+        [HttpGet]
+        public IActionResult VotanteCedula() => View();
     }
 }

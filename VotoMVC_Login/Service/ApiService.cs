@@ -135,7 +135,34 @@ namespace VotoMVC_Login.Service
             }
         }
 
+        public class RolPorCedulaResponse
+        {
+            public bool Ok { get; set; }
+            public string? Error { get; set; }
+            public int Rol { get; set; }
+        }
+        public async Task<RolPorCedulaResponse> GetRolPorCedulaAsync(string cedula, CancellationToken ct)
+        {
+            using var resp = await Client().GetAsync($"api/acceso/rol/{cedula}", ct);
+            var raw = await resp.Content.ReadAsStringAsync(ct);
+
+            try
+            {
+                var data = JsonSerializer.Deserialize<RolPorCedulaResponse>(raw, _jsonOpts);
+                if (data == null)
+                    return new RolPorCedulaResponse { Ok = false, Error = $"HTTP {(int)resp.StatusCode} - {raw}" };
+
+                if (!resp.IsSuccessStatusCode && string.IsNullOrWhiteSpace(data.Error))
+                    data.Error = $"HTTP {(int)resp.StatusCode} - {raw}";
+
+                return data;
+            }
+            catch
+            {
+                return new RolPorCedulaResponse { Ok = false, Error = $"HTTP {(int)resp.StatusCode} - {raw}" };
+            }
+        }
 
 
     }
-    }
+}

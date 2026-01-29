@@ -217,5 +217,27 @@ namespace SitemaVoto.Api.Controllers
             if (phone.Length <= 4) return "****";
             return new string('*', phone.Length - 4) + phone[^4..];
         }
+        public class RolPorCedulaResponse
+        {
+            public bool Ok { get; set; }
+            public string? Error { get; set; }
+            public int Rol { get; set; }
+        }
+
+        [HttpGet("rol/{cedula}")]
+        [Produces("application/json")]
+        public async Task<ActionResult<RolPorCedulaResponse>> RolPorCedula(string cedula, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(cedula) || cedula.Trim().Length != 10)
+                return BadRequest(new RolPorCedulaResponse { Ok = false, Error = "Cédula inválida." });
+
+            cedula = cedula.Trim();
+
+            var user = await _db.Usuarios.AsNoTracking().FirstOrDefaultAsync(x => x.Cedula == cedula, ct);
+            if (user == null)
+                return NotFound(new RolPorCedulaResponse { Ok = false, Error = "Usuario no existe." });
+
+            return Ok(new RolPorCedulaResponse { Ok = true, Rol = (int)user.Rol });
+        }
     }
 }
