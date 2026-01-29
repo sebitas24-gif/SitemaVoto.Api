@@ -64,14 +64,26 @@ namespace SitemaVoto.Api.Controllers
                 if (string.IsNullOrWhiteSpace(user.Correo))
                     return BadRequest(new SolicitarOtpResponse { Ok = false, Error = "El usuario no tiene correo registrado." });
 
-                await _email.EnviarOtpAsync(user.Correo, msg, ct);
-                return Ok(new SolicitarOtpResponse
+                try
                 {
-                    Ok = true,
-                    Destino = user.Correo,
-                    DestinoMasked = MaskEmail(user.Correo)
-                });
+                    await _email.EnviarOtpAsync(user.Correo, msg, ct);
+                    return Ok(new SolicitarOtpResponse
+                    {
+                        Ok = true,
+                        Destino = user.Correo,
+                        DestinoMasked = MaskEmail(user.Correo)
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(503, new SolicitarOtpResponse
+                    {
+                        Ok = false,
+                        Error = "SMTP falló o fue bloqueado. Detalle: " + ex.Message
+                    });
+                }
             }
+
 
             // ✅ SMS “visible” pero NO falla: fallback a correo si SMS no está configurado
             if (req.Metodo == MetodoOtp.Sms)
