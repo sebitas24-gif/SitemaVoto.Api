@@ -48,30 +48,43 @@ namespace SitemaVoto.Api
             });
 
 
-            // ✅ Options
             builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
             builder.Services.Configure<OtpOptions>(builder.Configuration.GetSection("Otp"));
 
-            // ✅ Email real (SMTP)
+            // =========================
+            // INFRA (Email/SMS/Notifs)
+            // =========================
             builder.Services.AddTransient<IEmailSenderApp, SmtpEmailSender>();
-
-            // ✅ SMS "Null" (NO lanza error)
             builder.Services.AddSingleton<ISmsSenderApp, NullSmsSender>();
 
-            // ✅ Notificadores (OJO: aquí ya no hay ambigüedad)
-            builder.Services.AddScoped<SitemaVoto.Api.Services.Notificaciones.EmailNotificador>();
-            builder.Services.AddScoped<SitemaVoto.Api.Services.Notificaciones.SmsNotificador>();
+          
 
-            // ✅ Servicios negocio
+            // =========================
+            // BUSINESS SERVICES
+            // =========================
             builder.Services.AddScoped<IProcesoService, ProcesoService>();
             builder.Services.AddScoped<IPadronService, PadronService>();
             builder.Services.AddScoped<IVotacionService, VotacionService>();
             builder.Services.AddScoped<IResultadosService, ResultadosService>();
 
-            // ✅ OTP
+            // OTP service (si lo usas como helper)
             builder.Services.AddSingleton<OtpService>();
 
+            // Cache (si lo necesitas)
+            builder.Services.AddMemoryCache();
+
             var app = builder.Build();
+
+            // =========================
+            // MIDDLEWARE ORDER
+            // =========================
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.All
+            });
+
+            // (Opcional) si publicas detrás de proxy y necesitas:
+            // app.UseHttpsRedirection();
 
             app.UseCors("AllowAll");
 
@@ -82,13 +95,12 @@ namespace SitemaVoto.Api
                 c.RoutePrefix = "swagger";
             });
 
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.All
-            });
-
+            // Si usas Auth:
+            // app.UseAuthentication();
             app.UseAuthorization();
+
             app.MapControllers();
+
             app.Run();
         }
     }
