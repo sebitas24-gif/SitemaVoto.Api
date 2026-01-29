@@ -8,5 +8,7 @@ namespace VotoMVC_Login.Models
         public CiudadanoDto? Ciudadano { get; set; }
         public string? Error { get; set; }
         public string? Msg { get; set; }
+       
+
     }
 }

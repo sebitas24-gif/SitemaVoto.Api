@@ -5,8 +5,8 @@
 }
 
 <div class="container mt-4">
-    <h2>Panel del Jefe de Junta</h2>
-    <p class="text-muted">Ingresa la cédula del votante para consultar sus datos.</p>
+    <h2 class="mb-1">Panel del Jefe de Junta</h2>
+    <p class="text-muted">Ingresa la cédula del votante para consultar sus datos, mesa y código PAD.</p>
 
     <div class="alert alert-success">
         ✅ Iniciaste sesión como <b>@User.Identity?.Name</b>
@@ -25,8 +25,12 @@
         @Html.AntiForgeryToken()
 
         <div class="col-md-8">
-            <input class="form-control" name="cedulaBuscada" maxlength="10"
-                   placeholder="Cédula del votante (10 dígitos)" value="@m.CedulaBuscada" required />
+            <input class="form-control"
+                   name="cedulaBuscada"
+                   maxlength="10"
+                   placeholder="Cédula del votante (10 dígitos)"
+                   value="@m.CedulaBuscada"
+                   required />
         </div>
 
         <div class="col-md-4 d-grid">
@@ -39,27 +43,59 @@
         <hr class="my-4" />
 
         <div class="row g-3">
+            <!-- Datos Personales -->
             <div class="col-md-6">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm h-100">
                     <div class="card-body">
                         <h5 class="card-title">Datos Personales</h5>
+
                         <div><b>Cédula:</b> @m.Ciudadano.cedula</div>
                         <div><b>Nombres:</b> @m.Ciudadano.nombres</div>
                         <div><b>Apellidos:</b> @m.Ciudadano.apellidos</div>
-                        <div><b>Correo:</b> @(m.Ciudadano.correo ?? "—")</div>
-                        <div><b>Teléfono:</b> @(m.Ciudadano.telefono ?? "—")</div>
+                        <div><b>Correo:</b> @(string.IsNullOrWhiteSpace(m.Ciudadano.correo) ? "—" : m.Ciudadano.correo)</div>
+                        <div><b>Teléfono:</b> @(string.IsNullOrWhiteSpace(m.Ciudadano.telefono) ? "—" : m.Ciudadano.telefono)</div>
                     </div>
                 </div>
             </div>
 
+            <!-- Ubicación / Junta -->
             <div class="col-md-6">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm h-100">
                     <div class="card-body">
                         <h5 class="card-title">Ubicación / Junta</h5>
-                        <div><b>Provincia:</b> @m.Ciudadano.provincia</div>
-                        <div><b>Cantón:</b> @m.Ciudadano.canton</div>
-                        <div><b>Parroquia:</b> @(m.Ciudadano.parroquia ?? "—")</div>
-                        <div><b>Rol:</b> @m.Ciudadano.rol</div>
+
+                        <div><b>Provincia:</b> @(string.IsNullOrWhiteSpace(m.Ciudadano.provincia) ? "—" : m.Ciudadano.provincia)</div>
+                        <div><b>Cantón:</b> @(string.IsNullOrWhiteSpace(m.Ciudadano.canton) ? "—" : m.Ciudadano.canton)</div>
+
+
+                        <!-- ✅ Mesa -->
+                        <div><b>Mesa:</b> @(string.IsNullOrWhiteSpace(m.Ciudadano.mesa) ? "—" : m.Ciudadano.mesa)</div>
+
+                   
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ Código PAD -->
+        <div class="row g-3 mt-2">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Código asignado (PAD)</h5>
+
+                        @if (!string.IsNullOrWhiteSpace(m.Ciudadano.codigoPad))
+                        {
+                            <div class="alert alert-success mb-0">
+                                <b>Código:</b> @m.Ciudadano.codigoPad
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning mb-0">
+                                Este ciudadano no tiene código PAD asignado.
+                            </div>
+                        }
                     </div>
                 </div>
             </div>

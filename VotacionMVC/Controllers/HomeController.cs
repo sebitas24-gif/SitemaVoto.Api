@@ -4,11 +4,11 @@ using VotacionMVC.Models;
 
 namespace VotacionMVC.Controllers;
 
-public class HomeController : Controller
+public class HomeVotacionController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    private readonly ILogger<HomeVotacionController> _logger;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeVotacionController(ILogger<HomeVotacionController> logger)
     {
         _logger = logger;
     }

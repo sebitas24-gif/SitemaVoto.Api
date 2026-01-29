@@ -125,6 +125,7 @@ namespace SitemaVoto.Api.Controllers
                 Telefono = user.Telefono ?? "",
                 Provincia = user.Junta?.Provincia ?? user.Provincia,
                 Canton = user.Junta?.Canton ?? user.Canton,
+                
                 Mesa = user.Junta?.CodigoMesa ?? "",
                 CodigoPad = pad ?? "",
                 Estado = "PADRÓN"

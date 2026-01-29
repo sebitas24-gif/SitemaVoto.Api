@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SitemaVoto.Api.Services.Votacion;
 using VotoMVC_Login.Data;
 using VotoMVC_Login.Service;
 
@@ -39,6 +40,7 @@ public class Program
             c.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"]!);
             c.Timeout = TimeSpan.FromSeconds(180); // ✅ 3 minutos para Render
         });
+        builder.Services.AddControllersWithViews();
 
         // =======================
         // Session (para guardar cedula mientras OTP)
@@ -49,6 +51,7 @@ public class Program
             o.Cookie.HttpOnly = true;
             o.Cookie.IsEssential = true;
         });
+        
 
         builder.Services.AddScoped<ApiService>();
 

@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Voto Registrado";
+    var email = (TempData["Email"] as string) ?? "";
+    var comp = (TempData["Comprobante"] as string) ?? "";
+}
+
+<div class="container py-4" style="max-width:1100px;">
+
+    <div class="alert alert-success d-flex align-items-center" style="gap:10px;">
+        <h4 class="m-0">✅ Voto Registrado Exitosamente</h4>
+        <span class="text-muted">Su voto fue procesado de forma segura y anónima.</span>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">📄 Comprobante de Votación (no revela su elección)</h5>
+
+            @if (!string.IsNullOrWhiteSpace(email))
+            {
+                <div class="alert alert-info">
+                    Se envió una copia del comprobante al correo: <b>@email</b>
+                </div>
+            }
+
+            <div class="border rounded p-4" style="border:2px solid #3b5bdb !important;">
+                <div class="text-center">
+                    <div class="fw-bold" style="color:#3b5bdb;">REPÚBLICA DEL ECUADOR</div>
+                    <div class="fw-bold">CONSEJO NACIONAL ELECTORAL</div>
+                    <div class="text-muted">Certificado de Sufragio</div>
+                </div>
+
+                <hr />
+
+                <!-- Aquí renderizas el comprobante -->
+                <pre class="m-0" style="white-space:pre-wrap;font-family:inherit;">
+                    @comp
+                </pre>
+
+                <hr />
+                <div class="text-center text-muted">
+                    Nota: Este comprobante certifica que usted votó. No incluye su selección.
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a class="btn btn-primary" asp-controller="Votacion" asp-action="Index">Volver</a>
+            </div>
+        </div>
+    </div>
+</div>

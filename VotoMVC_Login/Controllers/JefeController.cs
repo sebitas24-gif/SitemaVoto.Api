@@ -107,29 +107,35 @@ namespace VotoMVC_Login.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Panel(string cedulaBuscada, CancellationToken ct)
         {
-            var vm = new JefePanelVm { CedulaBuscada = cedulaBuscada?.Trim() };
+            var vm = new JefePanelVm { CedulaBuscada = cedulaBuscada };
 
-            if (string.IsNullOrWhiteSpace(vm.CedulaBuscada) || vm.CedulaBuscada.Length != 10)
+            if (string.IsNullOrWhiteSpace(cedulaBuscada) || cedulaBuscada.Length != 10)
             {
-                vm.Error = "Ingresa una cédula válida (10 dígitos).";
+                vm.Error = "Cédula inválida.";
                 return View(vm);
             }
 
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            cts.CancelAfter(TimeSpan.FromSeconds(60));
-
-            var (ok, error, data) = await _api.GetCiudadanoAsync(vm.CedulaBuscada, cts.Token);
-
-            if (!ok)
+            try
             {
-                vm.Error = error ?? "No se pudo consultar al ciudadano.";
+                var data = await _api.GetPadronPorCedulaAsync(cedulaBuscada, ct);
+
+                if (data == null)
+                {
+                    vm.Error = "No existe en padrón.";
+                    return View(vm);
+                }
+
+                vm.Ciudadano = data;
+                vm.Msg = "Ciudadano encontrado.";
                 return View(vm);
             }
-
-            vm.Ciudadano = data;
-            vm.Msg = "Ciudadano encontrado.";
-            return View(vm);
+            catch (Exception ex)
+            {
+                vm.Error = "Error consultando API: " + ex.Message;
+                return View(vm);
+            }
         }
+
 
     }
 }

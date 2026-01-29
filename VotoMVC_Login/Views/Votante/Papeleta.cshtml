@@ -1,0 +1,99 @@
+﻿@model VotoMVC_Login.Models.ViewModels.VotacionPapeletaVm
+@{
+    ViewData["Title"] = "Ejercicio del Voto";
+}
+
+<div class="container py-4">
+
+    <h2 class="mb-2">🗳️ Ejercicio del Voto</h2>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <div class="alert alert-danger">@Model.Error</div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @if (TempData["Msg"] != null)
+    {
+        <div class="alert alert-warning">@TempData["Msg"]</div>
+    }
+
+    <div class="alert alert-info">
+        <b>Importante:</b> Seleccione un candidato o vote en blanco. Su voto es secreto.
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 text-muted">Proceso</div>
+                <div class="col-md-6 fw-bold text-end">@Model.ProcesoNombre</div>
+
+                <div class="col-md-6 text-muted mt-2">Normas</div>
+                <div class="col-md-6 fw-bold text-end mt-2">Seleccione 1 opción y confirme.</div>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="fw-bold">Candidatos</h4>
+
+    <!-- POST a VotacionController/Confirmar -->
+    <form method="post" asp-controller="Votacion" asp-action="Confirmar" class="mt-3">
+        @Html.AntiForgeryToken()
+
+        <!-- Enviar ProcesoId -->
+        <input type="hidden" name="procesoId" value="@Model.ProcesoId" />
+
+        <div class="row g-3">
+
+            @foreach (var c in (Model.Candidatos ?? new List<VotoMVC_Login.Service.ApiService.CandidatoDto>()))
+            {
+                <div class="col-md-3">
+                    <label class="card h-100" style="cursor:pointer;">
+                        <div class="card-body text-center">
+                            <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                 style="width:72px;height:72px;background:#e9ecef;font-weight:800;">
+                                @{
+                                    var ini = (c.Nombre ?? "").Trim();
+                                    var sig = ini.Length >= 2 ? ini.Substring(0, 2).ToUpper() : "CV";
+                                }
+                                @sig
+                            </div>
+
+                            <div class="fw-bold">@c.Nombre</div>
+                            <div class="text-muted">@c.PartidoPolitico</div>
+
+                            <!-- Radio: candidatoId -->
+                            <input class="form-check-input mt-2" type="radio" name="candidatoId" value="@c.Id" required />
+                        </div>
+                    </label>
+                </div>
+            }
+
+            <!-- Voto en blanco como radio (candidatoId = 0) -->
+            <div class="col-md-3">
+                <label class="card h-100" style="cursor:pointer;">
+                    <div class="card-body text-center">
+                        <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                             style="width:72px;height:72px;background:#e9ecef;font-weight:800;">
+                            ⬜
+                        </div>
+                        <div class="fw-bold">Voto en Blanco</div>
+                        <div class="text-muted">No seleccionar ningún candidato</div>
+
+                        <input class="form-check-input mt-2" type="radio" name="candidatoId" value="0" />
+                    </div>
+                </label>
+            </div>
+
+        </div>
+
+        <div class="mt-4">
+            <button class="btn btn-success" type="submit">Confirmar Voto</button>
+            <a class="btn btn-secondary ms-2" asp-controller="Votacion" asp-action="Papeleta">Cancelar Selección</a>
+        </div>
+    </form>
+</div>

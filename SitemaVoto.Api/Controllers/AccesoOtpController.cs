@@ -83,7 +83,7 @@ namespace SitemaVoto.Api.Controllers
                     rol = (int)user.Rol,
                     provincia = user.Provincia,
                     canton = user.Canton,
-                    parroquia = user.Parroquia
+                    parroquia = user.Parroquia,
                 }
             });
         }

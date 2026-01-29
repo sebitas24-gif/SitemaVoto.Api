@@ -1,0 +1,46 @@
+﻿@model VotoMVC_Login.Models.ViewModels.VotacionPapeletaVm
+@{
+    ViewData["Title"] = "Confirmar Voto";
+    var candidato = Model.Candidatos?.FirstOrDefault(x => x.Id == Model.CandidatoId);
+}
+
+<div class="container py-4">
+    <h2 class="mb-3">✅ Confirmar Voto</h2>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <div class="alert alert-danger">@Model.Error</div>
+    }
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row py-2">
+                <div class="col-4 text-muted">Cédula</div>
+                <div class="col-8 text-end fw-bold">@Model.Cedula</div>
+            </div>
+            <div class="row py-2">
+                <div class="col-4 text-muted">Proceso</div>
+                <div class="col-8 text-end fw-bold">@Model.ProcesoNombre</div>
+            </div>
+            <div class="row py-2">
+                <div class="col-4 text-muted">Selección</div>
+                <div class="col-8 text-end fw-bold">
+                    @if (Model.CandidatoId <= 0)
+                    {
+                        <span>VOTO EN BLANCO</span>
+                    }
+                    else
+                    {
+                        <span>@(candidato?.Nombre ?? "Candidato no encontrado")</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" asp-controller="Votacion" asp-action="Emitir">
+        @Html.AntiForgeryToken()
+        <button class="btn btn-success" type="submit">📩 Emitir Voto</button>
+        <a class="btn btn-secondary ms-2" asp-controller="Votacion" asp-action="Papeleta">Cancelar</a>
+    </form>
+</div>
