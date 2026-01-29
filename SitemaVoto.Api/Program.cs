@@ -35,6 +35,7 @@ namespace SitemaVoto.Api
 
             builder.Services.AddMemoryCache();
 
+
             builder.Services
                 .AddControllers()
                 .AddNewtonsoftJson(options =>
@@ -45,6 +46,7 @@ namespace SitemaVoto.Api
                 // ✅ Evita nombres con "+" de clases anidadas
                 c.CustomSchemaIds(t => t.FullName!.Replace("+", "."));
             });
+
 
             // ✅ Options
             builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));

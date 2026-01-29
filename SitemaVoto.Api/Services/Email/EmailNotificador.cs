@@ -2,12 +2,17 @@
 {
     public class EmailNotificador
     {
-        private readonly IEmailSenderApp _email;
-        public EmailNotificador(IEmailSenderApp email) => _email = email;
+        private readonly IEmailSenderApp _sender;
 
-        public Task EnviarOtpAsync(string correo, string mensaje, CancellationToken ct)
+        public EmailNotificador(IEmailSenderApp sender)
         {
-            return _email.SendAsync(correo, "Código de verificación (OTP) - VotoEcua", mensaje, ct);
+            _sender = sender;
+        }
+
+        public Task EnviarOtpAsync(string correo, string msg, CancellationToken ct)
+        {
+            // ✅ token SIEMPRE se pasa al sender
+            return _sender.SendAsync(correo, "Código OTP - VotoEcua", msg, ct);
         }
     }
 }

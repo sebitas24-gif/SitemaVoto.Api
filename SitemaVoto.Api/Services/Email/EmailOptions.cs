@@ -7,6 +7,7 @@
         public string User { get; set; } = "";
         public string Pass { get; set; } = "";
         public string FromName { get; set; } = "VotoEcua";
-        public bool UseSsl { get; set; } 
+        public bool UseSsl { get; set; } = true;
+        public bool DisableSend { get; set; } = false;
     }
 }

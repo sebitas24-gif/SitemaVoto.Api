@@ -11,6 +11,13 @@ namespace SitemaVoto.Api.Services.Email
 
         public async Task SendAsync(string to, string subject, string body, CancellationToken ct)
         {
+            // ✅ Si estamos en Render (DisableSend=true), NO intentamos SMTP
+            if (_opt.DisableSend)
+            {
+                await Task.CompletedTask;
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(_opt.Host) ||
                 string.IsNullOrWhiteSpace(_opt.User) ||
                 string.IsNullOrWhiteSpace(_opt.Pass))
@@ -29,13 +36,14 @@ namespace SitemaVoto.Api.Services.Email
             {
                 EnableSsl = _opt.UseSsl,
                 Credentials = new NetworkCredential(_opt.User, _opt.Pass),
-                Timeout = 15000 // ✅ 15s (clave para que no se “pegue”)
+                Timeout = 15000,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false
             };
 
-            // ✅ Simular cancelación: si cancela, destruimos el cliente y falla rápido
             using var reg = ct.Register(() =>
             {
-                try { smtp.Dispose(); } catch { /* ignore */ }
+                try { smtp.Dispose(); } catch { }
             });
 
             ct.ThrowIfCancellationRequested();
