@@ -7,27 +7,37 @@ namespace SitemaVoto.Api.Services.Email
     public class SmtpEmailSender : IEmailSenderApp
     {
         private readonly EmailOptions _opt;
-        public SmtpEmailSender(IOptions<EmailOptions> opt)
-        {
-            _opt = opt.Value;
-        }
+        public SmtpEmailSender(IOptions<EmailOptions> opt) => _opt = opt.Value;
 
         public async Task SendAsync(string to, string subject, string body, CancellationToken ct)
         {
-            using var msg = new MailMessage();
-            msg.From = new MailAddress(_opt.User, _opt.FromName);
+            if (string.IsNullOrWhiteSpace(_opt.Host) ||
+                string.IsNullOrWhiteSpace(_opt.User) ||
+                string.IsNullOrWhiteSpace(_opt.Pass))
+                throw new InvalidOperationException("SMTP no configurado: Email:Host/User/Pass faltan.");
+
+            using var msg = new MailMessage
+            {
+                From = new MailAddress(_opt.User, _opt.FromName),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = false
+            };
             msg.To.Add(to);
-            msg.Subject = subject;
-            msg.Body = body;
-            msg.IsBodyHtml = false;
 
             using var smtp = new SmtpClient(_opt.Host, _opt.Port)
             {
                 EnableSsl = _opt.UseSsl,
-                Credentials = new NetworkCredential(_opt.User, _opt.Pass)
+                Credentials = new NetworkCredential(_opt.User, _opt.Pass),
+                Timeout = 15000 // ✅ 15s (clave para que no se “pegue”)
             };
 
-            // System.Net.Mail no soporta ct directo: simulamos cancelación.
+            // ✅ Simular cancelación: si cancela, destruimos el cliente y falla rápido
+            using var reg = ct.Register(() =>
+            {
+                try { smtp.Dispose(); } catch { /* ignore */ }
+            });
+
             ct.ThrowIfCancellationRequested();
             await smtp.SendMailAsync(msg);
         }

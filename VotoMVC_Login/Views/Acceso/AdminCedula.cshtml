@@ -1,14 +1,29 @@
-﻿<h2>Login Administrador</h2>
+﻿@{
+    ViewData["Title"] = "Login Administrador";
+}
+
+<h2 class="text-center">Login Administrador</h2>
 
 @if (ViewBag.Error != null)
 {
-    <div style="color:red;margin-bottom:10px;">@ViewBag.Error</div>
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+@if (ViewBag.Msg != null)
+{
+    <div class="alert alert-success">@ViewBag.Msg</div>
 }
 
-<form method="post">
-    <label>Cédula</label>
-    <input name="cedula" class="form-control" />
-    <button class="btn btn-secondary" style="margin-top:12px;">Enviar OTP</button>
-</form>
+<form asp-action="AdminCedula" method="post"
+      onsubmit="var b=document.getElementById('btn'); b.disabled=true; b.innerText='Enviando...';">
+    @Html.AntiForgeryToken()
 
-<a href="/Acceso" style="display:block;margin-top:12px;">Volver</a>
+    <div class="mb-3" style="max-width:900px;margin:0 auto;">
+        <label class="form-label">Cédula</label>
+        <input name="cedula" class="form-control" maxlength="10" />
+    </div>
+
+    <div class="d-flex gap-3 align-items-center" style="max-width:900px;margin:0 auto;">
+        <button id="btn" type="submit" class="btn btn-secondary">Enviar OTP</button>
+        <a asp-action="Index">Volver</a>
+    </div>
+</form>

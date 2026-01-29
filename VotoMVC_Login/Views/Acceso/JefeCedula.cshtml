@@ -13,19 +13,17 @@
     <div class="alert alert-success">@ViewBag.Msg</div>
 }
 
-<form asp-action="JefeCedula" method="post" onsubmit="btn.disabled=true; btn.innerText='Enviando...';">
+<form asp-action="JefeCedula" method="post"
+      onsubmit="var b=document.getElementById('btn'); b.disabled=true; b.innerText='Enviando...';">
     @Html.AntiForgeryToken()
 
-    <div class="mb-3" style="max-width:420px;margin:0 auto;">
+    <div class="mb-3" style="max-width:900px;margin:0 auto;">
         <label class="form-label">Cédula</label>
         <input name="cedula" class="form-control" maxlength="10" />
     </div>
 
-    <div class="text-center">
-        <button id="btn" name="btn" type="submit" class="btn btn-warning">Enviar OTP</button>
-    </div>
-
-    <div class="text-center mt-2">
+    <div class="d-flex gap-3 align-items-center" style="max-width:900px;margin:0 auto;">
+        <button id="btn" type="submit" class="btn btn-warning">Enviar OTP</button>
         <a asp-action="Index">Volver</a>
     </div>
 </form>

@@ -11,49 +11,46 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        var cs = builder.Configuration.GetConnectionString("DefaultConnection")
-                 ?? throw new InvalidOperationException("No hay DefaultConnection.");
-
+        // =======================
+        // DB Postgres (Identity)
+        // =======================
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(cs));
+            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+        // =======================
+        // Identity + Roles
+        // =======================
         builder.Services
-            .AddDefaultIdentity<IdentityUser>(options =>
-            {
-                options.SignIn.RequireConfirmedAccount = false;
-            })
-            .AddRoles<IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddDefaultIdentity<IdentityUser>(options =>
+                {
+                    options.SignIn.RequireConfirmedAccount = false;
+                })
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
 
         builder.Services.AddControllersWithViews();
         builder.Services.AddRazorPages();
 
-        builder.Services.AddSession(options =>
-        {
-            options.IdleTimeout = TimeSpan.FromMinutes(30);
-            options.Cookie.HttpOnly = true;
-            options.Cookie.IsEssential = true;
-        });
-
-        var apiBase = builder.Configuration["Api:BaseUrl"] ?? "https://sitemavoto-api.onrender.com/";
-        if (string.IsNullOrWhiteSpace(apiBase))
-            throw new InvalidOperationException("Falta configuración Api:BaseUrl en appsettings.json");
-
+        // =======================
+        // HttpClient hacia tu API
+        // =======================
         builder.Services.AddHttpClient("Api", c =>
         {
-            c.BaseAddress = new Uri(apiBase);
-            c.Timeout = TimeSpan.FromSeconds(120);
+            c.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"]!);
+            c.Timeout = TimeSpan.FromSeconds(180); // ✅ 3 minutos para Render
+        });
+
+        // =======================
+        // Session (para guardar cedula mientras OTP)
+        // =======================
+        builder.Services.AddSession(o =>
+        {
+            o.IdleTimeout = TimeSpan.FromMinutes(20);
+            o.Cookie.HttpOnly = true;
+            o.Cookie.IsEssential = true;
         });
 
         builder.Services.AddScoped<ApiService>();
-
-        builder.Services.ConfigureApplicationCookie(opt =>
-        {
-            opt.LoginPath = "/Acceso/Index";
-            opt.AccessDeniedPath = "/Acceso/Index";
-            opt.ExpireTimeSpan = TimeSpan.FromHours(2);
-            opt.SlidingExpiration = true;
-        });
 
         var app = builder.Build();
 
@@ -61,35 +58,23 @@ public class Program
         {
             app.UseExceptionHandler("/Home/Error");
             app.UseHsts();
-            app.UseHttpsRedirection(); // ✅ solo producción
         }
 
+        app.UseHttpsRedirection();
         app.UseStaticFiles();
+
         app.UseRouting();
 
-        app.UseSession();
-        app.UseAuthentication();
-        app.UseAuthorization();
-
-        using (var scope = app.Services.CreateScope())
-        {
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-            string[] roles = { "Admin", "JefeJunta", "Votante", "Users" };
-
-            foreach (var r in roles)
-            {
-                var exists = roleManager.RoleExistsAsync(r).GetAwaiter().GetResult();
-                if (!exists)
-                    roleManager.CreateAsync(new IdentityRole(r)).GetAwaiter().GetResult();
-            }
-        }
+        app.UseSession();           // ✅ CRÍTICO
+        app.UseAuthentication();    // ✅
+        app.UseAuthorization();     // ✅
 
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Acceso}/{action=Index}/{id?}");
 
         app.MapRazorPages();
+
         app.Run();
     }
 }

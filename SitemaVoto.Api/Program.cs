@@ -40,7 +40,11 @@ namespace SitemaVoto.Api
                 .AddNewtonsoftJson(options =>
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-            builder.Services.AddSwaggerGen(c => c.CustomSchemaIds(t => t.FullName));
+            builder.Services.AddSwaggerGen(c =>
+            {
+                // ✅ Evita nombres con "+" de clases anidadas
+                c.CustomSchemaIds(t => t.FullName!.Replace("+", "."));
+            });
 
             // ✅ Options
             builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));

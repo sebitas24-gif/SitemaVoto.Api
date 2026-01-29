@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 
 namespace VotoMVC_Login.Service
 {
@@ -6,16 +7,25 @@ namespace VotoMVC_Login.Service
     public class ApiService
     {
         private readonly IHttpClientFactory _http;
+        private readonly IConfiguration _cfg;
+
         private readonly JsonSerializerOptions _jsonOpts = new() { PropertyNameCaseInsensitive = true };
 
-        public ApiService(IHttpClientFactory http) => _http = http;
+        public ApiService(IHttpClientFactory http, IConfiguration cfg)
+        {
+            _http = http;
+            _cfg = cfg;
+        }
 
         private HttpClient Client() => _http.CreateClient("Api");
+
+        private string SolicitarOtpPath => _cfg["Api:SolicitarOtpPath"] ?? "api/acceso/solicitar-otp";
+        private string VerificarOtpPath => _cfg["Api:VerificarOtpPath"] ?? "api/acceso/verificar-otp";
 
         public class SolicitarOtpRequest
         {
             public string Cedula { get; set; } = "";
-            public int Metodo { get; set; } = 1; // 1=Correo
+            public int Metodo { get; set; } = 1;
         }
 
         public class SolicitarOtpResponse
@@ -40,18 +50,69 @@ namespace VotoMVC_Login.Service
             public int Rol { get; set; }
         }
 
-        public async Task<SolicitarOtpResponse?> SolicitarOtpCorreoAsync(string cedula, CancellationToken ct)
+        public async Task<SolicitarOtpResponse> SolicitarOtpCorreoAsync(string cedula, CancellationToken ct)
         {
             var req = new SolicitarOtpRequest { Cedula = cedula, Metodo = 1 };
-            var resp = await Client().PostAsJsonAsync("api/acceso/solicitar-otp", req, ct);
-            return await resp.Content.ReadFromJsonAsync<SolicitarOtpResponse>(_jsonOpts, ct);
+
+            // 🔥 Request manual para controlar todo
+            var json = JsonSerializer.Serialize(req);
+            var message = new HttpRequestMessage(HttpMethod.Post, SolicitarOtpPath)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+
+            using var resp = await Client().SendAsync(message, ct);
+            var raw = await resp.Content.ReadAsStringAsync(ct);
+
+            // Si vino JSON tipo { ok, error, ... }
+            try
+            {
+                var data = JsonSerializer.Deserialize<SolicitarOtpResponse>(raw, _jsonOpts);
+                if (data == null)
+                    return new SolicitarOtpResponse { Ok = false, Error = $"HTTP {(int)resp.StatusCode} - {raw}" };
+
+                if (!resp.IsSuccessStatusCode && string.IsNullOrWhiteSpace(data.Error))
+                    data.Error = $"HTTP {(int)resp.StatusCode} - {raw}";
+
+                return data;
+            }
+            catch
+            {
+                return new SolicitarOtpResponse { Ok = false, Error = $"HTTP {(int)resp.StatusCode} - {raw}" };
+            }
         }
 
-        public async Task<VerificarOtpResponse?> VerificarOtpAsync(string cedula, string codigo, CancellationToken ct)
+        public async Task<VerificarOtpResponse> VerificarOtpAsync(string cedula, string codigo, CancellationToken ct)
         {
             var req = new VerificarOtpRequest { Cedula = cedula, Codigo = codigo };
-            var resp = await Client().PostAsJsonAsync("api/acceso/verificar-otp", req, ct);
-            return await resp.Content.ReadFromJsonAsync<VerificarOtpResponse>(_jsonOpts, ct);
+
+            var json = JsonSerializer.Serialize(req);
+            var message = new HttpRequestMessage(HttpMethod.Post, VerificarOtpPath)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+
+            using var resp = await Client().SendAsync(message, ct);
+            var raw = await resp.Content.ReadAsStringAsync(ct);
+
+            try
+            {
+                var data = JsonSerializer.Deserialize<VerificarOtpResponse>(raw, _jsonOpts);
+                if (data == null)
+                    return new VerificarOtpResponse { Ok = false, Error = $"HTTP {(int)resp.StatusCode} - {raw}" };
+
+                if (!resp.IsSuccessStatusCode && string.IsNullOrWhiteSpace(data.Error))
+                    data.Error = $"HTTP {(int)resp.StatusCode} - {raw}";
+
+                return data;
+            }
+            catch
+            {
+                return new VerificarOtpResponse { Ok = false, Error = $"HTTP {(int)resp.StatusCode} - {raw}" };
+            }
         }
+
+
+
     }
     }
