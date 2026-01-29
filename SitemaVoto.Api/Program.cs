@@ -65,13 +65,13 @@ namespace SitemaVoto.Api
             builder.Services.AddScoped<IProcesoService, ProcesoService>();
             builder.Services.AddScoped<IPadronService, PadronService>();
             builder.Services.AddScoped<IVotacionService, VotacionService>();
+            builder.Services.AddScoped<VotacionService>();
             builder.Services.AddScoped<IResultadosService, ResultadosService>();
 
             // OTP service (si lo usas como helper)
             builder.Services.AddSingleton<OtpService>();
 
-            // Cache (si lo necesitas)
-            builder.Services.AddMemoryCache();
+           
 
             var app = builder.Build();
 

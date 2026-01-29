@@ -29,7 +29,13 @@ namespace SitemaVoto.Api.Controllers
         public async Task<ActionResult<EmitirVotoResultDto>> Emitir([FromBody] EmitirVotoDto dto, CancellationToken ct)
         {
             var r = await _votacion.EmitirVotoAsync(dto.Cedula, dto.CodigoPad, dto.CandidatoId, ct);
-            return Ok(new EmitirVotoResultDto { Ok = r.Ok, Error = r.Error,Comprobante = r.CodigoComprobante });
+
+            return Ok(new EmitirVotoResultDto
+            {
+                Ok = r.Ok,
+                Error = r.Error,
+                Comprobante = r.CodigoComprobante
+            });
         }
     }
 

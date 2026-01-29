@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ApiTest\ApiTest.csproj" />
-    <ProjectReference Include="..\SitemaVoto.Api\SitemaVoto.Api.csproj" />
     <ProjectReference Include="..\Voto.ApiConsumer\Voto.ApiConsumer.csproj" />
     <ProjectReference Include="..\VotoModelos\VotoModelos.csproj" />
   </ItemGroup>
