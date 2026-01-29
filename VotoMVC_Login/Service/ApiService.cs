@@ -162,6 +162,48 @@ namespace VotoMVC_Login.Service
                 return new RolPorCedulaResponse { Ok = false, Error = $"HTTP {(int)resp.StatusCode} - {raw}" };
             }
         }
+        public class ApiWrap<T>
+        {
+            public bool ok { get; set; }
+            public string? error { get; set; }
+            public T? data { get; set; }
+        }
+
+        public class CiudadanoDto
+        {
+            public string cedula { get; set; } = "";
+            public string nombres { get; set; } = "";
+            public string apellidos { get; set; } = "";
+            public string? correo { get; set; }
+            public string? telefono { get; set; }
+            public int rol { get; set; }
+            public string provincia { get; set; } = "";
+            public string canton { get; set; } = "";
+            public string? parroquia { get; set; }
+        }
+
+        public async Task<(bool Ok, string? Error, CiudadanoDto? Data)> GetCiudadanoAsync(string cedula, CancellationToken ct)
+        {
+            var resp = await Client().GetAsync($"api/acceso/ciudadano/{cedula}", ct);
+            var raw = await resp.Content.ReadAsStringAsync(ct);
+
+            try
+            {
+                var wrap = JsonSerializer.Deserialize<ApiWrap<CiudadanoDto>>(raw, _jsonOpts);
+
+                if (wrap == null)
+                    return (false, $"HTTP {(int)resp.StatusCode} - {raw}", null);
+
+                if (!resp.IsSuccessStatusCode || !wrap.ok)
+                    return (false, wrap.error ?? $"HTTP {(int)resp.StatusCode} - {raw}", null);
+
+                return (true, null, wrap.data);
+            }
+            catch
+            {
+                return (false, $"HTTP {(int)resp.StatusCode} - {raw}", null);
+            }
+        }
 
 
     }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using VotoMVC_Login.Models;
 using VotoMVC_Login.Service;
 
 namespace VotoMVC_Login.Controllers
@@ -74,7 +75,7 @@ namespace VotoMVC_Login.Controllers
         [HttpGet]
         public IActionResult Panel()
         {
-            return View(); // Views/Jefe/Panel.cshtml
+            return View(new VotoMVC_Login.Models.JefePanelVm());
         }
 
         private async Task LoginIdentityAsync(string cedula, string rol)
@@ -98,6 +99,36 @@ namespace VotoMVC_Login.Controllers
                 await _userManager.AddToRoleAsync(user, rol);
 
             await _signInManager.SignInAsync(user, isPersistent: false);
+        }
+      
+
+        [Authorize(Roles = "JefeJunta")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Panel(string cedulaBuscada, CancellationToken ct)
+        {
+            var vm = new JefePanelVm { CedulaBuscada = cedulaBuscada?.Trim() };
+
+            if (string.IsNullOrWhiteSpace(vm.CedulaBuscada) || vm.CedulaBuscada.Length != 10)
+            {
+                vm.Error = "Ingresa una cédula válida (10 dígitos).";
+                return View(vm);
+            }
+
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            cts.CancelAfter(TimeSpan.FromSeconds(60));
+
+            var (ok, error, data) = await _api.GetCiudadanoAsync(vm.CedulaBuscada, cts.Token);
+
+            if (!ok)
+            {
+                vm.Error = error ?? "No se pudo consultar al ciudadano.";
+                return View(vm);
+            }
+
+            vm.Ciudadano = data;
+            vm.Msg = "Ciudadano encontrado.";
+            return View(vm);
         }
 
     }
