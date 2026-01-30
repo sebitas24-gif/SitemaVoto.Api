@@ -38,18 +38,28 @@ namespace SitemaVoto.Api.Services.Votacion
 
         public async Task<EmitirVotoResult> EmitirVotoAsync(string cedula, string codigoPad, int? candidatoId, CancellationToken ct)
         {
+
             var proc = await _proceso.GetProcesoActivoAsync(ct);
-            if (proc == null) return new(false, "No hay proceso electoral ACTIVO.", null);
+            if (proc == null)
+            {
+                return new(false, "No hay proceso electoral ACTIVO.", null);
+            }
 
             var val = await _padron.ValidarCedulaPadAsync(cedula, codigoPad, ct);
-            if (!val.Ok) return new(false, val.Error, null);
+            if (!val.Ok)
+            {
+                return new(false, val.Error, null);
+            }
 
-            // Voto único por participación (mantiene secreto porque Voto NO tiene VotanteId)
+            // Voto único por participación
             var yaVoto = await _db.ParticipacionVotantes.AnyAsync(p =>
                 p.ProcesoElectoralId == proc.Id &&
                 p.UsuarioId == val.VotanteId, ct);
 
-            if (yaVoto) return new(false, "Voto ya registrado para este votante.", null);
+            if (yaVoto)
+            {
+                return new(false, "Voto ya registrado para este votante.", null);
+            }
 
             if (candidatoId.HasValue)
             {
@@ -59,9 +69,6 @@ namespace SitemaVoto.Api.Services.Votacion
                     c.Activo, ct);
 
                 if (!candOk) return new(false, "Candidato inválido.", null);
-            }
-            else
-            {
             }
 
             var user = await _db.Usuarios
@@ -73,52 +80,89 @@ namespace SitemaVoto.Api.Services.Votacion
                 x.UsuarioId == user.Id, ct);
 
             if (pad.Usado) return new(false, "Este código PAD ya fue usado.", null);
+
+            // Validación de seguridad del código exacto
             if (!string.Equals(pad.Codigo, codigoPad, StringComparison.OrdinalIgnoreCase))
                 return new(false, "Código PAD incorrecto.", null);
+
+            Console.WriteLine("[DEBUG] Validaciones exitosas. Preparando transacción...");
 
             var ahoraUtc = DateTime.UtcNow;
             var comprobante = "CONF-" + Guid.NewGuid().ToString("N")[..10].ToUpperInvariant();
 
             using var tx = await _db.Database.BeginTransactionAsync(ct);
 
-            var participacion = new ParticipacionVotante
+            try
             {
-                ProcesoElectoralId = proc.Id,
-                UsuarioId = user.Id,
-                CodigoComprobante = comprobante,
-                EmitidoUtc = ahoraUtc,
-                Provincia = user.Provincia,
-                Canton = user.Canton,
-                CodigoMesa = user.Junta?.CodigoMesa
-            };
+                var participacion = new ParticipacionVotante
+                {
+                    ProcesoElectoralId = proc.Id,
+                    UsuarioId = user.Id,
+                    CodigoComprobante = comprobante,
+                    EmitidoUtc = ahoraUtc,
+                    Provincia = user.Provincia,
+                    Canton = user.Canton,
+                    CodigoMesa = user.Junta?.CodigoMesa
+                };
 
-            var voto = new Voto
+                var voto = new Voto
+                {
+                    ProcesoElectoralId = proc.Id,
+                    CandidatoId = candidatoId, // null = blanco
+                    Provincia = user.Provincia,
+                    Canton = user.Canton,
+                    EmitidoUtc = ahoraUtc,
+                    HashIntegridad = null
+                };
+
+                _db.ParticipacionVotantes.Add(participacion);
+                _db.Votos.Add(voto);
+
+                pad.Usado = true;
+
+                await _db.SaveChangesAsync(ct);
+                await tx.CommitAsync(ct);
+
+            }
+            catch (Exception ex)
             {
-                ProcesoElectoralId = proc.Id,
-                CandidatoId = candidatoId, // null = blanco
-                Provincia = user.Provincia,
-                Canton = user.Canton,
-                EmitidoUtc = ahoraUtc,
-                HashIntegridad = null
-            };
-
-            _db.ParticipacionVotantes.Add(participacion);
-            _db.Votos.Add(voto);
-
-            pad.Usado = true;
-           
-
-            await _db.SaveChangesAsync(ct);
-            await tx.CommitAsync(ct);
+                Console.WriteLine($"[DEBUG] Error CRÍTICO en transacción: {ex.Message}");
+                await tx.RollbackAsync(ct);
+                throw; 
+            }
 
             if (!string.IsNullOrWhiteSpace(user.Correo))
             {
-                await _email.SendAsync(
-       user.Correo!,
-       "Comprobante de votación",
-       $"Su voto fue registrado correctamente.\n\nCódigo: {comprobante}\nProceso: {proc.Nombre}\n\n(Este comprobante NO incluye por quién votó.)",
-       ct
-   );
+                // las variables necesarias 
+                var correoDestino = user.Correo!;
+                var nombreProceso = proc.Nombre;
+                var codigoComprobante = comprobante;
+
+                // Task.Run para "disparar y olvidar". 
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        Console.WriteLine($"[DEBUG-BG] Intentando enviar correo a {correoDestino}...");
+
+                        await _email.SendAsync(
+                            correoDestino,
+                            "Comprobante de votación",
+                            $"Su voto fue registrado correctamente.\n\nCódigo: {codigoComprobante}\nProceso: {nombreProceso}\n\n(Este comprobante NO incluye por quién votó.)",
+                            CancellationToken.None
+                        );
+
+                        Console.WriteLine("[DEBUG-BG] Correo enviado exitosamente.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[DEBUG-BG] FALLÓ el envío de correo: {ex.Message}");
+                    }
+                });
+            }
+            else
+            {
+                Console.WriteLine("[DEBUG] Usuario no tiene correo, se omite notificación.");
             }
 
             return new(true, null, comprobante);

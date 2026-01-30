@@ -38,7 +38,7 @@
         </div>
     </div>
 
-    <form method="post" asp-controller="Votacion" asp-action="Emitir">
+    <form method="post" asp-controller="Votacion" asp-action="EmitirVoto">
         @Html.AntiForgeryToken()
         <button class="btn btn-success" type="submit">📩 Emitir Voto</button>
         <a class="btn btn-secondary ms-2" asp-controller="Votacion" asp-action="Papeleta">Cancelar</a>

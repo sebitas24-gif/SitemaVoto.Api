@@ -129,7 +129,7 @@ namespace VotoMVC_Login.Controllers
         // POST: /Votacion/Emitir
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Emitir(CancellationToken ct)
+        public async Task<IActionResult> EmitirVoto(CancellationToken ct)
         {
             var cedula = HttpContext.Session.GetString(SessionKeys.Cedula);
             var pad = HttpContext.Session.GetString(SessionKeys.CodigoUnico);
