@@ -64,9 +64,9 @@ namespace SitemaVoto.Api.Services.Padron
                     cedula, user.Nombres, user.Apellidos, user.Correo ?? "", user.Telefono ?? "",
                     user.Provincia, user.Canton, user.Junta?.CodigoMesa, user.ImagenUrl, null);
 
-            var pad = await _db.CodigoPadrones.FirstOrDefaultAsync(x =>
-                x.ProcesoElectoralId == proc.Id &&
-                x.UsuarioId == user.Id, ct);
+            var pad = await _db.CodigoPadrones.AsNoTracking().FirstOrDefaultAsync(x =>
+    x.ProcesoElectoralId == proc.Id && x.UsuarioId == user.Id, ct);
+
 
             if (pad == null)
                 return new(false, "No existe código PAD para este votante.", proc.Id, user.Id,

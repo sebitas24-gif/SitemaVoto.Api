@@ -2,7 +2,6 @@
 using System.Net.Mail;
 using System.Net;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Extensions.Options;
 using SitemaVoto.Api.Services.Email;
 
 namespace SitemaVoto.Api.Services.Notificaciones

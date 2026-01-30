@@ -13,11 +13,12 @@ namespace SitemaVoto.Api.Controllers
     {
         private readonly IPadronService _padron;
         private readonly SitemaVotoApiContext _db;
-
-        public PadronController(IPadronService padron, SitemaVotoApiContext db)
+        private readonly ILogger<PadronController> _log;
+        public PadronController(IPadronService padron, SitemaVotoApiContext db, ILogger<PadronController> log)
         {
             _padron = padron;
             _db = db;
+            _log = log;
         }
 
         /// <summary>
@@ -109,12 +110,18 @@ namespace SitemaVoto.Api.Controllers
                 .FirstOrDefaultAsync(u => u.Cedula == cedula, ct);
 
             if (user == null) return NotFound("No existe en padrón.");
+            _log.LogInformation("CEDULA={Cedula} USERID={UserId} PROCESO={ProcesoId}", cedula, user.Id, procesoId);
 
             var pad = await _db.CodigoPadrones
-                .AsNoTracking()
-                .Where(x => x.UsuarioId == user.Id && x.ProcesoElectoralId == procesoId)
-                .Select(x => x.Codigo)
-                .FirstOrDefaultAsync(ct);
+    .AsNoTracking()
+    .Where(x => x.UsuarioId == user.Id
+             && x.ProcesoElectoralId == procesoId
+             && !x.Usado)
+    .OrderByDescending(x => x.EmitidoEn)
+    .Select(x => x.Codigo)
+    .FirstOrDefaultAsync(ct);
+            _log.LogInformation("PADS_FOR_USER: {Json}", System.Text.Json.JsonSerializer.Serialize(pad));
+
 
             var dto = new JefeVerificacionDto
             {

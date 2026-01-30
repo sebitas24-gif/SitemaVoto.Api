@@ -56,8 +56,10 @@ namespace SitemaVoto.Api
             // =========================
             builder.Services.AddTransient<IEmailSenderApp, SmtpEmailSender>();
             builder.Services.AddSingleton<ISmsSenderApp, NullSmsSender>();
+            builder.Services.AddScoped<EmailNotificador>();
+            builder.Services.AddScoped<EmailNotificador>();
+            builder.Services.AddScoped<SmsNotificador>();
 
-          
 
             // =========================
             // BUSINESS SERVICES
