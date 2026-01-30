@@ -1,0 +1,65 @@
+﻿@model VotoMVC_Login.Models.DTOs.ResultadosNacionalResponse
+@{
+    ViewData["Title"] = "Resultados";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between flex-wrap gap-2 align-items-center">
+        <h3 class="fw-bold mb-0">Resultados Nacionales</h3>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" onclick="window.print()">Imprimir / Guardar PDF</button>
+            <a class="btn btn-outline-secondary" asp-action="Panel">Volver</a>
+        </div>
+    </div>
+
+    <div class="alert alert-info mt-3">
+        Estado Proceso: <b>@Model.estadoProceso</b>
+    </div>
+
+    <div class="card rounded-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="fw-bold">Votos por candidato</h5>
+
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Candidato</th>
+                        <th>Votos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.porCandidato)
+                    {
+                        <tr>
+                            <td>@c.nombre</td>
+                            <td>@c.votos</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <hr />
+
+            <h5 class="fw-bold">Líderes por provincia</h5>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Provincia</th>
+                        <th>Líder</th>
+                        <th>Votos líder</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.lideresPorProvincia)
+                    {
+                        <tr>
+                            <td>@p.provincia</td>
+                            <td>@p.lider</td>
+                            <td>@p.votosLider</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

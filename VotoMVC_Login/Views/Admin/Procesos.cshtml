@@ -1,0 +1,90 @@
+﻿@model VotoMVC_Login.Models.ViewModels.Admin.AdminProcesosVm
+@{
+    ViewData["Title"] = "Procesos";
+}
+
+<div class="container py-4">
+    <h3 class="fw-bold">Procesos Electorales</h3>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Ok))
+    {
+        <div class="alert alert-success">@Model.Ok</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <div class="alert alert-danger">@Model.Error</div>
+    }
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card rounded-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-bold">Crear proceso</h5>
+
+                    <form asp-action="Procesos" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <label class="form-label">Nombre</label>
+                        <input class="form-control" asp-for="Nuevo.Nombre" />
+
+                        <div class="row mt-2">
+                            <div class="col">
+                                <label class="form-label">Tipo</label>
+                                <select class="form-select" asp-for="Nuevo.Tipo">
+                                    <option value="1">Nominal</option>
+                                    <option value="2">Plancha</option>
+                                    <option value="3">Plurinominal</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Estado</label>
+                                <select class="form-select" asp-for="Nuevo.Estado">
+                                    <option value="1">Configuración</option>
+                                    <option value="2">Activo</option>
+                                    <option value="3">Cerrado</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col">
+                                <label class="form-label">Inicio</label>
+                                <input type="datetime-local" class="form-control" asp-for="Nuevo.InicioLocal" />
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Cierre</label>
+                                <input type="datetime-local" class="form-control" asp-for="Nuevo.FinLocal" />
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary mt-3 w-100">Crear</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card rounded-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-bold">Proceso activo</h5>
+
+                    @if (Model.Activo == null)
+                    {
+                        <div class="alert alert-warning">No hay proceso activo.</div>
+                    }
+                    else
+                    {
+                        <ul class="list-group">
+                            <li class="list-group-item"><b>Nombre:</b> @Model.Activo.Nombre</li>
+                            <li class="list-group-item"><b>Inicio:</b> @Model.Activo.Inicio</li>
+                            <li class="list-group-item"><b>Cierre:</b> @Model.Activo.Cierre</li>
+                            <li class="list-group-item"><b>Estado:</b> @Model.Activo.Estado</li>
+                        </ul>
+                    }
+
+                    <a class="btn btn-outline-secondary mt-3" asp-action="Panel">← Volver</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

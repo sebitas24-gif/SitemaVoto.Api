@@ -1,0 +1,30 @@
+﻿@model VotoMVC_Login.Models.ViewModels.Admin.AdminOtpVm
+@{
+    ViewData["Title"] = "OTP Administrador";
+}
+
+<div class="container py-5" style="max-width:720px;">
+    <div class="p-4 rounded-4 shadow" style="background:linear-gradient(135deg,#4c1d95,#6d28d9); color:white;">
+        <h2 class="fw-bold mb-1">Verificación OTP</h2>
+        <div class="text-white-50">Cédula: <b>@Model.Cedula</b></div>
+    </div>
+
+    <div class="card mt-3 rounded-4 shadow-sm">
+        <div class="card-body p-4">
+
+            @if (!string.IsNullOrWhiteSpace(Model.Error))
+            {
+                <div class="alert alert-danger">@Model.Error</div>
+            }
+
+            <form asp-action="Otp" method="post">
+                @Html.AntiForgeryToken()
+
+                <label class="form-label fw-semibold">Código OTP</label>
+                <input asp-for="Codigo" class="form-control" maxlength="6" />
+
+                <button class="btn btn-success mt-3 w-100">Ingresar</button>
+            </form>
+        </div>
+    </div>
+</div>

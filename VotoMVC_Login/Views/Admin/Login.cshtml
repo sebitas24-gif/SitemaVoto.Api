@@ -1,0 +1,34 @@
+﻿@model VotoMVC_Login.Models.ViewModels.Admin.AdminLoginVm
+@{
+    ViewData["Title"] = "Login Administrador";
+}
+
+<div class="container py-5" style="max-width:720px;">
+    <div class="p-4 rounded-4 shadow" style="background:linear-gradient(135deg,#4c1d95,#6d28d9); color:white;">
+        <h2 class="fw-bold mb-1">Administrador</h2>
+        <div class="text-white-50">Ingresa tu cédula para recibir OTP</div>
+    </div>
+
+    <div class="card mt-3 rounded-4 shadow-sm">
+        <div class="card-body p-4">
+
+            @if (!string.IsNullOrWhiteSpace(Model.Error))
+            {
+                <div class="alert alert-danger">@Model.Error</div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Msg))
+            {
+                <div class="alert alert-success">@Model.Msg</div>
+            }
+
+            <form asp-action="Login" method="post">
+                @Html.AntiForgeryToken()
+
+                <label class="form-label fw-semibold">Cédula</label>
+                <input asp-for="Cedula" class="form-control" maxlength="10" />
+
+                <button class="btn btn-primary mt-3 w-100">Enviar OTP</button>
+            </form>
+        </div>
+    </div>
+</div>

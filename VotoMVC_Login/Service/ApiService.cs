@@ -426,6 +426,65 @@ namespace VotoMVC_Login.Service
             var data = await res.Content.ReadFromJsonAsync<List<PadronItemDto>>(_jsonOpts, ct);
             return data ?? new List<PadronItemDto>();
         }
+        public class ProcesoCreateDto
+        {
+            public string Nombre { get; set; } = "";
+            public int Tipo { get; set; }
+            public DateTime InicioLocal { get; set; }
+            public DateTime FinLocal { get; set; }
+            public int Estado { get; set; }
+        }
+
+        public class CandidatoCreateDto
+        {
+            public int ProcesoElectoralId { get; set; }
+            public string NombreCompleto { get; set; } = "";
+            public string Partido { get; set; } = "";
+            public string Binomio { get; set; } = "";
+            public int NumeroLista { get; set; }
+            public bool Activo { get; set; }
+        }
+
+        public class CandidatoAdminDto
+        {
+            public int Id { get; set; }
+            public int ProcesoElectoralId { get; set; }
+            public string NombreCompleto { get; set; } = "";
+            public string Partido { get; set; } = "";
+            public string Binomio { get; set; } = "";
+            public int NumeroLista { get; set; }
+            public bool Activo { get; set; }
+        }
+        public class ApiResp<T>
+        {
+            public bool ok { get; set; }
+            public string? error { get; set; }
+            public T? data { get; set; }
+        }
+        public async Task<ApiResp<int>?> CrearProcesoAsync(ProcesoCreateDto dto, CancellationToken ct)
+        {
+            using var resp = await Client().PostAsJsonAsync("api/Proceso/crear", dto, ct);
+            return await resp.Content.ReadFromJsonAsync<ApiResp<int>>(_jsonOpts, ct);
+        }
+
+        public Task<List<CandidatoAdminDto>?> GetCandidatosAdminAsync(CancellationToken ct)
+            => Client().GetFromJsonAsync<List<CandidatoAdminDto>>("api/Candidatos", _jsonOpts, ct);
+
+        public async Task<(bool Ok, string? Error)> CrearCandidatoAsync(CandidatoCreateDto dto, CancellationToken ct)
+        {
+            using var resp = await Client().PostAsJsonAsync("api/Candidatos", dto, ct);
+            var raw = await resp.Content.ReadAsStringAsync(ct);
+            if (resp.IsSuccessStatusCode) return (true, null);
+            return (false, raw);
+        }
+
+        public async Task<(bool Ok, string? Error)> GenerarPadDemoAsync(CancellationToken ct)
+        {
+            using var resp = await Client().PostAsync("api/Padron/generar-demo", content: null, ct);
+            var raw = await resp.Content.ReadAsStringAsync(ct);
+            if (resp.IsSuccessStatusCode) return (true, raw);
+            return (false, raw);
+        }
 
     }
 }
