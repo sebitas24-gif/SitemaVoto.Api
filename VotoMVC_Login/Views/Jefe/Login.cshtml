@@ -1,58 +1,26 @@
 ﻿@{
-    Layout = null;
+    ViewData["Title"] = "Acceso Jefe de Junta";
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Acceso Jefe de Junta</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <style>
-        body {
-            background-color: #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
+<div class="container py-5" style="max-width:520px;">
+    <div class="card shadow-sm rounded-4">
+        <div class="card-body p-4">
+            <h4 class="fw-bold mb-1">Jefatura de Mesa</h4>
+            <p class="text-muted mb-4">Ingresa tu cédula para recibir OTP en tu correo.</p>
 
-        .login-card {
-            width: 100%;
-            max-width: 420px;
-            padding: 2.5rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            background: white;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-card text-center">
-        <div class="mb-4">
-            <span style="font-size: 4rem;">👮‍♂️</span>
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+
+            <form asp-action="Login" method="post">
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <label class="form-label">Número de Cédula</label>
+                    <input class="form-control" name="cedula" maxlength="10" />
+                </div>
+                <button class="btn btn-primary w-100">Enviar OTP</button>
+            </form>
         </div>
-        <h3 class="fw-bold text-dark mb-2">Jefatura de Mesa</h3>
-        <p class="text-muted mb-4">Sistema de Control Electoral</p>
-
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger text-start small">@TempData["Error"]</div>
-        }
-
-        <form asp-controller="Jefe" asp-action="Login" method="post">
-            @Html.AntiForgeryToken()
-
-            <div class="form-floating mb-3 text-start">
-                <input type="text" name="cedula" class="form-control" id="floatingInput"
-                       placeholder="Cédula" required autocomplete="off" maxlength="10">
-                <label for="floatingInput">Número de Cédula</label>
-            </div>
-
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary btn-lg fw-bold">Ingresar</button>
-            </div>
-        </form>
     </div>
-</body>
-</html>
+</div>
