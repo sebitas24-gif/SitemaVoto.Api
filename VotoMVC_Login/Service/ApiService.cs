@@ -485,6 +485,30 @@ namespace VotoMVC_Login.Service
             if (resp.IsSuccessStatusCode) return (true, raw);
             return (false, raw);
         }
+        public class EnviarResultadosCorreoRequest
+        {
+            public string Correo { get; set; } = "";
+            public string? Asunto { get; set; }
+        }
+
+        public async Task<bool> EnviarResultadosAlCorreoAsync(string correo, CancellationToken ct)
+        {
+            var dto = new EnviarResultadosCorreoRequest
+            {
+                Correo = correo,
+                Asunto = "Reporte de resultados - Voto Electrónico"
+            };
+
+            var resp = await Client().PostAsJsonAsync("api/Resultados/enviar-correo", dto, _jsonOpts, ct);
+
+            if (!resp.IsSuccessStatusCode) return false;
+
+            // si tu API devuelve { ok: true }, puedes leerlo:
+            var json = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>(_jsonOpts, ct);
+            return json != null && json.TryGetValue("ok", out var okVal) && okVal?.ToString() == "True";
+        }
+
+
 
     }
 }

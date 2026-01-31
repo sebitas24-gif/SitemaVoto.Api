@@ -350,5 +350,28 @@ namespace VotoMVC_Login.Controllers
             var data = await _api.GetResultadosNacionalAsync(ct);
             return View(data ?? new ResultadosNacionalResponse());
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EnviarResultadosCorreo(CancellationToken ct)
+        {
+            var correo = HttpContext.Session.GetString("correo");
+
+            if (string.IsNullOrWhiteSpace(correo))
+            {
+                TempData["Error"] = "No se encontró el correo del usuario.";
+                return RedirectToAction("Resultados");
+            }
+
+            var ok = await _api.EnviarResultadosAlCorreoAsync(correo, ct);
+
+            TempData[ok ? "Ok" : "Error"] = ok
+                ? $"Resultados enviados a {correo}"
+                : "No se pudo enviar el correo.";
+
+            return RedirectToAction("Resultados");
+        }
+
+
+
     }
 }

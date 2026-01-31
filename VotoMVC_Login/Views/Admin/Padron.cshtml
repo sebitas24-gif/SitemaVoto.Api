@@ -1,5 +1,57 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model VotoMVC_Login.Models.ViewModels.Admin.AdminPadronVm
 @{
+    ViewData["Title"] = "Padrón";
 }
+
+<div class="container py-4">
+    <h3 class="fw-bold">Padrón Electoral</h3>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Ok))
+    {
+        <div class="alert alert-success">@Model.Ok</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <div class="alert alert-danger">@Model.Error</div>
+    }
+
+    <div class="d-flex gap-2 flex-wrap mb-3">
+        <form asp-action="GenerarPadDemo" method="post">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-warning">Generar códigos PAD (demo)</button>
+        </form>
+
+        <a class="btn btn-outline-primary" asp-action="ExportarPadronCsv">Descargar CSV</a>
+        <a class="btn btn-outline-secondary" asp-action="Panel">Volver</a>
+    </div>
+
+    <div class="card rounded-4 shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>Cédula</th>
+                            <th>Nombre</th>
+                            <th>Provincia</th>
+                            <th>Código PAD</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var x in Model.Lista)
+                        {
+                            <tr>
+                                <td>@x.Cedula</td>
+                                <td>@x.NombreCompleto</td>
+                                <td>@x.Provincia</td>
+                                <td>@x.CodigoPad</td>
+                                <td>@x.Estado</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
