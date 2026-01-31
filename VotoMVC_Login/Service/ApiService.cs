@@ -508,7 +508,28 @@ namespace VotoMVC_Login.Service
             return json != null && json.TryGetValue("ok", out var okVal) && okVal?.ToString() == "True";
         }
 
+        public async Task<ResultadosPublicResponse?> GetResultadosNacionalPublicoAsync(CancellationToken ct)
+        {
+            var res = await Client().GetAsync("api/Resultados/nacional", ct);
+            if (!res.IsSuccessStatusCode) return null;
 
+            var json = await res.Content.ReadAsStringAsync(ct);
+            return JsonSerializer.Deserialize<ResultadosPublicResponse>(json, _jsonOpts);
+        }
+
+        public async Task<List<ResultadoItemDto>?> GetResultadosProvinciaPublicoAsync(string provincia, CancellationToken ct)
+        {
+            var res = await Client().GetAsync($"api/Resultados/provincia/{provincia}", ct);
+            if (!res.IsSuccessStatusCode) return null;
+
+            var json = await res.Content.ReadAsStringAsync(ct);
+            return JsonSerializer.Deserialize<List<ResultadoItemDto>>(json, _jsonOpts);
+        }
+        public async Task<ResultadosNacionalResponse?> GetResultadosFinalesAsync(CancellationToken ct)
+        {
+            var http = Client();
+            return await http.GetFromJsonAsync<ResultadosNacionalResponse>("api/Resultados/final", _jsonOpts, ct);
+        }
 
     }
 }

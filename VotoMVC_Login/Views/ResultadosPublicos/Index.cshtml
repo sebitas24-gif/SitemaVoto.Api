@@ -1,0 +1,206 @@
+﻿@model VotoMVC_Login.Models.DTOs.ResultadosNacionalResponse
+@{
+    ViewData["Title"] = "Resultados en tiempo real";
+
+    // Modo: EN_VIVO o FINALES (lo pone el controlador con ViewBag.Modo)
+    var modo = (ViewBag.Modo as string) ?? "EN_VIVO";
+
+    // Listas seguras (evita null)
+    var porCandidato = Model?.porCandidato ?? new List<VotoMVC_Login.Models.DTOs.ResultadosNacionalResponse.PorCandidato>();
+    var lideres = Model?.lideresPorProvincia ?? new List<VotoMVC_Login.Models.DTOs.ResultadosNacionalResponse.LiderProvincia>();
+
+    // Top 1 nacional (si existe)
+    var top = porCandidato
+        .OrderByDescending(x => x.votos)
+        .FirstOrDefault();
+
+    // Provincias disponibles desde líderes
+    var provincias = lideres
+        .Select(x => x.provincia)
+        .Where(x => !string.IsNullOrWhiteSpace(x))
+        .Distinct()
+        .OrderBy(x => x)
+        .ToList();
+
+    string fmtNum(long n) => n.ToString("N0"); // 1,234
+}
+
+<div class="container py-5" style="max-width: 1050px;">
+
+    <div class="text-center mb-4">
+        <h2 class="fw-bold mb-1">
+            <span style="font-size: 26px;">📊</span>
+            Resultados Electorales en Tiempo Real
+        </h2>
+        <div class="text-muted">Elecciones Presidenciales 2026</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="d-flex justify-content-center gap-2 mb-4">
+        <a class="btn btn-outline-primary @(modo == "EN_VIVO" ? "active" : "")"
+           asp-controller="ResultadosPublicos" asp-action="Index">
+            En vivo
+        </a>
+
+        <a class="btn btn-outline-primary @(modo == "FINALES" ? "active" : "")"
+           asp-controller="ResultadosPublicos" asp-action="Finales">
+            Finales
+        </a>
+    </div>
+
+    <!-- Alerts (opcional) -->
+    @if (TempData["Ok"] != null)
+    {
+        <div class="alert alert-success">@TempData["Ok"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <!-- Estado + última actualización -->
+    <div class="card shadow-sm rounded-4 mb-4">
+        <div class="card-body d-flex justify-content-between flex-wrap gap-3">
+            <div>
+                <div class="text-muted small">Estado del proceso</div>
+                <div class="fw-bold">@Model?.estadoProceso</div>
+
+                <span class="badge bg-warning text-dark mt-2" style="letter-spacing:.5px;">
+                    @Model?.estadoProceso
+                </span>
+            </div>
+
+            <div class="text-end">
+                <div class="text-muted small">Última actualización</div>
+                <div class="fw-bold">@DateTime.Now.ToString("dd/MM/yyyy, h:mm:ss tt")</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Candidato liderando -->
+    <div class="card shadow-sm rounded-4 mb-4" style="background:#37b36b; color:white;">
+        <div class="card-body text-center py-5">
+            <div class="fw-semibold" style="opacity:.95;">
+                🏆 <span class="ms-1">CANDIDATO LIDERANDO</span>
+            </div>
+
+            <div class="display-6 fw-bold mt-2">
+                @(top?.nombre ?? "—")
+            </div>
+
+            <div style="opacity:.95;">Nacional</div>
+
+            <div class="fs-3 fw-bold mt-2">
+                @(top != null ? $"{fmtNum(top.votos)} votos" : "0 votos")
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtro por provincia (solo visual por ahora) -->
+    <div class="card shadow-sm rounded-4 mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-2">Filtrar por provincia</h5>
+            <div class="text-muted small mb-2">Provincia</div>
+
+            <select class="form-select" id="selProvincia">
+                <option value="">Todas (Nacional)</option>
+                @foreach (var p in provincias)
+                {
+                    <option value="@p">@p</option>
+                }
+            </select>
+
+            <div class="text-muted small mt-2">
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla votos por candidato -->
+    <div class="card shadow-sm rounded-4 mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Votos por candidato</h5>
+
+            @if (porCandidato.Any())
+            {
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Candidato</th>
+                            <th class="text-end">Votos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in porCandidato.OrderByDescending(x => x.votos))
+                        {
+                            <tr>
+                                <td>@c.nombre</td>
+                                <td class="text-end">@fmtNum(c.votos)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-secondary mb-0">No hay datos todavía.</div>
+            }
+        </div>
+    </div>
+
+    <!-- Tabla líderes por provincia -->
+    <div class="card shadow-sm rounded-4 mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">🗺️ Líder por provincia (Ecuador)</h5>
+
+            @if (lideres.Any())
+            {
+                <table class="table table-sm" id="tblLideres">
+                    <thead>
+                        <tr>
+                            <th>Provincia</th>
+                            <th>Líder</th>
+                            <th class="text-end">Votos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var l in lideres.OrderBy(x => x.provincia))
+                        {
+                            <tr data-prov="@l.provincia">
+                                <td>@l.provincia</td>
+                                <td class="fw-semibold">@l.lider</td>
+                                <td class="text-end">@fmtNum(l.votosLider)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-secondary mb-0">No hay líderes por provincia todavía.</div>
+            }
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        // Filtro simple SOLO para la tabla de líderes (visual)
+        const sel = document.getElementById("selProvincia");
+        const tbl = document.getElementById("tblLideres");
+
+        if (sel && tbl) {
+            sel.addEventListener("change", function () {
+                const prov = this.value;
+                const rows = tbl.querySelectorAll("tbody tr");
+
+                rows.forEach(r => {
+                    const p = r.getAttribute("data-prov");
+                    if (!prov || prov === "" || p === prov) r.style.display = "";
+                    else r.style.display = "none";
+                });
+            });
+        }
+    </script>
+}

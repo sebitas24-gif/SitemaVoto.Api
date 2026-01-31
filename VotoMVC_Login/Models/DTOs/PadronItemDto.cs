@@ -1,4 +1,6 @@
-﻿namespace VotoMVC_Login.Models.DTOs
+﻿using System.Text.Json.Serialization;
+
+namespace VotoMVC_Login.Models.DTOs
 {
     public class PadronItemDto
     {
@@ -7,5 +9,10 @@
         public string Provincia { get; set; } = "";
         public string CodigoPad { get; set; } = "";
         public string Estado { get; set; } = "Generado";
+        [JsonPropertyName("nombre")]
+        public string Nombre { get; set; } = "";
+
+        [JsonPropertyName("votos")]
+        public long Votos { get; set; }
     }
 }
