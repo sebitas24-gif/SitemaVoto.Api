@@ -113,13 +113,11 @@ namespace SitemaVoto.Api.Controllers
             _log.LogInformation("CEDULA={Cedula} USERID={UserId} PROCESO={ProcesoId}", cedula, user.Id, procesoId);
 
             var pad = await _db.CodigoPadrones
-    .AsNoTracking()
-    .Where(x => x.UsuarioId == user.Id
-             && x.ProcesoElectoralId == procesoId
-             && !x.Usado)
-    .OrderByDescending(x => x.EmitidoEn)
-    .Select(x => x.Codigo)
-    .FirstOrDefaultAsync(ct);
+     .AsNoTracking()
+     .Where(x => x.UsuarioId == user.Id && x.ProcesoElectoralId == procesoId)
+     .OrderByDescending(x => x.EmitidoEn)
+     .Select(x => x.Codigo)
+     .FirstOrDefaultAsync(ct);
             _log.LogInformation("PADS_FOR_USER: {Json}", System.Text.Json.JsonSerializer.Serialize(pad));
 
 
