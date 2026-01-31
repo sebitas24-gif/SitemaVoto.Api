@@ -3,8 +3,10 @@ using VotoMVC_Login.Service;
 using VotoMVC_Login.Services;
 using VotoMVC_Login.Models.ViewModels;
 using VotoMVC_Login.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 namespace VotoMVC_Login.Controllers
 {
+    [Authorize(Roles = "Votacion")]
     public class VotacionController : Controller
     {
         private readonly ApiService _api;

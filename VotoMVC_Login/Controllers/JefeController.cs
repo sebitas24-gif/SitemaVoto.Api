@@ -6,6 +6,7 @@ using VotoMVC_Login.Service;
 
 namespace VotoMVC_Login.Controllers
 {
+    [Authorize(Roles = "Jefe")]
     public class JefeController : Controller
     {
         private readonly ApiService _api;

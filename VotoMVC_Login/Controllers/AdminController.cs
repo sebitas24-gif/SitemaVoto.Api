@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using VotoMVC_Login.Models.DTOs;
+using VotoMVC_Login.Models.ViewModels;
 using VotoMVC_Login.Models.ViewModels.Admin;
 using VotoMVC_Login.Service;
 
 namespace VotoMVC_Login.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly ApiService _api;
@@ -371,6 +373,51 @@ namespace VotoMVC_Login.Controllers
             return RedirectToAction("Resultados");
         }
 
+        [HttpGet]
+        public IActionResult LoginCredenciales()
+        {
+            return View(new AdminLoginPasswordVm());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LoginCredenciales(AdminLoginPasswordVm vm)
+        {
+            vm.Email = (vm.Email ?? "").Trim();
+
+            if (!ModelState.IsValid)
+                return View(vm);
+
+            var user = await _userManager.FindByEmailAsync(vm.Email);
+            if (user == null)
+            {
+                vm.Error = "Correo no encontrado.";
+                return View(vm);
+            }
+
+            // SignIn por UserName (Identity trabaja con username)
+            var result = await _signIn.PasswordSignInAsync(user.UserName!, vm.Password, isPersistent: false, lockoutOnFailure: false);
+
+            if (!result.Succeeded)
+            {
+                vm.Error = "Contraseña incorrecta.";
+                return View(vm);
+            }
+
+            // ✅ Seguridad: Solo Admin entra al panel
+            if (!await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                await _signIn.SignOutAsync();
+                vm.Error = "No tienes permisos de Administrador.";
+                return View(vm);
+            }
+
+            // ✅ Guarda correo para "Enviar resultados al correo"
+            HttpContext.Session.SetString("correo", user.Email ?? "");
+            HttpContext.Session.SetString("cedula", user.UserName ?? "");
+
+            return RedirectToAction(nameof(Panel));
+        }
 
 
     }
