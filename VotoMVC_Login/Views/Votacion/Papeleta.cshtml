@@ -44,7 +44,6 @@
 
     <h5 class="fw-bold mb-3">Candidatos</h5>
 
-    <!-- ✅ OJO: esto va al MVC Confirmar -->
     <form method="post" asp-controller="Votacion" asp-action="Confirmar">
         @Html.AntiForgeryToken()
 
@@ -64,7 +63,8 @@
                             <div class="fw-bold">@c.Nombre</div>
                             <div class="text-muted">@c.PartidoPolitico</div>
 
-                            <input class="form-check-input mt-2" type="radio" name="candidatoId" value="@c.Id" required />
+                            <!-- ✅ sin required aquí -->
+                            <input class="form-check-input mt-2" type="radio" name="candidatoId" value="@c.Id" />
                         </div>
                     </label>
                 </div>
@@ -81,7 +81,8 @@
                         <div class="fw-bold">Voto en Blanco</div>
                         <div class="text-muted">No seleccionar ningún candidato</div>
 
-                        <input class="form-check-input mt-2" type="radio" name="candidatoId" value="0" />
+                        <!-- ✅ required aquí para el grupo -->
+                        <input class="form-check-input mt-2" type="radio" name="candidatoId" value="0" required />
                     </div>
                 </label>
             </div>

@@ -1,6 +1,7 @@
 ﻿
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using VotoMVC_Login.Models;
 using VotoMVC_Login.Models.DTOs;
 
@@ -50,7 +51,7 @@ namespace VotoMVC_Login.Service
         {
             public string Cedula { get; set; } = "";
             public string CodigoPad { get; set; } = "";
-            public int CandidatoId { get; set; } = 0;
+            public int? CandidatoId { get; set; } = 0;
         }
         public class EmitirVotoResultDto
         {
@@ -301,13 +302,26 @@ namespace VotoMVC_Login.Service
         }
         public class CandidatoDto
         {
+            [JsonPropertyName("id")]
             public int Id { get; set; }
-            public string Nombre { get; set; } = "";
-            public string PartidoPolitico { get; set; } = "";
-            public string Dignidad { get; set; } = "";
-            public string? FotoUrl { get; set; }
-            public bool activo { get; set; } = true;
 
+            [JsonPropertyName("procesoElectoralId")]
+            public int ProcesoElectoralId { get; set; }
+
+            [JsonPropertyName("nombreCompleto")]
+            public string Nombre { get; set; } = "";
+
+            [JsonPropertyName("partido")]
+            public string PartidoPolitico { get; set; } = "";
+
+            [JsonPropertyName("binomio")]
+            public string Dignidad { get; set; } = "";
+
+            [JsonPropertyName("numeroLista")]
+            public int NumeroLista { get; set; }
+
+            [JsonPropertyName("activo")]
+            public bool activo { get; set; }
         }
 
         // ============================
@@ -327,6 +341,8 @@ namespace VotoMVC_Login.Service
         {
             public bool Ok { get; set; }
             public string? Error { get; set; }
+            public int? CandidatoId { get; set; }
+
         }
 
         public async Task<EmitirVotoResponse> EmitirVotoSimpleAsync(string cedula, int candidatoId, CancellationToken ct)
@@ -407,10 +423,18 @@ namespace VotoMVC_Login.Service
 
 
 
-      
 
-        public Task<List<CandidatoDto>?> GetCandidatosAsync(CancellationToken ct = default)
-          => Client().GetFromJsonAsync<List<CandidatoDto>>("api/Candidatos", _jsonOpts, ct);
+
+        public async Task<List<CandidatoDto>?> GetCandidatosAsync(CancellationToken ct)
+        {
+            var res = await Client().GetAsync("api/Candidatos", ct);
+            var json = await res.Content.ReadAsStringAsync(ct);
+
+            if (!res.IsSuccessStatusCode) return null;
+
+            return JsonSerializer.Deserialize<List<CandidatoDto>>(json, _jsonOpts);
+        }
+
 
         public Task<ProcesoActivoResponse?> GetProcesoActivoAsync(CancellationToken ct = default)
             => Client().GetFromJsonAsync<ProcesoActivoResponse>("api/Proceso/activo", _jsonOpts, ct);
@@ -530,6 +554,9 @@ namespace VotoMVC_Login.Service
             var http = Client();
             return await http.GetFromJsonAsync<ResultadosNacionalResponse>("api/Resultados/final", _jsonOpts, ct);
         }
+        
 
-    }
+
+
+}
 }

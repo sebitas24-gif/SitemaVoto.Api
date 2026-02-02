@@ -137,16 +137,17 @@ namespace VotoMVC_Login.Controllers
             var pad = HttpContext.Session.GetString(SessionKeys.CodigoUnico);
             if (string.IsNullOrWhiteSpace(cedula) || string.IsNullOrWhiteSpace(pad))
                 return RedirectToAction(nameof(Index));
-
             var candidatoId = HttpContext.Session.GetInt32(VOTO_CANDIDATO) ?? 0;
 
-            // ✅ ESTE DTO DEBE SER DEL ApiService (no Models.DTOs)
             var dto = new ApiService.EmitirVotoDto
             {
                 Cedula = cedula!,
                 CodigoPad = pad!,
-                CandidatoId = candidatoId
+                // 0 = blanco => null
+                CandidatoId = (candidatoId == 0 ? (int?)null : candidatoId)
             };
+
+
 
             var resp = await _api.EmitirVotoAsync(dto, ct);
 

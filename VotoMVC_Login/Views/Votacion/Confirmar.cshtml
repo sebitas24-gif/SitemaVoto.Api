@@ -1,46 +1,106 @@
 ﻿@model VotoMVC_Login.Models.ViewModels.VotacionPapeletaVm
 @{
     ViewData["Title"] = "Confirmar Voto";
-    var candidato = Model.Candidatos?.FirstOrDefault(x => x.Id == Model.CandidatoId);
+    var p = Model.Proceso;
+    var lista = Model.Candidatos ?? new List<VotoMVC_Login.Service.ApiService.CandidatoDto>();
+
+    // Buscar candidato seleccionado si no es blanco
+    var cand = (Model.CandidatoId > 0)
+        ? lista.FirstOrDefault(x => x.Id == Model.CandidatoId)
+        : null;
 }
 
 <div class="container py-4">
-    <h2 class="mb-3">✅ Confirmar Voto</h2>
+
+    <h2 class="mb-2">✅ Confirmar Voto</h2>
 
     @if (!string.IsNullOrWhiteSpace(Model.Error))
     {
         <div class="alert alert-danger">@Model.Error</div>
     }
 
-    <div class="card mb-3">
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-warning">@TempData["Error"]</div>
+    }
+
+    <div class="alert alert-info">
+        <b>Importante:</b> Verifique su selección antes de emitir. Su voto es secreto y no se puede cambiar.
+    </div>
+
+    <!-- Proceso -->
+    <div class="card mb-4">
         <div class="card-body">
-            <div class="row py-2">
-                <div class="col-4 text-muted">Cédula</div>
-                <div class="col-8 text-end fw-bold">@Model.Cedula</div>
+            <div class="row py-1">
+                <div class="col-3 text-muted">Proceso</div>
+                <div class="col-9 text-end fw-bold">@((p?.data?.nombre) ?? Model.ProcesoNombre ?? "—")</div>
             </div>
-            <div class="row py-2">
-                <div class="col-4 text-muted">Proceso</div>
-                <div class="col-8 text-end fw-bold">@Model.ProcesoNombre</div>
+            <hr class="my-2" />
+            <div class="row py-1">
+                <div class="col-3 text-muted">Tipo</div>
+                <div class="col-9 text-end fw-bold">@Model.Tipo</div>
             </div>
-            <div class="row py-2">
-                <div class="col-4 text-muted">Selección</div>
-                <div class="col-8 text-end fw-bold">
-                    @if (Model.CandidatoId <= 0)
-                    {
-                        <span>VOTO EN BLANCO</span>
-                    }
-                    else
-                    {
-                        <span>@(candidato?.Nombre ?? "Candidato no encontrado")</span>
-                    }
-                </div>
+            <hr class="my-2" />
+            <div class="row py-1">
+                <div class="col-3 text-muted">Normas</div>
+                <div class="col-9 text-end fw-bold">@Model.Normas</div>
             </div>
         </div>
     </div>
 
-    <form method="post" asp-controller="Votacion" asp-action="EmitirVoto">
-        @Html.AntiForgeryToken()
-        <button class="btn btn-success" type="submit">📩 Emitir Voto</button>
-        <a class="btn btn-secondary ms-2" asp-controller="Votacion" asp-action="Papeleta">Cancelar</a>
-    </form>
+    <!-- Resumen selección -->
+    <h5 class="fw-bold mb-3">Resumen de su selección</h5>
+
+    @if (Model.CandidatoId == 0)
+    {
+        <div class="alert alert-info">
+            Ha seleccionado: <b>Voto en blanco</b>
+        </div>
+    }
+    else
+    {
+        if (cand == null)
+        {
+            <div class="alert alert-warning">Candidato inválido.</div>
+        }
+        else
+        {
+            <div class="alert alert-success">
+                Ha seleccionado: <b>@cand.Nombre</b> - @cand.PartidoPolitico
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row py-1">
+                        <div class="col-4 text-muted">Candidato</div>
+                        <div class="col-8 text-end fw-bold">@cand.Nombre</div>
+                    </div>
+                    <hr class="my-2" />
+                    <div class="row py-1">
+                        <div class="col-4 text-muted">Partido</div>
+                        <div class="col-8 text-end fw-bold">@cand.PartidoPolitico</div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <!-- Botones -->
+    <div class="mt-4">
+        @* Solo permite emitir si es blanco (0) o candidato válido *@
+        @if (Model.CandidatoId == 0 || cand != null)
+        {
+            <form method="post" asp-controller="Votacion" asp-action="EmitirVoto" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button class="btn btn-success" type="submit">🗳️ Emitir Voto</button>
+            </form>
+        }
+        else
+        {
+            <button class="btn btn-success" type="button" disabled>🗳️ Emitir Voto</button>
+        }
+
+        <a class="btn btn-secondary ms-2" asp-controller="Votacion" asp-action="Papeleta">⬅ Volver a Papeleta</a>
+    </div>
+
 </div>
