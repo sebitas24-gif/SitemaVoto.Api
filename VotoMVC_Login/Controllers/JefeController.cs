@@ -6,7 +6,7 @@ using VotoMVC_Login.Service;
 
 namespace VotoMVC_Login.Controllers
 {
-    [Authorize(Roles = "Jefe")]
+  
     public class JefeController : Controller
     {
         private readonly ApiService _api;
@@ -123,14 +123,14 @@ public IActionResult Otp()
         // =========================
         // PANEL (solo Jefe)
         // =========================
-        [Authorize(Roles = "JefeJunta")]
+       
         [HttpGet]
         public IActionResult Panel()
         {
             return View(new VotoMVC_Login.Models.JefePanelVm());
         }
 
-        [Authorize(Roles = "JefeJunta")]
+  
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Panel(string cedulaBuscada, CancellationToken ct)
@@ -167,7 +167,7 @@ public IActionResult Otp()
         // =========================
         // LOGOUT JEFE
         // =========================
-        [Authorize(Roles = "JefeJunta")]
+     
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()

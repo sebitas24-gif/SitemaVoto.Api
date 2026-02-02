@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using VotoMVC_Login.Models.DTOs;
 using VotoMVC_Login.Service;
 
 namespace VotoMVC_Login.Controllers
 {
+    [AllowAnonymous]
     public class ResultadosPublicosController : Controller
     {
         private readonly ApiService _api;
