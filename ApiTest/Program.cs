@@ -12,7 +12,7 @@ namespace ApiTest
             //Crud<Votante>.UrlBase = "http://10.241.253.223:5203/api/Votantes";
 
             Console.WriteLine("Iniciando prueba de conexión a la API en ZeroTier...");
-
+             
         }
     }
 }
