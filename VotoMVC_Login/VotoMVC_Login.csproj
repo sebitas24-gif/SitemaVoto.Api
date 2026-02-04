@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SitemaVoto.Api\SitemaVoto.Api.csproj" />
     <ProjectReference Include="..\VotoModelos\VotoModelos.csproj" />
   </ItemGroup>
 
