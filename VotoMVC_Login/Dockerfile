@@ -13,10 +13,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["VotoMVC_Login/VotoMVC_Login.csproj", "VotoMVC_Login/"]
-COPY ["ApiTest/ApiTest.csproj", "ApiTest/"]
-COPY ["SitemaVoto.Api/SitemaVoto.Api.csproj", "SitemaVoto.Api/"]
 COPY ["VotoModelos/VotoModelos.csproj", "VotoModelos/"]
-COPY ["Voto.ApiConsumer/Voto.ApiConsumer.csproj", "Voto.ApiConsumer/"]
 RUN dotnet restore "./VotoMVC_Login/VotoMVC_Login.csproj"
 COPY . .
 WORKDIR "/src/VotoMVC_Login"
