@@ -34,13 +34,17 @@ namespace VotoMVC_Login.Controllers
 
             // 1) Validar que exista proceso ACTIVO antes de validar PAD
             var proc = await _api.GetProcesoActivoAsync(ct);
-            var procesoId = proc?.data?.id ?? 0;
 
-            if (procesoId <= 0)
+            if (proc == null || !proc.ok || proc.data == null)
             {
-                ViewBag.Error = "No hay un proceso electoral ACTIVO. No se puede votar en este momento.";
-                return View();
+                // limpiar sesión por seguridad
+                HttpContext.Session.Clear();
+
+                ViewBag.Error = "No hay un proceso electoral ACTIVO. No se puede votar.";
+                return View(); // o RedirectToAction(nameof(Index))
             }
+            var procesoId = proc.data.id;
+
 
             // 2) Validar PAD (aquí tu API debe devolver si ya está usado)
             var r = await _api.ValidarPadConGetAsync(cedula, codigoPad, ct);
@@ -79,13 +83,16 @@ namespace VotoMVC_Login.Controllers
 
             // 1) Verificar proceso activo
             var proc = await _api.GetProcesoActivoAsync(ct);
-            var procesoId = proc?.data?.id ?? 0;
 
-            if (procesoId <= 0)
+            if (proc == null || !proc.ok || proc.data == null)
             {
-                TempData["Error"] = "No hay un proceso ACTIVO. No se puede votar.";
-                return RedirectToAction(nameof(Index));
+                // limpiar sesión por seguridad
+                HttpContext.Session.Clear();
+
+                ViewBag.Error = "No hay un proceso electoral ACTIVO. No se puede votar.";
+                return View(); // o RedirectToAction(nameof(Index))
             }
+            var procesoId = proc.data.id;
 
             // 2) Revalidar que PAD no esté usado (por si intentan reingresar)
             var padCheck = await _api.ValidarPadConGetAsync(cedula!, pad!, ct);
@@ -139,12 +146,14 @@ namespace VotoMVC_Login.Controllers
 
             // Verificar proceso activo
             var proc = await _api.GetProcesoActivoAsync(ct);
-            var procesoActivoId = proc?.data?.id ?? 0;
-            if (procesoActivoId <= 0)
+
+            if (proc == null || !proc.ok || proc.data == null)
             {
                 TempData["Error"] = "No hay proceso ACTIVO. No se puede votar.";
                 return RedirectToAction(nameof(Index));
             }
+
+            var procesoActivoId = proc.data.id;
 
             var procesoId = HttpContext.Session.GetInt32(VOTO_PROCESO) ?? 0;
             var candidatoId = HttpContext.Session.GetInt32(VOTO_CANDIDATO) ?? 0;
@@ -194,12 +203,15 @@ namespace VotoMVC_Login.Controllers
 
             // Verificar proceso activo antes de emitir voto
             var proc = await _api.GetProcesoActivoAsync(ct);
-            var procesoActivoId = proc?.data?.id ?? 0;
-            if (procesoActivoId <= 0)
+
+            if (proc == null || !proc.ok || proc.data == null)
             {
                 TempData["Error"] = "No hay proceso ACTIVO. No se puede votar.";
                 return RedirectToAction(nameof(Index));
             }
+
+            var procesoActivoId = proc.data.id;
+
 
             // Revalidar PAD antes de emitir
             var padCheck = await _api.ValidarPadConGetAsync(cedula!, pad!, ct);

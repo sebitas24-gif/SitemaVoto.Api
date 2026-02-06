@@ -16,13 +16,20 @@ namespace SitemaVoto.Api.Services.Procesos
             return p?.Estado ?? EstadoProceso.Cerrado;
         }
 
-        public Task<ProcesoElectoral?> GetProcesoActivoAsync(CancellationToken ct = default)
+        public async Task<ProcesoElectoral?> GetProcesoActivoAsync(CancellationToken ct)
         {
-            return _db.ProcesoElectorales
-                .AsNoTracking()
-                .OrderByDescending(x => x.Id)
+            var ahora = DateTime.Now;
+
+            return await _db.ProcesoElectorales
+                .Where(p =>
+                    p.Estado == EstadoProceso.Activo &&
+                    p.InicioLocal <= ahora &&
+                    p.FinLocal >= ahora
+                )
+                .OrderByDescending(p => p.InicioLocal)
                 .FirstOrDefaultAsync(ct);
         }
+
 
         // ✅ ESTE ES EL QUE TE HACE FALTA
         public async Task<int> CrearAsync(ProcesoCreateDto req, CancellationToken ct = default)
