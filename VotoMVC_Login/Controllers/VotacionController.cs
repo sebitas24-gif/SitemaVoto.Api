@@ -11,7 +11,6 @@ namespace VotoMVC_Login.Controllers
     {
         private readonly ApiService _api;
 
-        // ✅ Keys de sesión (NO rutas)
         private const string VOTO_PROCESO = "VOTO_PROCESO";
         private const string VOTO_CANDIDATO = "VOTO_CANDIDATO";
 
@@ -33,6 +32,17 @@ namespace VotoMVC_Login.Controllers
                 return View();
             }
 
+            // 1) Validar que exista proceso ACTIVO antes de validar PAD
+            var proc = await _api.GetProcesoActivoAsync(ct);
+            var procesoId = proc?.data?.id ?? 0;
+
+            if (procesoId <= 0)
+            {
+                ViewBag.Error = "No hay un proceso electoral ACTIVO. No se puede votar en este momento.";
+                return View();
+            }
+
+            // 2) Validar PAD (aquí tu API debe devolver si ya está usado)
             var r = await _api.ValidarPadConGetAsync(cedula, codigoPad, ct);
             if (!r.Ok)
             {
@@ -40,8 +50,20 @@ namespace VotoMVC_Login.Controllers
                 return View();
             }
 
+            // ✅ Si tu API devuelve algo tipo: r.Data.usado / r.Data.puedeVotar
+            // adapta el nombre. Ejemplo recomendado:
+            if (r.Data != null && r.Data.usado == true)
+            {
+                ViewBag.Error = "Este código PAD ya fue utilizado. No se puede volver a votar.";
+                return View();
+            }
+
+            // Guardar sesión
             HttpContext.Session.SetString(SessionKeys.Cedula, cedula);
             HttpContext.Session.SetString(SessionKeys.CodigoUnico, (r.Data?.codigoPad ?? "").Trim());
+
+            // Guardar el proceso (para que no te cambien en medio)
+            HttpContext.Session.SetInt32(VOTO_PROCESO, procesoId);
 
             return RedirectToAction(nameof(Papeleta));
         }
@@ -55,8 +77,28 @@ namespace VotoMVC_Login.Controllers
             if (string.IsNullOrWhiteSpace(cedula) || string.IsNullOrWhiteSpace(pad))
                 return RedirectToAction(nameof(Index));
 
+            // 1) Verificar proceso activo
             var proc = await _api.GetProcesoActivoAsync(ct);
             var procesoId = proc?.data?.id ?? 0;
+
+            if (procesoId <= 0)
+            {
+                TempData["Error"] = "No hay un proceso ACTIVO. No se puede votar.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // 2) Revalidar que PAD no esté usado (por si intentan reingresar)
+            var padCheck = await _api.ValidarPadConGetAsync(cedula!, pad!, ct);
+            if (!padCheck.Ok)
+            {
+                TempData["Error"] = padCheck.Error ?? "No se pudo validar el PAD.";
+                return RedirectToAction(nameof(Index));
+            }
+            if (padCheck.Data != null && padCheck.Data.usado == true)
+            {
+                TempData["Error"] = "Este código PAD ya fue utilizado. No se puede volver a votar.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var vm = new VotacionPapeletaVm
             {
@@ -69,33 +111,24 @@ namespace VotoMVC_Login.Controllers
                 Normas = "Seleccione 1 opción y confirme."
             };
 
-            if (procesoId <= 0)
-            {
-                vm.Error = proc?.error ?? "No hay proceso electoral activo.";
-                return View(vm);
-            }
-
             var lista = await _api.GetCandidatosAsync(ct) ?? new List<ApiService.CandidatoDto>();
             vm.Candidatos = lista.Where(x => x.activo).ToList();
 
             if (vm.Candidatos.Count == 0)
                 vm.Error = "No hay candidatos activos.";
 
-            return View(vm); // Views/Votacion/Papeleta.cshtml
+            return View(vm);
         }
 
-        // POST: /Votacion/Confirmar (guarda selección y va a pantalla confirmar)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Confirmar(int procesoId, int candidatoId)
         {
             HttpContext.Session.SetInt32(VOTO_PROCESO, procesoId);
             HttpContext.Session.SetInt32(VOTO_CANDIDATO, candidatoId);
-
             return RedirectToAction(nameof(Confirmar));
         }
 
-        // GET: /Votacion/Confirmar
         [HttpGet]
         public async Task<IActionResult> Confirmar(CancellationToken ct)
         {
@@ -104,10 +137,33 @@ namespace VotoMVC_Login.Controllers
             if (string.IsNullOrWhiteSpace(cedula) || string.IsNullOrWhiteSpace(pad))
                 return RedirectToAction(nameof(Index));
 
+            // Verificar proceso activo
+            var proc = await _api.GetProcesoActivoAsync(ct);
+            var procesoActivoId = proc?.data?.id ?? 0;
+            if (procesoActivoId <= 0)
+            {
+                TempData["Error"] = "No hay proceso ACTIVO. No se puede votar.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var procesoId = HttpContext.Session.GetInt32(VOTO_PROCESO) ?? 0;
             var candidatoId = HttpContext.Session.GetInt32(VOTO_CANDIDATO) ?? 0;
 
-            var proc = await _api.GetProcesoActivoAsync(ct);
+            // Si cambió el proceso mientras estaba en pantalla, lo boto
+            if (procesoId != procesoActivoId)
+            {
+                TempData["Error"] = "El proceso activo cambió. Vuelve a ingresar.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Revalidar PAD
+            var padCheck = await _api.ValidarPadConGetAsync(cedula, pad, ct);
+            if (!padCheck.Ok || (padCheck.Data != null && padCheck.Data.usado == true))
+            {
+                TempData["Error"] = "El código PAD ya fue utilizado o no es válido.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var lista = await _api.GetCandidatosAsync(ct) ?? new List<ApiService.CandidatoDto>();
 
             var vm = new VotacionPapeletaVm
@@ -124,11 +180,9 @@ namespace VotoMVC_Login.Controllers
             };
 
             if (procesoId <= 0) vm.Error = "Proceso inválido. Vuelve a la papeleta.";
-
-            return View(vm); // Views/Votacion/Confirmar.cshtml
+            return View(vm);
         }
 
-        // POST: /Votacion/Emitir
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EmitirVoto(CancellationToken ct)
@@ -137,31 +191,48 @@ namespace VotoMVC_Login.Controllers
             var pad = HttpContext.Session.GetString(SessionKeys.CodigoUnico);
             if (string.IsNullOrWhiteSpace(cedula) || string.IsNullOrWhiteSpace(pad))
                 return RedirectToAction(nameof(Index));
+
+            // Verificar proceso activo antes de emitir voto
+            var proc = await _api.GetProcesoActivoAsync(ct);
+            var procesoActivoId = proc?.data?.id ?? 0;
+            if (procesoActivoId <= 0)
+            {
+                TempData["Error"] = "No hay proceso ACTIVO. No se puede votar.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Revalidar PAD antes de emitir
+            var padCheck = await _api.ValidarPadConGetAsync(cedula!, pad!, ct);
+            if (!padCheck.Ok)
+            {
+                TempData["Error"] = padCheck.Error ?? "No se pudo validar el PAD.";
+                return RedirectToAction(nameof(Index));
+            }
+            if (padCheck.Data != null && padCheck.Data.usado == true)
+            {
+                TempData["Error"] = "Este código PAD ya fue utilizado. No se puede volver a votar.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var candidatoId = HttpContext.Session.GetInt32(VOTO_CANDIDATO) ?? 0;
 
             var dto = new ApiService.EmitirVotoDto
             {
                 Cedula = cedula!,
                 CodigoPad = pad!,
-                // 0 = blanco => null
                 CandidatoId = (candidatoId == 0 ? (int?)null : candidatoId)
             };
 
-
-
             var resp = await _api.EmitirVotoAsync(dto, ct);
-
-
 
             if (resp == null || !resp.Ok)
             {
                 TempData["Error"] = resp?.Error ?? "No se pudo emitir el voto.";
-                return RedirectToAction(nameof(Papeleta));
+                return RedirectToAction(nameof(Index));
             }
 
             TempData["Comprobante"] = resp.Comprobante ?? "";
             return RedirectToAction(nameof(Exito));
-
         }
 
         [HttpGet]

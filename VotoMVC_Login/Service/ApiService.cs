@@ -222,6 +222,18 @@ namespace VotoMVC_Login.Service
             public string? mesa { get; set; }
             public string? codigoPad { get; set; }
         }
+        public class ValidarPadResultDto
+        {
+            public bool ok { get; set; }
+            public string? error { get; set; }
+            public int procesoId { get; set; }
+            public int votanteId { get; set; }
+            public string? codigoPad { get; set; }
+
+            // ✅ NUEVOS
+            public bool usado { get; set; }
+            public int estadoProceso { get; set; }
+        }
 
         // Si usas este endpoint también (api/acceso/ciudadano/{cedula}) con wrap ok/error/data:
         public async Task<(bool Ok, string? Error, CiudadanoDto? Data)> GetCiudadanoAsync(string cedula, CancellationToken ct)
@@ -256,38 +268,30 @@ namespace VotoMVC_Login.Service
         // ============================
         // ✅ Validar PAD usando GET (esto reemplaza el POST que te daba 404)
         // ============================
-        public async Task<(bool Ok, string? Error, CiudadanoDto? Data)> ValidarPadConGetAsync(string cedula, string codigoPad, CancellationToken ct)
+
+        public async Task<(bool Ok, string? Error, ValidarPadResultDto? Data)> ValidarPadConGetAsync(string cedula, string codigoPad, CancellationToken ct)
         {
+            var payload = new { Cedula = cedula, CodigoPad = codigoPad };
+            var json = JsonSerializer.Serialize(payload, _jsonOpts);
+            var resp = await Client().PostAsync("api/Padron/validar", new StringContent(json, Encoding.UTF8, "application/json"), ct);
+            var raw = await resp.Content.ReadAsStringAsync(ct);
+
             try
             {
-                var data = await GetPadronPorCedulaAsync(cedula, ct);
+                // Tu API aquí devuelve el objeto directo (no wrap). Si devuelve wrap, te lo adapto.
+                var data = JsonSerializer.Deserialize<ValidarPadResultDto>(raw, _jsonOpts);
 
-                if (data == null)
-                    return (false, "No existe en padrón.", null);
+                if (!resp.IsSuccessStatusCode || data == null)
+                    return (false, $"HTTP {(int)resp.StatusCode} - {raw}", null);
 
-                // IMPORTANTE: la propiedad es codigoPad (minúsculas)
-                if (string.IsNullOrWhiteSpace(data.codigoPad))
-                    return (false, "No existe código PAD para este votante.", data);
-
-                var padApi = LimpiarPad(data.codigoPad);
-                var padUser = LimpiarPad(codigoPad);
-
-                if (padApi != padUser)
-                    return (false, "Código PAD incorrecto.", data);
+                if (!data.ok)
+                    return (false, data.error ?? "No se pudo validar.", data);
 
                 return (true, null, data);
             }
-            catch (HttpRequestException ex)
+            catch
             {
-                return (false, "Error HTTP llamando API: " + ex.Message, null);
-            }
-            catch (TaskCanceledException)
-            {
-                return (false, "La API no respondió a tiempo (timeout).", null);
-            }
-            catch (Exception ex)
-            {
-                return (false, "Error llamando API: " + ex.Message, null);
+                return (false, $"HTTP {(int)resp.StatusCode} - {raw}", null);
             }
         }
 

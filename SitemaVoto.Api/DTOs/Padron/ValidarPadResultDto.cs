@@ -20,5 +20,9 @@
 
         //  el “código de la persona” (PAD) que pediste que se vea
         public string? CodigoPad { get; set; }
+        public bool Usado { get; set; }
+
+        // ✅ NUEVO: 1 Configuración, 2 Activo, 3 Cerrado
+        public int EstadoProceso { get; set; }
     }
 }

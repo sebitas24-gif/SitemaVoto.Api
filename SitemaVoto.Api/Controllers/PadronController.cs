@@ -145,6 +145,28 @@ namespace SitemaVoto.Api.Controllers
         {
             var r = await _padron.ValidarCedulaPadAsync(dto.Cedula, dto.CodigoPad, ct);
 
+            // Por defecto
+            var usado = false;
+            var estadoProceso = 0;
+
+            // Solo si validó bien, revisamos estado del proceso y si el código ya fue usado
+            if (r.Ok && r.ProcesoId > 0 && r.VotanteId > 0 && !string.IsNullOrWhiteSpace(r.CodigoPad))
+            {
+                usado = await _db.CodigoPadrones
+                    .AsNoTracking()
+                    .Where(x => x.ProcesoElectoralId == r.ProcesoId
+                             && x.UsuarioId == r.VotanteId
+                             && x.Codigo == r.CodigoPad)
+                    .Select(x => x.Usado)
+                    .FirstOrDefaultAsync(ct);
+
+                estadoProceso = await _db.ProcesoElectorales
+                    .AsNoTracking()
+                    .Where(p => p.Id == r.ProcesoId)
+                    .Select(p => (int)p.Estado)
+                    .FirstOrDefaultAsync(ct);
+            }
+
             return Ok(new ValidarPadResultDto
             {
                 Ok = r.Ok,
@@ -159,7 +181,10 @@ namespace SitemaVoto.Api.Controllers
                 Provincia = r.Provincia,
                 Canton = r.Canton,
                 CodigoMesa = r.CodigoMesa,
-                CodigoPad = r.CodigoPad
+                CodigoPad = r.CodigoPad,
+
+                Usado = usado,
+                EstadoProceso = estadoProceso
             });
         }
 
