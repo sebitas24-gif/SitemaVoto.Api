@@ -1,0 +1,172 @@
+﻿/* ===== Admin Panel - Soft / Professional ===== */
+:root {
+    --bg1: #edf2ff;
+    --bg2: #f5f3ff;
+    --card: rgba(255,255,255,.78);
+    --stroke: rgba(15,23,42,.10);
+    --shadow: 0 18px 40px rgba(2,6,23,.10);
+    --shadow2: 0 10px 25px rgba(2,6,23,.08);
+    --text: #0f172a;
+    --muted: #64748b;
+    --primary: #5b6bff;
+    --primary2: #8b5cf6;
+    --good: #16a34a;
+}
+
+.admin-page {
+    min-height: calc(100vh - 56px);
+    background: radial-gradient(900px 520px at 12% 18%, rgba(91,107,255,.18), transparent 60%), radial-gradient(900px 520px at 85% 18%, rgba(139,92,246,.16), transparent 60%), radial-gradient(900px 520px at 50% 95%, rgba(14,165,233,.10), transparent 55%), linear-gradient(135deg, var(--bg1), var(--bg2));
+    padding: 28px 16px 48px;
+}
+
+.admin-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.admin-hero {
+    background: linear-gradient(135deg, rgba(76,29,149,.98), rgba(109,40,217,.95));
+    color: #fff;
+    border-radius: 18px;
+    padding: 22px 22px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255,255,255,.22);
+    position: relative;
+    overflow: hidden;
+}
+
+    .admin-hero:before {
+        content: "";
+        position: absolute;
+        inset: -70px;
+        background: radial-gradient(320px 190px at 18% 25%, rgba(255,255,255,.22), transparent 60%), radial-gradient(260px 180px at 75% 55%, rgba(255,255,255,.16), transparent 65%);
+        opacity: .9;
+    }
+
+    .admin-hero .content {
+        position: relative;
+    }
+
+    .admin-hero h2 {
+        margin: 0;
+        font-weight: 900;
+        letter-spacing: .2px;
+    }
+
+    .admin-hero .sub {
+        margin-top: 6px;
+        color: rgba(255,255,255,.75);
+    }
+
+.admin-grid {
+    margin-top: 14px;
+}
+
+.admin-tile {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+    .admin-tile .tile {
+        border-radius: 18px;
+        min-height: 150px;
+        padding: 18px;
+        background: linear-gradient(135deg, rgba(109,40,217,.95), rgba(91,107,255,.90));
+        color: #fff;
+        box-shadow: var(--shadow2);
+        border: 1px solid rgba(255,255,255,.16);
+        position: relative;
+        overflow: hidden;
+        transition: transform .12s ease, box-shadow .12s ease;
+    }
+
+        .admin-tile .tile:before {
+            content: "";
+            position: absolute;
+            inset: -60px;
+            background: radial-gradient(280px 180px at 15% 30%, rgba(255,255,255,.18), transparent 60%), radial-gradient(250px 170px at 85% 70%, rgba(255,255,255,.12), transparent 65%);
+        }
+
+        .admin-tile .tile .content {
+            position: relative;
+        }
+
+    .admin-tile .title {
+        font-weight: 900;
+        font-size: 1.05rem;
+        margin-bottom: 4px;
+    }
+
+    .admin-tile .desc {
+        opacity: .82;
+        font-size: .95rem;
+    }
+
+    .admin-tile:hover .tile {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 35px rgba(2,6,23,.14);
+    }
+
+.admin-card {
+    margin-top: 16px;
+    background: var(--card);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--stroke);
+    border-radius: 18px;
+    box-shadow: var(--shadow2);
+}
+
+    .admin-card .card-body {
+        padding: 18px;
+    }
+
+.admin-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+    .admin-head h5 {
+        margin: 0;
+        font-weight: 900;
+        color: var(--text);
+    }
+
+.btn {
+    border-radius: 12px !important;
+    font-weight: 800;
+    padding: 10px 14px;
+}
+
+.btn-outline-secondary {
+    background: rgba(255,255,255,.55);
+}
+
+.alert {
+    border-radius: 14px;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+    .table thead th {
+        color: var(--muted);
+        font-weight: 800;
+        border-bottom-color: rgba(15,23,42,.10);
+    }
+
+    .table td {
+        border-top-color: rgba(15,23,42,.06);
+    }
+
+.badge-soft {
+    background: rgba(22,163,74,.14);
+    color: var(--good);
+    border: 1px solid rgba(22,163,74,.22);
+    padding: .45rem .7rem;
+    border-radius: 999px;
+    font-weight: 900;
+}

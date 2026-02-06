@@ -3,85 +3,106 @@
     ViewData["Title"] = "Panel Admin";
 }
 
-<div class="container py-4">
-    <div class="p-4 rounded-4 shadow" style="background:linear-gradient(135deg,#4c1d95,#6d28d9); color:white;">
-        <h2 class="fw-bold mb-0">Panel de Administración</h2>
-        <div class="text-white-50">Gestión del proceso (monitoreo en vivo lo ve el público)</div>
-    </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-panel.css" asp-append-version="true" />
+}
 
-    <div class="row g-3 mt-2">
-        <div class="col-md-3">
-            <a class="text-decoration-none" asp-action="Procesos">
-                <div class="p-4 rounded-4 shadow-sm" style="background:#6d28d9;color:white;min-height:140px;">
-                    <div class="fs-5 fw-bold">Crear Proceso Electoral</div>
-                    <div class="opacity-75">Configurar nueva elección</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a class="text-decoration-none" asp-action="Candidatos">
-                <div class="p-4 rounded-4 shadow-sm" style="background:#6d28d9;color:white;min-height:140px;">
-                    <div class="fs-5 fw-bold">Gestionar Candidatos</div>
-                    <div class="opacity-75">Agregar y editar candidatos</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a class="text-decoration-none" asp-action="Padron">
-                <div class="p-4 rounded-4 shadow-sm" style="background:#6d28d9;color:white;min-height:140px;">
-                    <div class="fs-5 fw-bold">Padrón Electoral</div>
-                    <div class="opacity-75">Imprimir y descargar (CSV)</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a class="text-decoration-none" asp-action="Resultados">
-                <div class="p-4 rounded-4 shadow-sm" style="background:#6d28d9;color:white;min-height:140px;">
-                    <div class="fs-5 fw-bold">Exportar Resultados</div>
-                    <div class="opacity-75">Vista imprimible (PDF desde navegador)</div>
-                </div>
-            </a>
-        </div>
-    </div>
+<div class="admin-page">
+    <div class="admin-wrap">
 
-    <div class="card rounded-4 shadow-sm mt-3">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="fw-bold mb-0">Proceso Electoral</h5>
+        <div class="admin-hero">
+            <div class="content">
+                <h2>Panel de Administración</h2>
+                <div class="sub">Gestión del proceso (monitoreo en vivo lo ve el público)</div>
+            </div>
+        </div>
 
-                <form asp-action="Logout" method="post">
-                    @Html.AntiForgeryToken()
-                    <button class="btn btn-outline-secondary btn-sm">Cerrar sesión</button>
-                </form>
+        <div class="row g-3 admin-grid">
+            <div class="col-md-3">
+                <a class="admin-tile" asp-action="Procesos">
+                    <div class="tile">
+                        <div class="content">
+                            <div class="title">Crear Proceso Electoral</div>
+                            <div class="desc">Configurar nueva elección</div>
+                        </div>
+                    </div>
+                </a>
             </div>
 
-            @if (!string.IsNullOrWhiteSpace(Model.Error))
-            {
-                <div class="alert alert-warning mt-3">@Model.Error</div>
-            }
-            else
-            {
-                <div class="table-responsive mt-3">
-                    <table class="table align-middle">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Inicio</th>
-                                <th>Cierre</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>@Model.Proceso.Nombre</td>
-                                <td>@Model.Proceso.Inicio</td>
-                                <td>@Model.Proceso.Cierre</td>
-                                <td><span class="badge bg-success">@Model.Proceso.Estado</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            }
+            <div class="col-md-3">
+                <a class="admin-tile" asp-action="Candidatos">
+                    <div class="tile">
+                        <div class="content">
+                            <div class="title">Gestionar Candidatos</div>
+                            <div class="desc">Agregar y editar candidatos</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-3">
+                <a class="admin-tile" asp-action="Padron">
+                    <div class="tile">
+                        <div class="content">
+                            <div class="title">Padrón Electoral</div>
+                            <div class="desc">Imprimir y descargar (CSV)</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-3">
+                <a class="admin-tile" asp-action="Resultados">
+                    <div class="tile">
+                        <div class="content">
+                            <div class="title">Exportar Resultados</div>
+                            <div class="desc">Vista imprimible (PDF desde navegador)</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
         </div>
+
+        <div class="admin-card">
+            <div class="card-body">
+                <div class="admin-head">
+                    <h5>Proceso Electoral</h5>
+
+                    <form asp-action="Logout" method="post">
+                        @Html.AntiForgeryToken()
+                        <button class="btn btn-outline-secondary btn-sm">Cerrar sesión</button>
+                    </form>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Error))
+                {
+                    <div class="alert alert-warning mt-3">@Model.Error</div>
+                }
+                else
+                {
+                    <div class="table-responsive mt-3">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Inicio</th>
+                                    <th>Cierre</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>@Model.Proceso.Nombre</td>
+                                    <td>@Model.Proceso.Inicio</td>
+                                    <td>@Model.Proceso.Cierre</td>
+                                    <td><span class="badge-soft">@Model.Proceso.Estado</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
     </div>
 </div>

@@ -1,0 +1,140 @@
+﻿/* ===== Admin Procesos - Soft UI ===== */
+:root {
+    --bg1: #edf2ff;
+    --bg2: #f5f3ff;
+    --card: rgba(255,255,255,.78);
+    --stroke: rgba(15,23,42,.10);
+    --shadow: 0 18px 40px rgba(2,6,23,.10);
+    --shadow2: 0 10px 25px rgba(2,6,23,.08);
+    --text: #0f172a;
+    --muted: #64748b;
+    --primary: #5b6bff;
+    --primary2: #8b5cf6;
+}
+
+.admin-page {
+    min-height: calc(100vh - 56px);
+    background: radial-gradient(900px 520px at 12% 18%, rgba(91,107,255,.20), transparent 60%), radial-gradient(900px 520px at 85% 18%, rgba(139,92,246,.16), transparent 60%), radial-gradient(900px 520px at 50% 95%, rgba(14,165,233,.10), transparent 55%), linear-gradient(135deg, var(--bg1), var(--bg2));
+    padding: 28px 16px 48px;
+}
+
+.admin-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.admin-hero {
+    background: linear-gradient(135deg, rgba(91,107,255,.95), rgba(139,92,246,.92));
+    color: #fff;
+    border-radius: 18px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255,255,255,.22);
+    position: relative;
+    overflow: hidden;
+}
+
+    .admin-hero:before {
+        content: "";
+        position: absolute;
+        inset: -70px;
+        background: radial-gradient(320px 190px at 18% 25%, rgba(255,255,255,.22), transparent 60%), radial-gradient(260px 180px at 75% 55%, rgba(255,255,255,.16), transparent 65%);
+        opacity: .9;
+    }
+
+    .admin-hero .content {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .admin-hero h3 {
+        margin: 0;
+        font-weight: 900;
+        letter-spacing: .2px;
+    }
+
+    .admin-hero p {
+        margin: 4px 0 0;
+        opacity: .9;
+    }
+
+.admin-card {
+    background: var(--card);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--stroke);
+    border-radius: 16px;
+    box-shadow: var(--shadow2);
+}
+
+    .admin-card .card-body {
+        padding: 18px;
+    }
+
+.admin-title {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.admin-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba(91,107,255,.18), rgba(139,92,246,.16));
+    border: 1px solid rgba(91,107,255,.20);
+    font-weight: 900;
+    color: var(--text);
+}
+
+.admin-title h5 {
+    margin: 0;
+    font-weight: 900;
+    color: var(--text);
+}
+
+.admin-title .sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.form-control, .form-select {
+    border-radius: 12px !important;
+    border: 1px solid rgba(15,23,42,.12) !important;
+    padding: 10px 12px;
+}
+
+.btn {
+    border-radius: 12px !important;
+    font-weight: 800;
+    padding: 12px 14px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary2)) !important;
+    border: none !important;
+    box-shadow: 0 10px 22px rgba(91,107,255,.18);
+}
+
+.btn-outline-secondary {
+    border-radius: 12px !important;
+}
+
+.alert {
+    border-radius: 14px;
+}
+
+.list-group {
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.list-group-item {
+    border-color: rgba(15,23,42,.08);
+}

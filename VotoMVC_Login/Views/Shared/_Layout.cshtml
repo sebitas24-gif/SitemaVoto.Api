@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/VotoMVC_Login.styles.css" asp-append-version="true" />
 </head>
+@RenderSection("Styles", required: false)
+
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
@@ -25,13 +27,16 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        <link rel="stylesheet" href="~/css/jefe-panel.css" asp-append-version="true" />
+                        <link rel="stylesheet" href="~/css/admon-panel.css" asp-append-version="true" />
+                        <link rel="stylesheet" href="~/css/admin-proceso.css" asp-append-version="true" />
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container-fluid p-0">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>

@@ -6,7 +6,8 @@ using VotoMVC_Login.Service;
 
 namespace VotoMVC_Login.Controllers
 {
-  
+    [AllowAnonymous]
+
     public class JefeController : Controller
     {
         private readonly ApiService _api;
