@@ -18,5 +18,5 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+    background: radial-gradient(circle at top left, #eef1ff 0%, transparent 45%), radial-gradient(circle at bottom right, #f3f4ff 0%, transparent 45%), #f6f7fb;
 }

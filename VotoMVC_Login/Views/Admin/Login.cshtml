@@ -3,32 +3,36 @@
     ViewData["Title"] = "Login Administrador";
 }
 
-<div class="container py-5" style="max-width:720px;">
-    <div class="p-4 rounded-4 shadow" style="background:linear-gradient(135deg,#4c1d95,#6d28d9); color:white;">
-        <h2 class="fw-bold mb-1">Administrador</h2>
-        <div class="text-white-50">Ingresa tu cédula para recibir OTP</div>
+<div class="container py-5 admin-container">
+
+    <div class="admin-header">
+        <h3 class="fw-bold mb-1">Administrador</h3>
+        <small>Ingresa tu cédula para recibir OTP</small>
     </div>
 
-    <div class="card mt-3 rounded-4 shadow-sm">
-        <div class="card-body p-4">
+    <div class="admin-card p-4">
 
-            @if (!string.IsNullOrWhiteSpace(Model.Error))
-            {
-                <div class="alert alert-danger">@Model.Error</div>
-            }
-            @if (!string.IsNullOrWhiteSpace(Model.Msg))
-            {
-                <div class="alert alert-success">@Model.Msg</div>
-            }
+        @if (!string.IsNullOrWhiteSpace(Model.Error))
+        {
+            <div class="alert alert-danger">@Model.Error</div>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Msg))
+        {
+            <div class="alert alert-success">@Model.Msg</div>
+        }
 
-            <form asp-action="Login" method="post">
-                @Html.AntiForgeryToken()
+        <form asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
 
-                <label class="form-label fw-semibold">Cédula</label>
-                <input asp-for="Cedula" class="form-control" maxlength="10" />
+            <label class="form-label fw-semibold">Cédula</label>
+            <input asp-for="Cedula"
+                   class="form-control"
+                   maxlength="10"
+                   placeholder="Ej: 0102030405" />
 
-                <button class="btn btn-primary mt-3 w-100">Enviar OTP</button>
-            </form>
-        </div>
+            <button class="btn btn-admin w-100 mt-3">
+                Enviar OTP
+            </button>
+        </form>
     </div>
 </div>

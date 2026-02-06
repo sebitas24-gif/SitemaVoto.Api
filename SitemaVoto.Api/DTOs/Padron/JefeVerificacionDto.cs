@@ -12,5 +12,6 @@
         public string Mesa { get; set; } = "";
         public string CodigoPad { get; set; } = "";
         public string Estado { get; set; } = "PADRÓN";
+        public string? ImagenUrl { get; set; }
     }
 }

@@ -67,8 +67,27 @@
 
         @if (m.Ciudadano != null)
         {
-            <div class="jefe-grid">
+            <!-- PERFIL (foto + nombre) -->
+            <div class="jefe-card mb-3">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="avatar">
+                        <img src="@(string.IsNullOrWhiteSpace(m.Ciudadano.imagenUrl) ? Url.Content("~/img/user-default.png") : m.Ciudadano.imagenUrl)"
+                             alt="Foto del votante"
+                             onerror="this.src='@Url.Content("~/img/user-default.png")';" />
+                    </div>
 
+                    <div>
+                        <div class="fw-bold" style="font-size:1.05rem;">
+                            @m.Ciudadano.nombres @m.Ciudadano.apellidos
+                        </div>
+                        <div class="text-muted small">
+                            Cédula: @m.Ciudadano.cedula
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="jefe-grid">
                 <!-- DATOS PERSONALES -->
                 <div class="jefe-card">
                     <div class="card-body">
@@ -153,8 +172,8 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         }
+
     </div>
 </div>

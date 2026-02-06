@@ -3,29 +3,68 @@
     var cedula = (string)ViewBag.Cedula;
 }
 
-<div class="container py-5" style="max-width:520px;">
-    <div class="card shadow-sm rounded-4">
+<div class="container py-5 jefe-login-container" style="max-width:520px;">
+    <div class="card jefe-card">
         <div class="card-body p-4">
+
             <h4 class="fw-bold mb-1">Verificar OTP</h4>
-            <p class="text-muted mb-4">Se envió un código al correo asociado a la cédula <b>@cedula</b>.</p>
+            <p class="text-muted mb-4">
+                Se envió un código al correo asociado a la cédula
+                <b>@cedula</b>.
+            </p>
 
             @if (TempData["ErrorOtp"] != null)
             {
-                <div class="alert alert-danger">@TempData["ErrorOtp"]</div>
+                <div class="alert alert-danger">
+                    @TempData["ErrorOtp"]
+                </div>
             }
 
             <form asp-action="Otp" method="post">
                 @Html.AntiForgeryToken()
+
                 <div class="mb-3">
-                    <label class="form-label">Código OTP</label>
-                    <input class="form-control" name="codigo" maxlength="6" />
+                    <label class="form-label fw-semibold">
+                        Código OTP
+                    </label>
+                    <input class="form-control otp-input"
+                           name="codigo"
+                           maxlength="6"
+                           autocomplete="off" />
                 </div>
-                <button class="btn btn-primary w-100">Ingresar</button>
+
+                <button class="btn btn-primary w-100 jefe-btn">
+                    Ingresar
+                </button>
             </form>
 
-            <div class="mt-3">
-                <a asp-action="Login" class="btn btn-link">Volver</a>
+            <!-- BOTONES VISUALES (NO FUNCIONAN AÚN) -->
+            <div class="mt-4 text-center">
+                <p class="text-muted small mb-2">
+                    ¿No recibiste el código?
+                </p>
+
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-envelope"></i>
+                        Reenviar Correo
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-phone"></i>
+                        Reenviar SMS
+                    </button>
+                </div>
             </div>
+
+            <div class="mt-3 text-center">
+                <a asp-action="Login" class="btn btn-link">
+                    Volver
+                </a>
+            </div>
+
         </div>
     </div>
 </div>

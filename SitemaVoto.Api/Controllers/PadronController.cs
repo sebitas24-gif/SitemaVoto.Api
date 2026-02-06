@@ -133,7 +133,8 @@ namespace SitemaVoto.Api.Controllers
                 
                 Mesa = user.Junta?.CodigoMesa ?? "",
                 CodigoPad = pad ?? "",
-                Estado = "PADRÓN"
+                Estado = "PADRÓN",
+                 ImagenUrl = user.ImagenUrl
             };
 
             return Ok(dto);

@@ -221,6 +221,8 @@ namespace VotoMVC_Login.Service
             public string? parroquia { get; set; }
             public string? mesa { get; set; }
             public string? codigoPad { get; set; }
+            [JsonPropertyName("imagenUrl")]
+            public string? imagenUrl { get; set; }
         }
         public class ValidarPadResultDto
         {

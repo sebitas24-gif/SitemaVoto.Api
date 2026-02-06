@@ -2,25 +2,40 @@
     ViewData["Title"] = "Acceso Jefe de Junta";
 }
 
-<div class="container py-5" style="max-width:520px;">
-    <div class="card shadow-sm rounded-4">
+<div class="container py-5 jefe-login-container" style="max-width:520px;">
+    <div class="card jefe-card">
         <div class="card-body p-4">
+
             <h4 class="fw-bold mb-1">Jefatura de Mesa</h4>
-            <p class="text-muted mb-4">Ingresa tu cédula para recibir OTP en tu correo.</p>
+            <p class="text-muted mb-4">
+                Ingresa tu cédula para recibir OTP en tu correo.
+            </p>
 
             @if (TempData["Error"] != null)
             {
-                <div class="alert alert-danger">@TempData["Error"]</div>
+                <div class="alert alert-danger">
+                    @TempData["Error"]
+                </div>
             }
 
             <form asp-action="Login" method="post">
                 @Html.AntiForgeryToken()
+
                 <div class="mb-3">
-                    <label class="form-label">Número de Cédula</label>
-                    <input class="form-control" name="cedula" maxlength="10" />
+                    <label class="form-label fw-semibold">
+                        Número de Cédula
+                    </label>
+                    <input class="form-control"
+                           name="cedula"
+                           maxlength="10"
+                           autocomplete="off" />
                 </div>
-                <button class="btn btn-primary w-100">Enviar OTP</button>
+
+                <button class="btn btn-primary w-100 jefe-btn">
+                    Enviar OTP
+                </button>
             </form>
+
         </div>
     </div>
 </div>

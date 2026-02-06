@@ -3,28 +3,45 @@
     ViewData["Title"] = "OTP Administrador";
 }
 
-<div class="container py-5" style="max-width:720px;">
-    <div class="p-4 rounded-4 shadow" style="background:linear-gradient(135deg,#4c1d95,#6d28d9); color:white;">
-        <h2 class="fw-bold mb-1">Verificación OTP</h2>
-        <div class="text-white-50">Cédula: <b>@Model.Cedula</b></div>
+<div class="container py-5 admin-container">
+
+    <div class="admin-header">
+        <h3 class="fw-bold mb-1">Verificación OTP</h3>
+        <small>Cédula: <b>@Model.Cedula</b></small>
     </div>
 
-    <div class="card mt-3 rounded-4 shadow-sm">
-        <div class="card-body p-4">
+    <div class="admin-card p-4">
 
-            @if (!string.IsNullOrWhiteSpace(Model.Error))
-            {
-                <div class="alert alert-danger">@Model.Error</div>
-            }
+        @if (!string.IsNullOrWhiteSpace(Model.Error))
+        {
+            <div class="alert alert-danger">@Model.Error</div>
+        }
 
-            <form asp-action="Otp" method="post">
-                @Html.AntiForgeryToken()
+        <form asp-action="Otp" method="post">
+            @Html.AntiForgeryToken()
 
-                <label class="form-label fw-semibold">Código OTP</label>
-                <input asp-for="Codigo" class="form-control" maxlength="6" />
+            <label class="form-label fw-semibold">Código OTP</label>
+            <input asp-for="Codigo"
+                   class="form-control otp-input"
+                   maxlength="6"
+                   placeholder="••••••" />
 
-                <button class="btn btn-success mt-3 w-100">Ingresar</button>
-            </form>
+            <button class="btn btn-admin w-100 mt-3">
+                Ingresar
+            </button>
+        </form>
+
+        <div class="mt-4 text-center">
+            <p class="resend-text mb-2">¿No recibiste el código?</p>
+
+            <div class="d-flex justify-content-center gap-2">
+                <button type="button" class="btn btn-resend btn-sm">
+                    📧 Reenviar correo
+                </button>
+                <button type="button" class="btn btn-resend btn-sm">
+                    📱 Reenviar SMS
+                </button>
+            </div>
         </div>
     </div>
 </div>

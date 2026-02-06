@@ -131,7 +131,7 @@ public IActionResult Otp()
             return View(new VotoMVC_Login.Models.JefePanelVm());
         }
 
-  
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Panel(string cedulaBuscada, CancellationToken ct)
@@ -140,7 +140,7 @@ public IActionResult Otp()
 
             if (string.IsNullOrWhiteSpace(cedulaBuscada) || cedulaBuscada.Length != 10)
             {
-                vm.Error = "Cédula inválida.";
+                vm.Error = "Ingresa una cédula válida de 10 dígitos.";
                 return View(vm);
             }
 
@@ -150,7 +150,7 @@ public IActionResult Otp()
 
                 if (data == null)
                 {
-                    vm.Error = "No existe en padrón.";
+                    vm.Error = "La cédula no se encuentra en el padrón electoral.";
                     return View(vm);
                 }
 
@@ -158,17 +158,24 @@ public IActionResult Otp()
                 vm.Msg = "Ciudadano encontrado.";
                 return View(vm);
             }
-            catch (Exception ex)
+            catch (HttpRequestException ex) when (ex.Message.Contains("404"))
             {
-                vm.Error = "Error consultando API: " + ex.Message;
+                // 👈 AQUÍ ESTÁ LA MAGIA
+                vm.Error = "La cédula no se encuentra en el padrón electoral.";
+                return View(vm);
+            }
+            catch
+            {
+                vm.Error = "No se pudo consultar el padrón. Intenta nuevamente.";
                 return View(vm);
             }
         }
 
+
         // =========================
         // LOGOUT JEFE
         // =========================
-     
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()

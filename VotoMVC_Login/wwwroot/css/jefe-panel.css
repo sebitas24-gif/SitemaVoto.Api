@@ -1,23 +1,8 @@
-﻿/* ===== Jefe Panel - Soft UI ===== */
-:root {
-    --bg1: #edf2ff;
-    --bg2: #f5f3ff;
-    --card: #ffffff;
-    --stroke: rgba(15,23,42,.10);
-    --shadow: 0 18px 40px rgba(2,6,23,.10);
-    --shadow2: 0 10px 25px rgba(2,6,23,.08);
-    --text: #0f172a;
-    --muted: #64748b;
-    --primary: #5b6bff;
-    --primary2: #8b5cf6;
-    --success: #16a34a;
-    --info: #0ea5e9;
-}
-
+﻿/* Fondo suave full screen */
 .jefe-page {
-    min-height: calc(100vh - 56px); /* ajusta si tu navbar mide distinto */
-    background: radial-gradient(900px 500px at 15% 20%, rgba(91,107,255,.22), transparent 60%), radial-gradient(900px 500px at 85% 20%, rgba(139,92,246,.18), transparent 60%), radial-gradient(900px 500px at 50% 95%, rgba(14,165,233,.12), transparent 55%), linear-gradient(135deg, var(--bg1), var(--bg2));
-    padding: 28px 16px 48px;
+    min-height: calc(100vh - 56px);
+    padding: 40px 16px;
+    background: radial-gradient(900px 400px at 15% 15%, rgba(99,102,241,.20), transparent 60%), radial-gradient(900px 400px at 85% 30%, rgba(236,72,153,.12), transparent 55%), radial-gradient(900px 400px at 50% 85%, rgba(34,197,94,.10), transparent 55%), linear-gradient(180deg, #f6f7ff 0%, #eef2ff 35%, #f8fafc 100%);
 }
 
 .jefe-wrap {
@@ -25,191 +10,158 @@
     margin: 0 auto;
 }
 
+/* Hero */
 .jefe-hero {
-    background: linear-gradient(135deg, rgba(91,107,255,.95), rgba(139,92,246,.92));
-    color: #fff;
-    border-radius: 18px;
-    padding: 22px 22px;
-    box-shadow: var(--shadow);
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 20px;
+    padding: 18px;
+    background: linear-gradient(135deg, rgba(79,70,229,.95), rgba(124,58,237,.90));
+    color: white;
+    box-shadow: 0 18px 55px rgba(15,23,42,.18);
 }
 
-    .jefe-hero:before {
-        content: "";
-        position: absolute;
-        inset: -60px;
-        background: radial-gradient(300px 180px at 20% 25%, rgba(255,255,255,.22), transparent 60%), radial-gradient(240px 160px at 75% 55%, rgba(255,255,255,.18), transparent 65%);
-        filter: blur(2px);
-        opacity: .9;
-    }
-
     .jefe-hero .content {
-        position: relative;
         display: flex;
-        gap: 16px;
         align-items: center;
         justify-content: space-between;
-    }
-
-    .jefe-hero h2 {
-        margin: 0;
-        font-weight: 800;
-        letter-spacing: .2px;
-    }
-
-    .jefe-hero p {
-        margin: 4px 0 0;
-        opacity: .9;
+        gap: 14px;
     }
 
 .jefe-badge {
-    background: rgba(255,255,255,.18);
-    border: 1px solid rgba(255,255,255,.28);
-    padding: 10px 14px;
-    border-radius: 999px;
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.22);
+    padding: 10px 12px;
+    border-radius: 16px;
     text-align: right;
-    backdrop-filter: blur(8px);
+    min-width: 180px;
 }
 
     .jefe-badge .small {
-        font-size: 12px;
-        opacity: .85;
-        margin-bottom: 2px;
+        font-size: .8rem;
+        opacity: .9;
     }
 
     .jefe-badge .big {
         font-weight: 800;
-        letter-spacing: .3px;
+        letter-spacing: .2px;
     }
 
+/* Cards glass */
 .jefe-card {
-    background: rgba(255,255,255,.75);
+    border-radius: 18px;
+    background: rgba(255,255,255,.85);
     backdrop-filter: blur(10px);
-    border: 1px solid var(--stroke);
-    border-radius: 16px;
-    box-shadow: var(--shadow2);
+    border: 1px solid rgba(0,0,0,.06);
+    box-shadow: 0 14px 40px rgba(15,23,42,.10);
 }
-
-    .jefe-card .card-body {
-        padding: 18px;
-    }
 
 .jefe-section-title {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
+
+    .jefe-section-title h5 {
+        margin: 0;
+        font-weight: 800;
+    }
+
+    .jefe-section-title .sub {
+        font-size: .85rem;
+        color: #6b7280;
+    }
 
 .jefe-icon {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 12px;
-    display: grid;
-    place-items: center;
-    background: linear-gradient(135deg, rgba(91,107,255,.18), rgba(139,92,246,.16));
-    border: 1px solid rgba(91,107,255,.20);
-    color: var(--text);
-    font-weight: 800;
+    background: rgba(99,102,241,.12);
 }
 
-.jefe-section-title h5 {
-    margin: 0;
-    font-weight: 800;
-    color: var(--text);
-}
-
-.jefe-section-title .sub {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 2px;
-}
-
-.jefe-form .form-control {
-    border-radius: 12px;
-    border: 1px solid rgba(15,23,42,.12);
-    padding: 12px 12px;
-}
-
-.jefe-form .btn {
-    border-radius: 12px;
-    padding: 12px 14px;
-    font-weight: 700;
-}
-
-.jefe-form .btn-primary {
-    background: linear-gradient(135deg, var(--primary), var(--primary2));
-    border: none;
-    box-shadow: 0 10px 22px rgba(91,107,255,.20);
-}
-
+/* Grid */
 .jefe-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 14px;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
 }
 
-@media (min-width: 992px) {
+@media (max-width: 992px) {
     .jefe-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
     }
 }
 
+/* Key value boxes */
 .kv {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
 }
 
     .kv .item {
-        background: rgba(255,255,255,.65);
-        border: 1px solid rgba(15,23,42,.10);
-        border-radius: 14px;
         padding: 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(0,0,0,.06);
+        background: rgba(255,255,255,.70);
     }
 
     .kv .label {
-        font-size: 12px;
-        color: var(--muted);
+        font-size: .78rem;
+        color: #6b7280;
         margin-bottom: 2px;
     }
 
     .kv .value {
-        font-weight: 800;
-        color: var(--text);
+        font-weight: 700;
+        color: #111827;
         word-break: break-word;
     }
 
+/* PAD box */
 .pad-box {
     margin-top: 12px;
-    background: linear-gradient(135deg, rgba(16,185,129,.12), rgba(14,165,233,.10));
-    border: 1px solid rgba(16,185,129,.20);
-    border-radius: 16px;
     padding: 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(16,185,129,.25);
+    background: rgba(16,185,129,.12);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
 }
 
     .pad-box .code {
-        font-size: 18px;
         font-weight: 900;
-        letter-spacing: .5px;
+        font-size: 1.2rem;
+        letter-spacing: .4px;
     }
 
 .pad-pill {
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-radius: 999px;
-    background: rgba(22,163,74,.12);
-    border: 1px solid rgba(22,163,74,.24);
-    color: #0f5132;
+    font-size: .78rem;
     font-weight: 800;
-    font-size: 12px;
+    background: rgba(16,185,129,.15);
+    border: 1px solid rgba(16,185,129,.35);
 }
 
-.alert {
-    border-radius: 14px;
+/* Avatar */
+.avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(255,255,255,.75);
+    border: 1px solid rgba(0,0,0,.06);
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
+    flex: 0 0 auto;
 }
+
+    .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }

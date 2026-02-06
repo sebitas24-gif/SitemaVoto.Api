@@ -2,49 +2,154 @@
     ViewData["Title"] = "Voto Registrado";
     var email = (TempData["Email"] as string) ?? "";
     var comp = (TempData["Comprobante"] as string) ?? "";
+
+    // Opcionales (si luego quieres mandarlos desde el controlador)
+    var nombre = (TempData["Nombre"] as string) ?? "";          // Ej: "Juan Pérez"
+    var cedula = (TempData["Cedula"] as string) ?? "";          // Ej: "1234567890"
+    var provincia = (TempData["Provincia"] as string) ?? "";    // Ej: "Pichincha"
+    var canton = (TempData["Canton"] as string) ?? "";          // Ej: "Quito"
+    var mesa = (TempData["Mesa"] as string) ?? "";              // Ej: "Mesa 1523-A"
+    var fotoUrl = (TempData["FotoUrl"] as string) ?? "";        // URL directa a imagen (https://...jpg)
 }
 
-<div class="container py-4" style="max-width:1100px;">
+@section Styles {
+    <link rel="stylesheet" href="~/css/comprobante.css" asp-append-version="true" />
+}
 
-    <div class="alert alert-success d-flex align-items-center" style="gap:10px;">
-        <h4 class="m-0">✅ Voto Registrado Exitosamente</h4>
-        <span class="text-muted">Su voto fue procesado de forma segura y anónima.</span>
-    </div>
+<div class="cmp-page">
+    <div class="cmp-wrap">
 
-    <div class="card">
-        <div class="card-body">
-            <h5 class="fw-bold mb-3">📄 Comprobante de Votación (no revela su elección)</h5>
-
-            @if (!string.IsNullOrWhiteSpace(email))
-            {
-                <div class="alert alert-info">
-                    Se envió una copia del comprobante al correo: <b>@email</b>
-                </div>
-            }
-
-            <div class="border rounded p-4" style="border:2px solid #3b5bdb !important;">
-                <div class="text-center">
-                    <div class="fw-bold" style="color:#3b5bdb;">REPÚBLICA DEL ECUADOR</div>
-                    <div class="fw-bold">CONSEJO NACIONAL ELECTORAL</div>
-                    <div class="text-muted">Certificado de Sufragio</div>
-                </div>
-
-                <hr />
-
-                <!-- Aquí renderizas el comprobante -->
-                <pre class="m-0" style="white-space:pre-wrap;font-family:inherit;">
-                    @comp
-                </pre>
-
-                <hr />
-                <div class="text-center text-muted">
-                    Nota: Este comprobante certifica que usted votó. No incluye su selección.
-                </div>
-            </div>
-
-            <div class="mt-4">
-                <a class="btn btn-primary" asp-controller="Votacion" asp-action="Index">Volver</a>
+        <!-- Banner éxito -->
+        <div class="cmp-success">
+            <div class="cmp-success-icon">✓</div>
+            <div>
+                <div class="cmp-success-title">Voto registrado exitosamente</div>
+                <div class="cmp-success-sub">Su voto fue procesado de forma segura y anónima.</div>
             </div>
         </div>
+
+        @if (!string.IsNullOrWhiteSpace(email))
+        {
+            <div class="cmp-info">
+                Se envió una copia del comprobante al correo: <b>@email</b>
+            </div>
+        }
+
+        <!-- Tarjeta / certificado -->
+        <div class="cmp-card">
+
+            <div class="cmp-header">
+                <div class="cmp-brand">
+                    <div class="cmp-seal">
+                        <!-- “Sello” fake bonito -->
+                        <div class="cmp-seal-inner">CNE</div>
+                    </div>
+                    <div>
+                        <div class="cmp-country">REPÚBLICA DEL ECUADOR</div>
+                        <div class="cmp-entity">CONSEJO NACIONAL ELECTORAL</div>
+                        <div class="cmp-doc">Certificado de Sufragio</div>
+                    </div>
+                </div>
+
+                <div class="cmp-meta">
+                    <div class="cmp-meta-box">
+                        <div class="lbl">Código de verificación</div>
+                        <div class="val">@(!string.IsNullOrWhiteSpace(comp) ? comp : "—")</div>
+                    </div>
+
+                    <div class="cmp-meta-box">
+                        <div class="lbl">Fecha y hora</div>
+                        <div class="val">@DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cmp-body">
+
+                <!-- Columna izquierda: datos mínimos -->
+                <div class="cmp-left">
+
+                    <div class="cmp-section-title">Datos del elector (opcional)</div>
+
+                    <div class="cmp-grid">
+                        <div class="cmp-field">
+                            <div class="k">Nombre</div>
+                            <div class="v">@(!string.IsNullOrWhiteSpace(nombre) ? nombre : "—")</div>
+                        </div>
+
+                        <div class="cmp-field">
+                            <div class="k">Cédula</div>
+                            <div class="v">@(!string.IsNullOrWhiteSpace(cedula) ? cedula : "—")</div>
+                        </div>
+
+                        <div class="cmp-field">
+                            <div class="k">Provincia</div>
+                            <div class="v">@(!string.IsNullOrWhiteSpace(provincia) ? provincia : "—")</div>
+                        </div>
+
+                        <div class="cmp-field">
+                            <div class="k">Cantón</div>
+                            <div class="v">@(!string.IsNullOrWhiteSpace(canton) ? canton : "—")</div>
+                        </div>
+
+                        <div class="cmp-field" style="grid-column:1/-1;">
+                            <div class="k">Mesa</div>
+                            <div class="v">@(!string.IsNullOrWhiteSpace(mesa) ? mesa : "—")</div>
+                        </div>
+                    </div>
+
+                    <div class="cmp-note">
+                        <b>Nota:</b> Este comprobante certifica que usted votó. No incluye su selección.
+                    </div>
+
+                    <div class="cmp-privacy">
+                        Privacidad: el sistema no almacena su elección en este documento.
+                    </div>
+                </div>
+
+                <!-- Columna derecha: foto (si hay) + QR fake -->
+                <div class="cmp-right">
+
+                    @* FOTO OPCIONAL *@
+                    @if (!string.IsNullOrWhiteSpace(fotoUrl))
+                    {
+                        <div class="cmp-photo">
+                            <img src="@fotoUrl"
+                                 alt="Foto del elector"
+                                 onerror="this.closest('.cmp-photo').style.display='none';" />
+                            <div class="cmp-photo-cap">Foto (opcional)</div>
+                        </div>
+                    }
+
+                    <div class="cmp-qr">
+                        <div class="cmp-qr-box">
+                            <!-- QR “decorativo”. Si luego quieres QR real, se genera con lib/imagen -->
+                            <div class="cmp-qr-fake"></div>
+                        </div>
+                        <div class="cmp-qr-text">
+                            Verificación: use el código en el portal de resultados / auditoría (demo).
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="cmp-footer">
+                <div class="cmp-footer-left">
+                    Documento generado automáticamente. Válido solo como comprobante informativo.
+                </div>
+                <div class="cmp-footer-right">
+                    CNE · Sistema de Voto Electrónico (Demo)
+                </div>
+            </div>
+
+        </div>
+
+        <div class="cmp-actions">
+            <a class="btn btn-primary btn-lg" asp-controller="Votacion" asp-action="Index">Volver</a>
+            <button class="btn btn-outline-secondary btn-lg" onclick="window.print()">Imprimir</button>
+        </div>
+
     </div>
 </div>
