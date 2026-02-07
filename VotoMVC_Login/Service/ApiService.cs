@@ -235,6 +235,24 @@ namespace VotoMVC_Login.Service
             // ✅ NUEVOS
             public bool usado { get; set; }
             public int estadoProceso { get; set; }
+            public string? cedula { get; set; }
+
+            public string nombre { get; set; }
+            public string provincia { get; set; }
+            public string canton { get; set; }
+            public string mesa { get; set; }
+            public string? email { get; set; }
+
+            public string fotoUrl { get; set; }
+        }
+        public class ProcesoData
+        {
+            public int id { get; set; }
+            public string nombre { get; set; }
+            public int estado { get; set; }
+            // 🚩 Cambia inicioUtc por inicioLocal para que coincida con la API
+            public DateTime? inicioLocal { get; set; }
+            public DateTime? finLocal { get; set; }
         }
 
         // Si usas este endpoint también (api/acceso/ciudadano/{cedula}) con wrap ok/error/data:
@@ -395,12 +413,11 @@ namespace VotoMVC_Login.Service
         {
             public int id { get; set; }
             public string nombre { get; set; } = "";
+            public int estado { get; set; }
 
-            // 🔥 AQUÍ ESTÁ EL FIX
-            public int estado { get; set; }  // antes lo tenías string
-
-            public DateTime? inicioUtc { get; set; }
-            public DateTime? finUtc { get; set; }
+            // 🔥 CAMBIA ESTOS NOMBRES: Deben ser iguales a los de Swagger
+            public DateTime? inicioLocal { get; set; }
+            public DateTime? finLocal { get; set; }
         }
 
 

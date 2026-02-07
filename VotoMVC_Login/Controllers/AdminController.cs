@@ -140,16 +140,17 @@ namespace VotoMVC_Login.Controllers
         [HttpGet]
         public async Task<IActionResult> Panel(CancellationToken ct)
         {
-            var vm = new AdminPanelVm();
-
+            var vm = new AdminPanelVm { Proceso = new ProcesoCardVm() };
             var proc = await _api.GetProcesoActivoAsync(ct);
+
             if (proc?.ok == true && proc.data != null)
             {
                 vm.Proceso.Nombre = proc.data.nombre;
-                vm.Proceso.Tipo = proc.data.estado.ToString(); // si quieres, cámbialo a texto
-                vm.Proceso.Inicio = proc.data.inicioUtc?.ToString("dd/MM/yyyy HH:mm") ?? "—";
-                vm.Proceso.Cierre = proc.data.finUtc?.ToString("dd/MM/yyyy HH:mm") ?? "—";
                 vm.Proceso.Estado = proc.data.estado.ToString();
+
+                // 🚩 Ahora sí reconocerá inicioLocal y finLocal
+                vm.Proceso.Inicio = proc.data.inicioLocal?.ToString("dd/MM/yyyy HH:mm") ?? "Sin fecha";
+                vm.Proceso.Cierre = proc.data.finLocal?.ToString("dd/MM/yyyy HH:mm") ?? "Sin fecha";
             }
             else
             {
@@ -175,8 +176,9 @@ namespace VotoMVC_Login.Controllers
                 {
                     Nombre = proc.data.nombre,
                     Tipo = proc.data.estado.ToString(),
-                    Inicio = proc.data.inicioUtc?.ToString("dd/MM/yyyy HH:mm") ?? "—",
-                    Cierre = proc.data.finUtc?.ToString("dd/MM/yyyy HH:mm") ?? "—",
+                    // 🚩 CAMBIA ESTO: Usa inicioLocal y finLocal
+                    Inicio = proc.data.inicioLocal?.ToString("dd/MM/yyyy HH:mm") ?? "—",
+                    Cierre = proc.data.finLocal?.ToString("dd/MM/yyyy HH:mm") ?? "—",
                     Estado = proc.data.estado.ToString()
                 };
                 vm.Nuevo.Estado = 2;

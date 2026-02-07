@@ -1,15 +1,14 @@
 ﻿@{
     ViewData["Title"] = "Voto Registrado";
-    var email = (TempData["Email"] as string) ?? "";
-    var comp = (TempData["Comprobante"] as string) ?? "";
+    var email = (TempData.Peek("Email") as string) ?? "";
+    var comp = (TempData.Peek("Comprobante") as string) ?? "";
 
-    // Opcionales (si luego quieres mandarlos desde el controlador)
-    var nombre = (TempData["Nombre"] as string) ?? "";          // Ej: "Juan Pérez"
-    var cedula = (TempData["Cedula"] as string) ?? "";          // Ej: "1234567890"
-    var provincia = (TempData["Provincia"] as string) ?? "";    // Ej: "Pichincha"
-    var canton = (TempData["Canton"] as string) ?? "";          // Ej: "Quito"
-    var mesa = (TempData["Mesa"] as string) ?? "";              // Ej: "Mesa 1523-A"
-    var fotoUrl = (TempData["FotoUrl"] as string) ?? "";        // URL directa a imagen (https://...jpg)
+    var nombre = (TempData.Peek("Nombre") as string) ?? "";
+    var cedula = (TempData.Peek("Cedula") as string) ?? "";
+    var provincia = (TempData.Peek("Provincia") as string) ?? "";
+    var canton = (TempData.Peek("Canton") as string) ?? "";
+    var mesa = (TempData.Peek("Mesa") as string) ?? "";
+    var fotoUrl = (TempData.Peek("FotoUrl") as string) ?? "";
 }
 
 @section Styles {
@@ -69,7 +68,7 @@
                 <!-- Columna izquierda: datos mínimos -->
                 <div class="cmp-left">
 
-                    <div class="cmp-section-title">Datos del elector (opcional)</div>
+                    <div class="cmp-section-title">Datos del elector </div>
 
                     <div class="cmp-grid">
                         <div class="cmp-field">
@@ -148,7 +147,12 @@
 
         <div class="cmp-actions">
             <a class="btn btn-primary btn-lg" asp-controller="Votacion" asp-action="Index">Volver</a>
-            <button class="btn btn-outline-secondary btn-lg" onclick="window.print()">Imprimir</button>
+            <a class="btn btn-outline-secondary btn-lg"
+               asp-controller="Votacion"
+               asp-action="DescargarComprobantePdf">
+                Descargar comprobante (PDF)
+            </a>
+
         </div>
 
     </div>
