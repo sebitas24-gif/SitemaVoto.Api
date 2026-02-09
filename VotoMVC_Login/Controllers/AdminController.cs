@@ -34,6 +34,11 @@ namespace VotoMVC_Login.Controllers
         // LOGIN (CEDULA -> OTP)
         // =========================
         [HttpGet]
+        public IActionResult Index()
+        {
+            return RedirectToAction(nameof(Login));
+        }
+        [HttpGet]
         public IActionResult Login() => View(new AdminLoginVm());
 
         [HttpPost]

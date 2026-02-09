@@ -30,6 +30,7 @@ public class Program
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
         builder.Services.AddControllersWithViews();
+        builder.Services.AddTransient<EmailService>();
         builder.Services.AddRazorPages();
 
         // =======================
@@ -77,7 +78,7 @@ public class Program
 
         app.MapControllerRoute(
             name: "default",
-            pattern: "{controller=Jefe}/{action=Login}/{id?}");
+            pattern: "{controller=Home}/{action=Index}/{id?}");
 
         app.MapRazorPages();
 

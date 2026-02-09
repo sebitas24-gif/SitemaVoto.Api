@@ -255,11 +255,12 @@ namespace VotoMVC_Login.Controllers
         }
 
         [HttpGet]
-        public IActionResult DescargarComprobantePdf()
+        public async Task<IActionResult> DescargarComprobantePdf([FromServices] EmailService emailService)
         {
+            TempData.Keep();
             QuestPDF.Settings.License = LicenseType.Community;
 
-            // Recuperamos lo que guardamos arriba
+            var email = TempData.Peek("Email") as string ?? "";
             var nombre = TempData.Peek("Nombre") as string ?? "N/A";
             var cedula = TempData.Peek("Cedula") as string ?? "N/A";
             var provincia = TempData.Peek("Provincia") as string ?? "N/A";
@@ -273,14 +274,12 @@ namespace VotoMVC_Login.Controllers
                 {
                     page.Margin(40);
                     page.Size(PageSizes.A4);
-                    // CORRECCIÓN: "Helvetica" como texto evita el error de compilación
                     page.DefaultTextStyle(x => x.FontSize(11).FontFamily("Helvetica"));
 
                     page.Content().Column(col =>
                     {
                         col.Spacing(20);
 
-                        // Encabezado
                         col.Item().AlignCenter().Text("REPÚBLICA DEL ECUADOR").FontSize(10);
                         col.Item().AlignCenter().Text("CONSEJO NACIONAL ELECTORAL").Bold().FontSize(14);
                         col.Item().PaddingTop(10).AlignCenter().Text("CERTIFICADO DE SUFRAGIO")
@@ -288,7 +287,6 @@ namespace VotoMVC_Login.Controllers
 
                         col.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
 
-                        // Datos del Ciudadano (Igual que el panel del Jefe)
                         col.Item().Padding(10).Background(Colors.Grey.Lighten5).Column(c =>
                         {
                             c.Spacing(8);
@@ -296,15 +294,9 @@ namespace VotoMVC_Login.Controllers
                             c.Item().Text(t => { t.Span("Cédula: ").Bold(); t.Span(cedula); });
                             c.Item().Text(t => { t.Span("Provincia: ").Bold(); t.Span(provincia); });
                             c.Item().Text(t => { t.Span("Cantón: ").Bold(); t.Span(canton); });
-
-                            // ESTA ES LA LÍNEA QUE BUSCAMOS
-                            c.Item().Text(t => {
-                                t.Span("Mesa Electoral: ").Bold();
-                                t.Span(mesa).Bold().FontColor(Colors.Blue.Darken2);
-                            });
+                            c.Item().Text(t => { t.Span("Mesa Electoral: ").Bold(); t.Span(mesa).Bold().FontColor(Colors.Blue.Darken2); });
                         });
 
-                        // Código de barras o verificación
                         col.Item().AlignRight().Text(t => {
                             t.Span("CÓDIGO DE VERIFICACIÓN: ").FontSize(9);
                             t.Span(comp).Bold().FontSize(12);
@@ -316,8 +308,32 @@ namespace VotoMVC_Login.Controllers
                 });
             });
 
-            return File(pdf.GeneratePdf(), "application/pdf", $"Certificado_Voto_{cedula}.pdf");
+            var pdfBytes = pdf.GeneratePdf();
+            var fileName = $"Certificado_Voto_{cedula}.pdf";
+
+            // ✅ Enviar el mismo PDF por correo (si hay email)
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                await emailService.EnviarPdfAdjuntoAsync(
+                    paraEmail: email,
+                    asunto: "Comprobante de votación (PDF)",
+                    texto: $"Hola {nombre},\nAdjunto está tu comprobante.\nCódigo: {comp}\n\nVotoEcua (Demo)",
+                    pdfBytes: pdfBytes,
+                    fileName: fileName
+                );
+
+                TempData["PapeletaEnviada"] = true; // si quieres mostrarlo en la vista
+            }
+            else
+            {
+                TempData["PapeletaEnviada"] = false;
+            }
+
+            // ✅ Igual te lo devuelve para descargar
+            return File(pdfBytes, "application/pdf", fileName);
         }
+
+
         [HttpPost]
         public async Task<IActionResult> ProcesarBusqueda(string cedula, CancellationToken ct)
         {

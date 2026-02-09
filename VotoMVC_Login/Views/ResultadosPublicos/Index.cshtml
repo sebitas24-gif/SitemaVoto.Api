@@ -1,28 +1,50 @@
 ﻿@model VotoMVC_Login.Models.DTOs.ResultadosNacionalResponse
-@{
-    ViewData["Title"] = "Resultados en tiempo real";
+@using VotoModelos.Enums
 
-    // Modo: EN_VIVO o FINALES (lo pone el controlador con ViewBag.Modo)
-    var modo = (ViewBag.Modo as string) ?? "EN_VIVO";
+@{
+    ViewData["Title"] = "Resultados";
 
     // Listas seguras (evita null)
     var porCandidato = Model?.porCandidato ?? new List<VotoMVC_Login.Models.DTOs.ResultadosNacionalResponse.PorCandidato>();
     var lideres = Model?.lideresPorProvincia ?? new List<VotoMVC_Login.Models.DTOs.ResultadosNacionalResponse.LiderProvincia>();
+
+    // =========================
+    // MAPEO: Model.estadoProceso (string/int) -> EstadoProceso (enum)
+    // =========================
+    var estadoTexto = (Model?.estadoProceso ?? "").Trim();
+
+    // Default si viene vacío o raro
+    EstadoProceso estadoProcesoEnum = EstadoProceso.Activo;
+
+    if (!string.IsNullOrWhiteSpace(estadoTexto))
+    {
+        // Intenta por nombre ("Activo", "Cerrado", "Configuracion")
+        if (!Enum.TryParse<EstadoProceso>(estadoTexto, ignoreCase: true, out estadoProcesoEnum))
+        {
+            // Si viene como número ("1","2","3")
+            if (int.TryParse(estadoTexto, out var n) && Enum.IsDefined(typeof(EstadoProceso), n))
+                estadoProcesoEnum = (EstadoProceso)n;
+            else
+                estadoProcesoEnum = EstadoProceso.Activo;
+        }
+    }
+
+    bool estaCerrado = (estadoProcesoEnum == EstadoProceso.Cerrado);
 
     // Top 1 nacional (si existe)
     var top = porCandidato
         .OrderByDescending(x => x.votos)
         .FirstOrDefault();
 
-    // Provincias disponibles desde líderes
-    var provincias = lideres
+    // Provincias donde sí hubo votos (según votosLider > 0)
+    var provinciasConVotos = lideres
+        .Where(x => !string.IsNullOrWhiteSpace(x.provincia) && x.votosLider > 0)
         .Select(x => x.provincia)
-        .Where(x => !string.IsNullOrWhiteSpace(x))
         .Distinct()
         .OrderBy(x => x)
         .ToList();
 
-    string fmtNum(long n) => n.ToString("N0"); // 1,234
+    string fmtNum(long n) => n.ToString("N0");
 }
 
 <div class="container py-5" style="max-width: 1050px;">
@@ -30,65 +52,96 @@
     <div class="text-center mb-4">
         <h2 class="fw-bold mb-1">
             <span style="font-size: 26px;">📊</span>
-            Resultados Electorales en Tiempo Real
+            Resultados Electorales
         </h2>
         <div class="text-muted">Elecciones Presidenciales 2026</div>
     </div>
 
-    <!-- Tabs -->
-    <div class="d-flex justify-content-center gap-2 mb-4">
-        <a class="btn btn-outline-primary @(modo == "EN_VIVO" ? "active" : "")"
-           asp-controller="ResultadosPublicos" asp-action="Index">
-            En vivo
-        </a>
-
-        <a class="btn btn-outline-primary @(modo == "FINALES" ? "active" : "")"
-           asp-controller="ResultadosPublicos" asp-action="Finales">
-            Finales
-        </a>
-    </div>
-
-    <!-- Alerts (opcional) -->
-    @if (TempData["Ok"] != null)
+    @* ==========================
+       BLOQUEO: si NO está cerrado, NO se ve nada
+       ========================== *@
+    @if (!estaCerrado)
     {
-        <div class="alert alert-success">@TempData["Ok"]</div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger">@TempData["Error"]</div>
+        <div class="alert alert-warning rounded-4 shadow-sm mb-4">
+            <div class="d-flex align-items-start gap-3">
+                <div style="font-size:22px;">⏳</div>
+                <div>
+                    <div class="fw-bold">Proceso electoral en curso</div>
+                    <div class="small" style="opacity:.9;">
+                        Los resultados finales se habilitarán automáticamente cuando el estado sea <b>Cerrado</b>.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between flex-wrap gap-3">
+                    <div>
+                        <div class="text-muted small">Estado actual</div>
+                        <div class="fw-bold" style="font-size:18px;">
+                            @estadoProcesoEnum
+                        </div>
+
+                        <span class="badge bg-dark mt-2">RESULTADOS BLOQUEADOS</span>
+                    </div>
+
+                    <div class="text-end">
+                        <div class="text-muted small">Disponibilidad</div>
+                        <div class="fw-bold">Solo al cerrar el proceso</div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="text-muted">
+                    Por política del sistema, no se muestran resultados mientras el proceso esté <b>@estadoProcesoEnum</b>.
+                </div>
+
+                <div class="mt-4">
+                  
+                </div>
+            </div>
+        </div>
+
+        return;
     }
 
-    <!-- Estado + última actualización -->
+    @* ==========================
+       VISTA FINAL: proceso CERRADO
+       ========================== *@
+
+    <!-- Estado -->
     <div class="card shadow-sm rounded-4 mb-4">
         <div class="card-body d-flex justify-content-between flex-wrap gap-3">
             <div>
                 <div class="text-muted small">Estado del proceso</div>
-                <div class="fw-bold">@Model?.estadoProceso</div>
+                <div class="fw-bold">@estadoProcesoEnum</div>
 
-                <span class="badge bg-warning text-dark mt-2" style="letter-spacing:.5px;">
-                    @Model?.estadoProceso
+                <span class="badge bg-success mt-2" style="letter-spacing:.5px;">
+                    RESULTADOS FINALES
                 </span>
             </div>
 
             <div class="text-end">
-                <div class="text-muted small">Última actualización</div>
-                <div class="fw-bold">@DateTime.Now.ToString("dd/MM/yyyy, h:mm:ss tt")</div>
+                <div class="text-muted small">Fecha de cierre</div>
+                <div class="fw-bold">—</div>
             </div>
         </div>
     </div>
 
-    <!-- Candidato liderando -->
-    <div class="card shadow-sm rounded-4 mb-4" style="background:#37b36b; color:white;">
+    <!-- Ganador / líder nacional -->
+    <div class="card shadow-sm rounded-4 mb-4" style="background:#2b66ff; color:white;">
         <div class="card-body text-center py-5">
             <div class="fw-semibold" style="opacity:.95;">
-                🏆 <span class="ms-1">CANDIDATO LIDERANDO</span>
+                🏆 <span class="ms-1">GANADOR / LÍDER NACIONAL</span>
             </div>
 
             <div class="display-6 fw-bold mt-2">
                 @(top?.nombre ?? "—")
             </div>
 
-            <div style="opacity:.95;">Nacional</div>
+            <div style="opacity:.95;">Resultado nacional</div>
 
             <div class="fs-3 fw-bold mt-2">
                 @(top != null ? $"{fmtNum(top.votos)} votos" : "0 votos")
@@ -96,34 +149,81 @@
         </div>
     </div>
 
-    <!-- Filtro por provincia (solo visual por ahora) -->
+    <!-- Filtro por provincia -->
     <div class="card shadow-sm rounded-4 mb-4">
         <div class="card-body">
-            <h5 class="fw-bold mb-2">Filtrar por provincia</h5>
-            <div class="text-muted small mb-2">Provincia</div>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h5 class="fw-bold mb-1">Filtrar por provincia</h5>
+                    <div class="text-muted small">Se muestran solo provincias donde hubo votos</div>
+                </div>
+                <span class="badge bg-light text-dark border rounded-pill px-3 py-2">
+                    Provincias con votos: @provinciasConVotos.Count
+                </span>
+            </div>
 
-            <select class="form-select" id="selProvincia">
-                <option value="">Todas (Nacional)</option>
-                @foreach (var p in provincias)
-                {
-                    <option value="@p">@p</option>
-                }
-            </select>
+            <div class="mt-3">
+                <select class="form-select" id="selProvincia">
+                    <option value="">Todas (Nacional)</option>
+                    @foreach (var p in provinciasConVotos)
+                    {
+                        <option value="@p">@p</option>
+                    }
+                </select>
 
-            <div class="text-muted small mt-2">
-                
+                <div class="text-muted small mt-2" id="provHint"></div>
             </div>
         </div>
     </div>
 
-    <!-- Tabla votos por candidato -->
+    <!-- Gráficas -->
     <div class="card shadow-sm rounded-4 mb-4">
         <div class="card-body">
-            <h5 class="fw-bold mb-3">Votos por candidato</h5>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="fw-bold mb-0">📊 Estadísticas</h5>
+                <div class="text-muted small" id="chartScope">Nacional</div>
+            </div>
 
             @if (porCandidato.Any())
             {
-                <table class="table table-sm">
+                <div class="row g-4 mt-2">
+                    <div class="col-12 col-lg-8">
+                        <div class="p-3 border rounded-4">
+                            <div class="fw-semibold mb-2" id="tituloBarras">Barras: votos por candidato (Nacional)</div>
+                            <div style="height:320px;">
+                                <canvas id="chartBarras"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-4">
+                        <div class="p-3 border rounded-4">
+                            <div class="fw-semibold mb-2" id="tituloDona">Distribución (% aprox.)</div>
+                            <div style="height:320px;">
+                                <canvas id="chartDona"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-muted small mt-2">
+                    Nota: el filtro por provincia grafica al líder provincial (tu API no trae el desglose por candidato dentro de cada provincia).
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-secondary mt-3 mb-0">No hay datos para graficar.</div>
+            }
+        </div>
+    </div>
+
+    <!-- Tabla votos por candidato (Nacional) -->
+    <div class="card shadow-sm rounded-4 mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Votos finales por candidato (Nacional)</h5>
+
+            @if (porCandidato.Any())
+            {
+                <table class="table table-sm align-middle">
                     <thead>
                         <tr>
                             <th>Candidato</th>
@@ -151,11 +251,11 @@
     <!-- Tabla líderes por provincia -->
     <div class="card shadow-sm rounded-4 mb-4">
         <div class="card-body">
-            <h5 class="fw-bold mb-3">🗺️ Líder por provincia (Ecuador)</h5>
+            <h5 class="fw-bold mb-3">🗺️ Líder final por provincia (Ecuador)</h5>
 
             @if (lideres.Any())
             {
-                <table class="table table-sm" id="tblLideres">
+                <table class="table table-sm align-middle" id="tblLideres">
                     <thead>
                         <tr>
                             <th>Provincia</th>
@@ -164,7 +264,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var l in lideres.OrderBy(x => x.provincia))
+                        @foreach (var l in lideres
+                       .Where(x => !string.IsNullOrWhiteSpace(x.provincia) && x.votosLider > 0)
+                       .OrderBy(x => x.provincia))
                         {
                             <tr data-prov="@l.provincia">
                                 <td>@l.provincia</td>
@@ -177,7 +279,7 @@
             }
             else
             {
-                <div class="alert alert-secondary mb-0">No hay líderes por provincia todavía.</div>
+                <div class="alert alert-secondary mb-0">No hay líderes por provincia.</div>
             }
         </div>
     </div>
@@ -185,21 +287,172 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-        // Filtro simple SOLO para la tabla de líderes (visual)
+        // =========================
+        // DATOS (Razor -> JS)
+        // =========================
+
+        // Nacional: votos por candidato
+        const nacionalLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        porCandidato.OrderByDescending(x => x.votos).Select(x => x.nombre).ToList()
+    ));
+
+        const nacionalVotos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        porCandidato.OrderByDescending(x => x.votos).Select(x => x.votos).ToList()
+    ));
+
+        // Líderes por provincia (solo donde hubo votos)
+        const lideresProvincia = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        lideres
+            .Where(x => !string.IsNullOrWhiteSpace(x.provincia) && x.votosLider > 0)
+            .Select(x => new { provincia = x.provincia, lider = x.lider, votosLider = x.votosLider })
+            .ToList()
+    ));
+
+        const totalNacional = nacionalVotos.reduce((a, b) => a + b, 0);
+
+        // UI
         const sel = document.getElementById("selProvincia");
         const tbl = document.getElementById("tblLideres");
+        const hint = document.getElementById("provHint");
+        const scope = document.getElementById("chartScope");
+        const tituloBarras = document.getElementById("tituloBarras");
+        const tituloDona = document.getElementById("tituloDona");
 
-        if (sel && tbl) {
+        // Charts
+        const canvasBarras = document.getElementById("chartBarras");
+        const canvasDona = document.getElementById("chartDona");
+
+        let chartBarras = null;
+        let chartDona = null;
+
+        function crearBarras(labels, votos, tituloDataset) {
+            if (!canvasBarras) return;
+            if (chartBarras) chartBarras.destroy();
+
+            chartBarras = new Chart(canvasBarras, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: tituloDataset,
+                        data: votos,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => " " + (ctx.parsed.y ?? 0).toLocaleString("en-US") + " votos"
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { maxRotation: 35, minRotation: 0 } },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: (v) => v.toLocaleString("en-US") }
+                        }
+                    }
+                }
+            });
+        }
+
+        function crearDona(labels, votos) {
+            if (!canvasDona) return;
+            if (chartDona) chartDona.destroy();
+
+            chartDona = new Chart(canvasDona, {
+                type: "doughnut",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: votos,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: "bottom" },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                    const val = ctx.parsed ?? 0;
+                                    const pct = total ? ((val / total) * 100).toFixed(1) : 0;
+                                    return ` ${ctx.label}: ${val.toLocaleString("en-US")} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function filtrarTablaProvincia(prov) {
+            if (!tbl) return;
+
+            const rows = tbl.querySelectorAll("tbody tr");
+            rows.forEach(r => {
+                const p = r.getAttribute("data-prov");
+                if (!prov || prov === "" || p === prov) r.style.display = "";
+                else r.style.display = "none";
+            });
+        }
+
+        function actualizarGraficasPorProvincia(prov) {
+            if (!nacionalLabels.length) return;
+
+            // Nacional
+            if (!prov) {
+                if (scope) scope.textContent = "Nacional";
+                if (tituloBarras) tituloBarras.textContent = "Barras: votos por candidato (Nacional)";
+                if (tituloDona) tituloDona.textContent = "Distribución (% aprox.)";
+                if (hint) hint.textContent = "";
+
+                crearBarras(nacionalLabels, nacionalVotos, "Votos (Nacional)");
+                crearDona(nacionalLabels, nacionalVotos);
+                return;
+            }
+
+            // Provincia: solo tenemos líder (no desglose real)
+            const item = lideresProvincia.find(x => x.provincia === prov);
+            if (!item) {
+                if (hint) hint.textContent = "No hay datos para esta provincia. Mostrando nacional.";
+                crearBarras(nacionalLabels, nacionalVotos, "Votos (Nacional)");
+                crearDona(nacionalLabels, nacionalVotos);
+                return;
+            }
+
+            if (scope) scope.textContent = prov;
+            if (tituloBarras) tituloBarras.textContent = `Barras: líder en ${prov}`;
+            if (tituloDona) tituloDona.textContent = `Líder vs resto (aprox.) en ${prov}`;
+            if (hint) hint.textContent = `Provincia seleccionada: ${prov}. (Se grafica el líder provincial con los datos actuales).`;
+
+            crearBarras([item.lider], [item.votosLider], `Votos líder (${prov})`);
+
+            const resto = Math.max(0, totalNacional - item.votosLider);
+            crearDona([item.lider, "Resto (aprox.)"], [item.votosLider, resto]);
+        }
+
+        // Inicial
+        crearBarras(nacionalLabels, nacionalVotos, "Votos (Nacional)");
+        crearDona(nacionalLabels, nacionalVotos);
+
+        // Evento filtro
+        if (sel) {
             sel.addEventListener("change", function () {
                 const prov = this.value;
-                const rows = tbl.querySelectorAll("tbody tr");
-
-                rows.forEach(r => {
-                    const p = r.getAttribute("data-prov");
-                    if (!prov || prov === "" || p === prov) r.style.display = "";
-                    else r.style.display = "none";
-                });
+                filtrarTablaProvincia(prov);
+                actualizarGraficasPorProvincia(prov);
             });
         }
     </script>

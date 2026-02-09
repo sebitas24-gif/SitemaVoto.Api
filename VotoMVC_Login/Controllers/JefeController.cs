@@ -33,6 +33,11 @@ namespace VotoMVC_Login.Controllers
         // LOGIN JEFE (CEDULA -> OTP)
         // =========================
         [HttpGet]
+        public IActionResult Index()
+        {
+            return RedirectToAction(nameof(Login));
+        }
+        [HttpGet]
         public IActionResult Login()
         {
             return View(); // Views/Jefe/Login.cshtml
@@ -44,31 +49,38 @@ namespace VotoMVC_Login.Controllers
         {
             cedula = (cedula ?? "").Trim();
 
-            if (cedula.Length != 10)
+            if (cedula.Length != 10 || !cedula.All(char.IsDigit))
             {
-                TempData["Error"] = "Ingresa una cédula válida (10 dígitos).";
+                TempData["Error"] = "Ingresa una cédula válida (10 dígitos numéricos).";
                 return RedirectToAction(nameof(Login));
             }
 
-            // 1) Solicitar OTP al correo (igual que Admin)
             var r = await _api.SolicitarOtpCorreoAsync(cedula, ct);
 
             if (!r.Ok)
             {
-                TempData["Error"] = r.Error ?? "No se pudo solicitar OTP.";
+                var msg = (r.Error ?? "").ToLowerInvariant();
+
+                // Ajusta keywords según lo que tu API realmente devuelve
+                if (msg.Contains("no encontrado") || msg.Contains("not found") || msg.Contains("no existe"))
+                    TempData["Error"] = "Cédula no encontrada en la base de datos.";
+                else if (msg.Contains("rol") || msg.Contains("forbidden") || msg.Contains("no autorizado") || msg.Contains("permiso"))
+                    TempData["Error"] = "Acceso denegado: esta cédula no pertenece a un Jefe de Junta.";
+                else
+                    TempData["Error"] = r.Error ?? "No se pudo solicitar OTP.";
+
                 return RedirectToAction(nameof(Login));
             }
 
-            // 2) Guardar cédula en sesión y mandar a vista OTP
             HttpContext.Session.SetString(SessCedula, cedula);
-
             return RedirectToAction(nameof(Otp));
         }
+
 
         // =========================
         // OTP JEFE
         // =========================
-       [HttpGet]
+        [HttpGet]
 public IActionResult Otp()
 {
     var cedula = HttpContext.Session.GetString("jefe_cedula");
