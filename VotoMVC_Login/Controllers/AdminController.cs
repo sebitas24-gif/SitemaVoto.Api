@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using VotoModelos.Enums;
 using VotoMVC_Login.Models.DTOs;
 using VotoMVC_Login.Models.ViewModels;
 using VotoMVC_Login.Models.ViewModels.Admin;
@@ -174,23 +175,34 @@ namespace VotoMVC_Login.Controllers
         {
             var vm = new AdminProcesosVm();
 
+            // Defaults para el formulario (aunque no haya activo)
+            vm.Nuevo.Estado = 2; // Activo por defecto
+          
+
+            // Mensajes después de redirect
+            vm.Ok = TempData["Ok"] as string;
+            vm.Error = TempData["Error"] as string;
+
             var proc = await _api.GetProcesoActivoAsync(ct);
             if (proc?.ok == true && proc.data != null)
             {
                 vm.Activo = new ProcesoCardVm
                 {
                     Nombre = proc.data.nombre,
-                    Tipo = proc.data.estado.ToString(),
-                    // 🚩 CAMBIA ESTO: Usa inicioLocal y finLocal
+                    TipoEnum = proc.data.TipoEnum,
+                    Tipo = proc.data.TipoEnum.ToString(),  // "Nominal" / "Plancha" / "Plurinominal"
                     Inicio = proc.data.inicioLocal?.ToString("dd/MM/yyyy HH:mm") ?? "—",
                     Cierre = proc.data.finLocal?.ToString("dd/MM/yyyy HH:mm") ?? "—",
-                    Estado = proc.data.estado.ToString()
+                    Estado = proc.data.EstadoEnum.ToString(),
+                    Descripcion = proc.data.descripcion
                 };
-                vm.Nuevo.Estado = 2;
+
+
             }
 
             return View(vm);
         }
+
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
@@ -209,19 +221,21 @@ namespace VotoMVC_Login.Controllers
                 Tipo = vm.Nuevo.Tipo,
                 Estado = vm.Nuevo.Estado,
                 InicioLocal = vm.Nuevo.InicioLocal,
-                FinLocal = vm.Nuevo.FinLocal
+                FinLocal = vm.Nuevo.FinLocal,
+                 Descripcion = vm.Nuevo.Descripcion
             };
 
             var r = await _api.CrearProcesoAsync(dto, ct);
             if (r?.ok != true)
             {
-                vm.Error = r?.error ?? "No se pudo crear el proceso.";
-                return View(vm);
+                TempData["Error"] = r?.error ?? "No se pudo crear el proceso.";
+                return RedirectToAction(nameof(Procesos));
             }
 
-            vm.Ok = $"Proceso creado. Id={r.data}";
+            TempData["Ok"] = $"Proceso creado. Id={r.data}";
             return RedirectToAction(nameof(Procesos));
         }
+
 
         // =========================
         // CANDIDATOS
@@ -232,11 +246,33 @@ namespace VotoMVC_Login.Controllers
         {
             var vm = new AdminCandidatosVm();
 
+            // Mensajes (si vienes de Redirect)
+            vm.Ok = TempData["Ok"] as string;
+            vm.Error = TempData["Error"] as string;
+
+            // 1) Proceso activo (para saber Id y Tipo)
             var proc = await _api.GetProcesoActivoAsync(ct);
-            vm.ProcesoElectoralId = proc?.data?.id ?? 0;
+
+            if (proc?.ok != true || proc.data == null)
+            {
+                vm.Error = "No hay un proceso electoral ACTIVO. Primero crea/activa un proceso.";
+                vm.ProcesoElectoralId = 0;
+                vm.TipoProceso = default; // queda en 0
+                vm.Nuevo.ProcesoElectoralId = 0;
+                vm.Lista = new();
+                return View(vm);
+            }
+
+            vm.ProcesoElectoralId = proc.data.id;
+            vm.TipoProceso =(TipoEleccion)proc.data.tipo;              // ✅ CLAVE
             vm.Nuevo.ProcesoElectoralId = vm.ProcesoElectoralId;
 
+            // 2) Lista candidatos
             var list = await _api.GetCandidatosAdminAsync(ct) ?? new();
+
+            // Si tu API devuelve candidatos de TODOS los procesos, filtra aquí:
+            list = list.Where(x => x.ProcesoElectoralId == vm.ProcesoElectoralId).ToList();
+
             vm.Lista = list.Select(x => new CandidatoRowVm
             {
                 Id = x.Id,
@@ -256,37 +292,79 @@ namespace VotoMVC_Login.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Candidatos(AdminCandidatosVm vm, CancellationToken ct)
         {
+            // 0) Asegurar proceso activo para setear Id y Tipo aunque el form venga mal
+            var proc = await _api.GetProcesoActivoAsync(ct);
+
+            if (proc?.ok != true || proc.data == null)
+            {
+                TempData["Error"] = "No hay proceso electoral ACTIVO. No se puede crear candidatos.";
+                return RedirectToAction(nameof(Candidatos));
+            }
+
+            vm.ProcesoElectoralId = proc.data.id;
+            vm.TipoProceso = (TipoEleccion)proc.data.tipo;
+            vm.Nuevo.ProcesoElectoralId = vm.ProcesoElectoralId;
+
+            // 1) Validación MVC normal
             if (!ModelState.IsValid)
             {
                 vm.Error = "Revisa los campos del candidato.";
-                vm.Lista = (await _api.GetCandidatosAdminAsync(ct) ?? new())
-                    .Select(x => new CandidatoRowVm
-                    {
-                        Id = x.Id,
-                        ProcesoElectoralId = x.ProcesoElectoralId,
-                        NombreCompleto = x.NombreCompleto,
-                        Partido = x.Partido,
-                        Binomio = x.Binomio,
-                        NumeroLista = x.NumeroLista,
-                        Activo = x.Activo
-                    }).ToList();
+
+                var list = await _api.GetCandidatosAdminAsync(ct) ?? new();
+                list = list.Where(x => x.ProcesoElectoralId == vm.ProcesoElectoralId).ToList();
+
+                vm.Lista = list.Select(x => new CandidatoRowVm
+                {
+                    Id = x.Id,
+                    ProcesoElectoralId = x.ProcesoElectoralId,
+                    NombreCompleto = x.NombreCompleto,
+                    Partido = x.Partido,
+                    Binomio = x.Binomio,
+                    NumeroLista = x.NumeroLista,
+                    Activo = x.Activo
+                }).ToList();
+
                 return View(vm);
             }
 
+            // 2) DTO para crear
             var dto = new ApiService.CandidatoCreateDto
             {
                 ProcesoElectoralId = vm.Nuevo.ProcesoElectoralId,
-                NombreCompleto = vm.Nuevo.NombreCompleto,
-                Partido = vm.Nuevo.Partido,
-                Binomio = vm.Nuevo.Binomio,
+                NombreCompleto = (vm.Nuevo.NombreCompleto ?? "").Trim(),
+                Partido = (vm.Nuevo.Partido ?? "").Trim(),
+                Binomio = (vm.Nuevo.Binomio ?? "").Trim(),
                 NumeroLista = vm.Nuevo.NumeroLista,
                 Activo = vm.Nuevo.Activo
             };
 
+            // 3) Validación extra (según tipo) SIN cambiar BD
+            // Plancha: usar Binomio como “Vicepresidente” -> obligatorio
+            if (vm.TipoProceso == VotoModelos.Enums.TipoEleccion.Plancha && string.IsNullOrWhiteSpace(dto.Binomio))
+            {
+                vm.Error = "En Plancha debes ingresar el Vicepresidente (campo Binomio).";
+
+                var list = await _api.GetCandidatosAdminAsync(ct) ?? new();
+                list = list.Where(x => x.ProcesoElectoralId == vm.ProcesoElectoralId).ToList();
+
+                vm.Lista = list.Select(x => new CandidatoRowVm
+                {
+                    Id = x.Id,
+                    ProcesoElectoralId = x.ProcesoElectoralId,
+                    NombreCompleto = x.NombreCompleto,
+                    Partido = x.Partido,
+                    Binomio = x.Binomio,
+                    NumeroLista = x.NumeroLista,
+                    Activo = x.Activo
+                }).ToList();
+
+                return View(vm);
+            }
+
             var r = await _api.CrearCandidatoAsync(dto, ct);
             if (!r.Ok)
             {
-                TempData["Error"] = "No se pudo crear: " + r.Error;
+                TempData["Error"] = "No se pudo crear: " + (r.Error ?? "Error desconocido");
                 return RedirectToAction(nameof(Candidatos));
             }
 

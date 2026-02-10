@@ -1,10 +1,44 @@
-﻿@model VotoMVC_Login.Models.ViewModels.Admin.AdminCandidatosVm
+﻿@using VotoModelos.Enums
+@model VotoMVC_Login.Models.ViewModels.Admin.AdminCandidatosVm
 @{
     ViewData["Title"] = "Candidatos";
+
+    string tipoTxt = Model.TipoProceso switch
+    {
+        TipoEleccion.Nominal => "Nominal",
+        TipoEleccion.Plancha => "Plancha (Binomio)",
+        TipoEleccion.Plurinominal => "Plurinominal (Lista)",
+        _ => "—"
+    };
+
+    // Labels dinámicos según tipo
+    string lblNombre = Model.TipoProceso switch
+    {
+        TipoEleccion.Nominal => "Nombre del candidato",
+        TipoEleccion.Plancha => "Presidente",
+        TipoEleccion.Plurinominal => "Nombre del candidato (lista)",
+        _ => "Nombre"
+    };
+
+    string lblBinomio = Model.TipoProceso switch
+    {
+        TipoEleccion.Nominal => "Cargo (simulación)",
+        TipoEleccion.Plancha => "Vicepresidente",
+        TipoEleccion.Plurinominal => "Orden / Observación",
+        _ => "Binomio"
+    };
+
+    bool mostrarBinomio = Model.TipoProceso != 0; // si viene 0, igual lo mostramos por seguridad
 }
 
 <div class="container py-4">
-    <h3 class="fw-bold">Gestionar Candidatos</h3>
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <h3 class="fw-bold mb-0">Gestionar Candidatos</h3>
+
+        <span class="badge rounded-pill text-bg-secondary">
+            Proceso: @tipoTxt
+        </span>
+    </div>
 
     @if (TempData["Ok"] != null)
     {
@@ -14,10 +48,17 @@
     {
         <div class="alert alert-danger">@TempData["Error"]</div>
     }
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <div class="alert alert-danger">@Model.Error</div>
+    }
 
     <div class="card rounded-4 shadow-sm">
         <div class="card-body">
             <h5 class="fw-bold">Crear candidato</h5>
+            <div class="text-muted small mb-3">
+                El formulario se adapta al tipo de proceso activo: <b>@tipoTxt</b>
+            </div>
 
             <form asp-action="Candidatos" method="post">
                 @Html.AntiForgeryToken()
@@ -26,21 +67,48 @@
 
                 <div class="row g-2">
                     <div class="col-md-6">
-                        <label class="form-label">Nombre Completo</label>
+                        <label class="form-label">@lblNombre</label>
                         <input class="form-control" asp-for="Nuevo.NombreCompleto" />
                     </div>
+
                     <div class="col-md-3">
                         <label class="form-label">Partido</label>
                         <input class="form-control" asp-for="Nuevo.Partido" />
                     </div>
+
                     <div class="col-md-3">
                         <label class="form-label">N° Lista</label>
-                        <input class="form-control" asp-for="Nuevo.NumeroLista" />
+                        <input class="form-control" asp-for="Nuevo.NumeroLista" type="number" min="0" />
                     </div>
-                    <div class="col-md-8">
-                        <label class="form-label">Binomio</label>
-                        <input class="form-control" asp-for="Nuevo.Binomio" />
-                    </div>
+
+                    @if (mostrarBinomio)
+                    {
+                        <div class="col-md-8">
+                            <label class="form-label">@lblBinomio</label>
+
+                            @* Reutilizamos Nuevo.Binomio según tipo:
+                               - Nominal: Cargo (simulación)
+                               - Plancha: Vicepresidente
+                               - Plurinominal: Orden / Observación
+                            *@
+                            <input class="form-control" asp-for="Nuevo.Binomio" />
+                            <div class="form-text">
+                                @if (Model.TipoProceso == TipoEleccion.Plancha)
+                                {
+                                    <span>En Plancha, aquí va el <b>Vicepresidente</b>.</span>
+                                }
+                                else if (Model.TipoProceso == TipoEleccion.Plurinominal)
+                                {
+                                    <span>En Plurinominal, puedes poner <b>Orden</b> (Ej: “Orden 1”).</span>
+                                }
+                                else if (Model.TipoProceso == TipoEleccion.Nominal)
+                                {
+                                    <span>En Nominal, puedes indicar el <b>Cargo</b> (simulación).</span>
+                                }
+                            </div>
+                        </div>
+                    }
+
                     <div class="col-md-4 d-flex align-items-end">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" asp-for="Nuevo.Activo" />
@@ -66,7 +134,24 @@
                             <th>Id</th>
                             <th>Nombre</th>
                             <th>Partido</th>
-                            <th>Binomio</th>
+                            <th>
+                                @if (Model.TipoProceso == TipoEleccion.Plancha)
+                                {
+                                    <span>Vicepresidente</span>
+                                }
+                                else if (Model.TipoProceso == TipoEleccion.Plurinominal)
+                                {
+                                    <span>Orden/Obs</span>
+                                }
+                                else if (Model.TipoProceso == TipoEleccion.Nominal)
+                                {
+                                    <span>Cargo</span>
+                                }
+                                else
+                                {
+                                    <span>Binomio</span>
+                                }
+                            </th>
                             <th>N° Lista</th>
                             <th>Activo</th>
                         </tr>

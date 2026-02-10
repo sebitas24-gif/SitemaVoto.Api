@@ -50,6 +50,11 @@
                             <label class="form-label">Nombre</label>
                             <input class="form-control" asp-for="Nuevo.Nombre" />
 
+                            <!-- ✅ SOLO ESTO: Descripción -->
+                            <label class="form-label mt-2">Descripción</label>
+                            <textarea class="form-control" asp-for="Nuevo.Descripcion" rows="3"
+                                      placeholder="Ej: Proceso para Alcaldes / Presidencia / Asambleístas..."></textarea>
+
                             <div class="row mt-2">
                                 <div class="col">
                                     <label class="form-label">Tipo</label>
@@ -107,6 +112,13 @@
                         {
                             <ul class="list-group">
                                 <li class="list-group-item"><b>Nombre:</b> @Model.Activo.Nombre</li>
+
+                                <!-- ✅ opcional: mostrar descripción -->
+                                @if (!string.IsNullOrWhiteSpace(Model.Activo.Descripcion))
+                                {
+                                    <li class="list-group-item"><b>Descripción:</b> @Model.Activo.Descripcion</li>
+                                }
+
                                 <li class="list-group-item"><b>Inicio:</b> @Model.Activo.Inicio</li>
                                 <li class="list-group-item"><b>Cierre:</b> @Model.Activo.Cierre</li>
                                 <li class="list-group-item"><b>Estado:</b> @Model.Activo.Estado</li>

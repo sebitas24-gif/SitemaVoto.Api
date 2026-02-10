@@ -10,5 +10,6 @@ namespace SitemaVoto.Api.DTOs.Proceso
         public DateTime InicioLocal { get; set; }
         public DateTime FinLocal { get; set; }
         public EstadoProceso Estado { get; set; }
+        public string? Descripcion { get; set; }
     }
 }

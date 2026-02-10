@@ -9,6 +9,8 @@ namespace VotoMVC_Login.Models.ViewModels.Admin
 
         public ProcesoCrearVm Nuevo { get; set; } = new();
         public ProcesoCardVm? Activo { get; set; }
+        public string? Descripcion { get; set; } // ✅ NUEVO
+
     }
     public class ProcesoCrearVm
     {
@@ -18,5 +20,7 @@ namespace VotoMVC_Login.Models.ViewModels.Admin
 
         [Required] public DateTime InicioLocal { get; set; } = DateTime.Now.AddHours(1);
         [Required] public DateTime FinLocal { get; set; } = DateTime.Now.AddHours(10);
+        public string? Descripcion { get; set; } // ✅ NUEVO
+
     }
 }

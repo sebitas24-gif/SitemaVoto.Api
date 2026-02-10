@@ -20,15 +20,22 @@ namespace SitemaVoto.Api.Services.Procesos
         {
             var ahora = DateTime.Now;
 
+            var vigente = await _db.ProcesoElectorales
+                .Where(p => p.Estado == EstadoProceso.Activo &&
+                            p.InicioLocal <= ahora &&
+                            p.FinLocal >= ahora)
+                .OrderByDescending(p => p.InicioLocal)
+                .FirstOrDefaultAsync(ct);
+
+            if (vigente != null) return vigente;
+
+            // fallback: el último marcado como Activo (aunque todavía no esté en rango)
             return await _db.ProcesoElectorales
-                .Where(p =>
-                    p.Estado == EstadoProceso.Activo &&
-                    p.InicioLocal <= ahora &&
-                    p.FinLocal >= ahora
-                )
+                .Where(p => p.Estado == EstadoProceso.Activo)
                 .OrderByDescending(p => p.InicioLocal)
                 .FirstOrDefaultAsync(ct);
         }
+
 
 
         // ✅ ESTE ES EL QUE TE HACE FALTA
@@ -41,7 +48,8 @@ namespace SitemaVoto.Api.Services.Procesos
                 Tipo = (TipoEleccion)req.Tipo,      // ✅ int -> enum (casting)
                 Estado = (EstadoProceso)req.Estado, // ✅ int -> enum (casting)
                 InicioLocal = req.InicioLocal,
-                FinLocal = req.FinLocal
+                FinLocal = req.FinLocal,
+
             };
 
             // Si tienes candidatos en el request

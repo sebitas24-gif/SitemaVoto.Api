@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using VotoModelos.Enums;
 using VotoMVC_Login.Models;
 using VotoMVC_Login.Models.DTOs;
 
@@ -413,11 +414,21 @@ namespace VotoMVC_Login.Service
         {
             public int id { get; set; }
             public string nombre { get; set; } = "";
-            public int estado { get; set; }
 
-            // 🔥 CAMBIA ESTOS NOMBRES: Deben ser iguales a los de Swagger
+            // Del JSON (Swagger)
+            public int tipo { get; set; }
+            public int estado { get; set; }
             public DateTime? inicioLocal { get; set; }
             public DateTime? finLocal { get; set; }
+            public string? descripcion { get; set; }
+
+            // Derivados (NO van en JSON)
+            [JsonIgnore]
+            public TipoEleccion TipoEnum => (TipoEleccion)tipo;
+
+            [JsonIgnore]
+            public EstadoProceso EstadoEnum => (EstadoProceso)estado;
+
         }
 
 
@@ -480,6 +491,7 @@ namespace VotoMVC_Login.Service
             public DateTime InicioLocal { get; set; }
             public DateTime FinLocal { get; set; }
             public int Estado { get; set; }
+            public string? Descripcion { get; set; }
         }
 
         public class CandidatoCreateDto

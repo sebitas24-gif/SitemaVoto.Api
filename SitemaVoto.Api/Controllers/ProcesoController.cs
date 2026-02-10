@@ -36,7 +36,8 @@ namespace SitemaVoto.Api.Controllers
                 Tipo = p.Tipo,
                 InicioLocal = p.InicioLocal,
                 FinLocal = p.FinLocal,
-                Estado = p.Estado
+                Estado = p.Estado,
+                 Descripcion = p.Descripcion
             };
 
             return ApiResponseDto<ProcesoDto>.Success(dto);

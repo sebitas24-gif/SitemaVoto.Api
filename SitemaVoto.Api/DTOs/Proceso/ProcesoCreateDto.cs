@@ -9,6 +9,7 @@
         public DateTime InicioLocal { get; set; }
         public DateTime FinLocal { get; set; }
 
+
         public List<CandidatoCreateDto> Candidatos { get; set; } = new();
     }
     public class CandidatoCreateDto
