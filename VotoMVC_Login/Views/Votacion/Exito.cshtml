@@ -119,14 +119,19 @@
                             <div class="cmp-photo-cap">Foto (opcional)</div>
                         </div>
                     }
+                    else
+                    {
+                        <div class="cmp-photo" style="display:flex;align-items:center;justify-content:center;flex-direction:column;
+                                                     width:160px;height:200px;border:1px dashed #cfcfe6;border-radius:16px;
+                                                     background:#f7f7ff;color:#6c757d;">
+                            <div style="font-size:42px;line-height:1;">👤</div>
+                            <div style="margin-top:8px;font-weight:700;">Sin foto</div>
+                            <div style="font-size:12px;opacity:.85;">(No registrada)</div>
+                        </div>
+                    }
 
                     <div class="cmp-qr">
-                        <div class="cmp-qr-box">
-                            <!-- QR “decorativo”. Si luego quieres QR real, se genera con lib/imagen -->
-                            <div class="cmp-qr-fake"></div>
-                        </div>
                         <div class="cmp-qr-text">
-                            Verificación: use el código en el portal de resultados / auditoría (demo).
                         </div>
                     </div>
 
@@ -138,9 +143,7 @@
                 <div class="cmp-footer-left">
                     Documento generado automáticamente. Válido solo como comprobante informativo.
                 </div>
-                <div class="cmp-footer-right">
-                    CNE · Sistema de Voto Electrónico (Demo)
-                </div>
+             
             </div>
 
         </div>
@@ -152,8 +155,8 @@
                asp-action="DescargarComprobantePdf">
                 Descargar comprobante (PDF)
             </a>
-
         </div>
 
     </div>
 </div>
+

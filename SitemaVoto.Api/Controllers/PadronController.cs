@@ -94,51 +94,60 @@ namespace SitemaVoto.Api.Controllers
             return Ok(list);
         }
 
-        // ✅ GET: api/Padron/cedula(lo usa Jefe de Junta)
+        // ✅ GET: api/Padron/cedula/{cedula} (Jefe de Junta)
         [HttpGet("cedula/{cedula}")]
         public async Task<ActionResult<JefeVerificacionDto>> GetPorCedula(string cedula, CancellationToken ct)
         {
+            cedula = (cedula ?? "").Trim();
+
             if (string.IsNullOrWhiteSpace(cedula))
                 return BadRequest("Cédula requerida.");
 
             var procesoId = await GetProcesoIdParaPadronAsync(ct);
-            if (procesoId == 0) return BadRequest("No existe proceso electoral.");
+            if (procesoId == 0)
+                return BadRequest("No existe proceso electoral.");
 
+            // 👇 Importante: comparar TRIM para evitar "173... " vs "173..."
             var user = await _db.Usuarios
                 .AsNoTracking()
                 .Include(u => u.Junta)
-                .FirstOrDefaultAsync(u => u.Cedula == cedula, ct);
+                .FirstOrDefaultAsync(u => u.Cedula != null && u.Cedula.Trim() == cedula, ct);
 
-            if (user == null) return NotFound("No existe en padrón.");
-            _log.LogInformation("CEDULA={Cedula} USERID={UserId} PROCESO={ProcesoId}", cedula, user.Id, procesoId);
+            if (user == null)
+                return NotFound("No existe en padrón.");
+
+            _log.LogInformation("PADRON_LOOKUP cedula_in={CedulaIn} cedula_db={CedulaDb} userId={UserId} juntaId={JuntaId} procesoId={ProcesoId}",
+                cedula, user.Cedula, user.Id, user.JuntaId, procesoId);
 
             var pad = await _db.CodigoPadrones
-     .AsNoTracking()
-     .Where(x => x.UsuarioId == user.Id && x.ProcesoElectoralId == procesoId)
-     .OrderByDescending(x => x.EmitidoEn)
-     .Select(x => x.Codigo)
-     .FirstOrDefaultAsync(ct);
-            _log.LogInformation("PADS_FOR_USER: {Json}", System.Text.Json.JsonSerializer.Serialize(pad));
+                .AsNoTracking()
+                .Where(x => x.UsuarioId == user.Id && x.ProcesoElectoralId == procesoId)
+                .OrderByDescending(x => x.EmitidoEn)
+                .Select(x => x.Codigo)
+                .FirstOrDefaultAsync(ct);
+
+            var provincia = user.Provincia ?? user.Junta?.Provincia ?? "";
+            var canton = user.Canton ?? user.Junta?.Canton ?? "";
 
 
             var dto = new JefeVerificacionDto
             {
-                Cedula = user.Cedula,
-                Nombres = user.Nombres,
-                Apellidos = user.Apellidos,
+                Cedula = user.Cedula ?? cedula,
+                Nombres = user.Nombres ?? "",
+                Apellidos = user.Apellidos ?? "",
                 Correo = user.Correo ?? "",
                 Telefono = user.Telefono ?? "",
-                Provincia = user.Junta?.Provincia ?? user.Provincia,
-                Canton = user.Junta?.Canton ?? user.Canton,
-                
+                Provincia = provincia,
+                Canton = canton,
                 Mesa = user.Junta?.CodigoMesa ?? "",
                 CodigoPad = pad ?? "",
                 Estado = "PADRÓN",
-                 ImagenUrl = user.ImagenUrl
+                ImagenUrl = user.ImagenUrl
             };
 
             return Ok(dto);
         }
+
 
         // ✅ POST: api/Padron/validar
         [HttpPost("validar")]

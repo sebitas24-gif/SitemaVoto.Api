@@ -255,7 +255,9 @@ namespace VotoMVC_Login.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> DescargarComprobantePdf([FromServices] EmailService emailService)
+        public async Task<IActionResult> DescargarComprobantePdf(
+     [FromServices] EmailService emailService,
+     [FromServices] IHttpClientFactory httpClientFactory)
         {
             TempData.Keep();
             QuestPDF.Settings.License = LicenseType.Community;
@@ -267,6 +269,23 @@ namespace VotoMVC_Login.Controllers
             var canton = TempData.Peek("Canton") as string ?? "N/A";
             var mesa = TempData.Peek("Mesa") as string ?? "MESA-00";
             var comp = TempData.Peek("Comprobante") as string ?? "N/A";
+            var fotoUrl = TempData.Peek("FotoUrl") as string ?? "";
+
+            // ✅ Descarga la foto (si hay URL)
+            byte[]? fotoBytes = null;
+            if (!string.IsNullOrWhiteSpace(fotoUrl))
+            {
+                try
+                {
+                    var http = httpClientFactory.CreateClient();
+                    http.Timeout = TimeSpan.FromSeconds(10);
+                    fotoBytes = await http.GetByteArrayAsync(fotoUrl);
+                }
+                catch
+                {
+                    fotoBytes = null; // si falla, simplemente no ponemos foto
+                }
+            }
 
             var pdf = Document.Create(container =>
             {
@@ -287,17 +306,43 @@ namespace VotoMVC_Login.Controllers
 
                         col.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
 
-                        col.Item().Padding(10).Background(Colors.Grey.Lighten5).Column(c =>
+                        // ✅ Datos + Foto en 2 columnas
+                        col.Item().Row(row =>
                         {
-                            c.Spacing(8);
-                            c.Item().Text(t => { t.Span("Nombre: ").Bold(); t.Span(nombre); });
-                            c.Item().Text(t => { t.Span("Cédula: ").Bold(); t.Span(cedula); });
-                            c.Item().Text(t => { t.Span("Provincia: ").Bold(); t.Span(provincia); });
-                            c.Item().Text(t => { t.Span("Cantón: ").Bold(); t.Span(canton); });
-                            c.Item().Text(t => { t.Span("Mesa Electoral: ").Bold(); t.Span(mesa).Bold().FontColor(Colors.Blue.Darken2); });
+                            row.RelativeItem().PaddingRight(10).Background(Colors.Grey.Lighten5).Padding(10).Column(c =>
+                            {
+                                c.Spacing(8);
+                                c.Item().Text(t => { t.Span("Nombre: ").Bold(); t.Span(nombre); });
+                                c.Item().Text(t => { t.Span("Cédula: ").Bold(); t.Span(cedula); });
+                                c.Item().Text(t => { t.Span("Provincia: ").Bold(); t.Span(provincia); });
+                                c.Item().Text(t => { t.Span("Cantón: ").Bold(); t.Span(canton); });
+                                c.Item().Text(t => { t.Span("Mesa Electoral: ").Bold(); t.Span(mesa).Bold().FontColor(Colors.Blue.Darken2); });
+                            });
+
+                            row.ConstantItem(120).AlignRight().Column(c =>
+                            {
+                                c.Spacing(6);
+
+                                if (fotoBytes != null)
+                                {
+                                    c.Item().Height(120).Width(120)
+                                        .Image(fotoBytes)
+                                        .FitArea();
+
+                                    c.Item().AlignCenter().Text("Foto (opcional)").FontSize(8).FontColor(Colors.Grey.Darken1);
+                                }
+                                else
+                                {
+                                    c.Item().Height(120).Width(120)
+                                        .Border(1).BorderColor(Colors.Grey.Lighten2)
+                                        .AlignCenter().AlignMiddle()
+                                        .Text("Sin foto").FontSize(9).FontColor(Colors.Grey.Darken1);
+                                }
+                            });
                         });
 
-                        col.Item().AlignRight().Text(t => {
+                        col.Item().AlignRight().Text(t =>
+                        {
                             t.Span("CÓDIGO DE VERIFICACIÓN: ").FontSize(9);
                             t.Span(comp).Bold().FontSize(12);
                         });
@@ -311,7 +356,6 @@ namespace VotoMVC_Login.Controllers
             var pdfBytes = pdf.GeneratePdf();
             var fileName = $"Certificado_Voto_{cedula}.pdf";
 
-            // ✅ Enviar el mismo PDF por correo (si hay email)
             if (!string.IsNullOrWhiteSpace(email))
             {
                 await emailService.EnviarPdfAdjuntoAsync(
@@ -322,14 +366,13 @@ namespace VotoMVC_Login.Controllers
                     fileName: fileName
                 );
 
-                TempData["PapeletaEnviada"] = true; // si quieres mostrarlo en la vista
+                TempData["PapeletaEnviada"] = true;
             }
             else
             {
                 TempData["PapeletaEnviada"] = false;
             }
 
-            // ✅ Igual te lo devuelve para descargar
             return File(pdfBytes, "application/pdf", fileName);
         }
 
