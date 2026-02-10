@@ -13,6 +13,8 @@ namespace VotoMVC_Login.Models.ViewModels.Admin
         public List<CandidatoRowVm> Lista { get; set; } = new();
 
         public CandidatoCrearVm Nuevo { get; set; } = new();
+        public string? ImagenUrl { get; set; }  // ✅ NUEVO
+
 
     }
     public class CandidatoRowVm
@@ -24,6 +26,8 @@ namespace VotoMVC_Login.Models.ViewModels.Admin
         public string Binomio { get; set; } = "";
         public int NumeroLista { get; set; }
         public bool Activo { get; set; }
+        public string? ImagenUrl { get; set; }  // ✅ NUEVO
+
     }
 
     public class CandidatoCrearVm
@@ -34,6 +38,8 @@ namespace VotoMVC_Login.Models.ViewModels.Admin
         public string Binomio { get; set; } = "";
         public int NumeroLista { get; set; } = 0;
         public bool Activo { get; set; } = true;
+        public string? ImagenUrl { get; set; }  // ✅ NUEVO
+
     }
     public class NuevoCandidatoVm
     {
@@ -52,6 +58,8 @@ namespace VotoMVC_Login.Models.ViewModels.Admin
 
         // Plurinominal
         public int? Orden { get; set; } // ✅ orden dentro de la lista
+        public string? ImagenUrl { get; set; }  // ✅ NUEVO
+
     }
 
     public class CandidatoItemVm
@@ -65,5 +73,7 @@ namespace VotoMVC_Login.Models.ViewModels.Admin
         public string? Vicepresidente { get; set; } // plancha
         public int? Orden { get; set; } // plurinominal
         public string? Cargo { get; set; } // nominal
+        public string? ImagenUrl { get; set; }  // ✅ NUEVO
+
     }
 }

@@ -52,13 +52,36 @@
         <div class="row g-3">
             @foreach (var c in lista)
             {
+                var iniciales = (!string.IsNullOrWhiteSpace(c.Nombre) && c.Nombre.Length >= 2)
+                ? c.Nombre.Substring(0, 2).ToUpper()
+                : "CV";
+
                 <div class="col-md-3">
                     <label class="card h-100 p-2" style="cursor:pointer;">
                         <div class="card-body text-center">
-                            <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                                 style="width:72px;height:72px;background:#e9ecef;font-weight:800;">
-                                @((c.Nombre?.Length ?? 0) >= 2 ? c.Nombre.Substring(0, 2).ToUpper() : "CV")
-                            </div>
+
+                            <!-- ✅ FOTO o INICIALES -->
+                            @if (!string.IsNullOrWhiteSpace(c.ImagenUrl))
+                            {
+                                <img src="@c.ImagenUrl"
+                                     alt="Foto de @c.Nombre"
+                                     class="mx-auto mb-2"
+                                     style="width:72px;height:72px;object-fit:cover;border-radius:50%;border:2px solid #e9ecef;"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+
+                                <!-- fallback si la imagen falla -->
+                                <div class="rounded-circle mx-auto mb-2 d-none align-items-center justify-content-center"
+                                     style="width:72px;height:72px;background:#e9ecef;font-weight:800;">
+                                    @iniciales
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                     style="width:72px;height:72px;background:#e9ecef;font-weight:800;">
+                                    @iniciales
+                                </div>
+                            }
 
                             <div class="fw-bold">@c.Nombre</div>
                             <div class="text-muted">@c.PartidoPolitico</div>

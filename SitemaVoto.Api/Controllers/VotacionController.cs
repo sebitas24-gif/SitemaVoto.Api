@@ -21,7 +21,9 @@ namespace SitemaVoto.Api.Controllers
             {
                 Id = x.Id,
                 Nombre = x.Nombre,
-                Partido = x.Partido
+                Partido = x.Partido,
+                ImagenUrl = x.ImagenUrl,
+                NumeroLista = x.NumeroLista
             }).ToList());
         }
 

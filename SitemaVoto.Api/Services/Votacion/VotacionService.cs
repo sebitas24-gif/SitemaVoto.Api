@@ -21,19 +21,19 @@ namespace SitemaVoto.Api.Services.Votacion
             _padron = padron;
             _email = email;
         }
-        public async Task<IReadOnlyList<(int Id, string Nombre, string Partido)>> GetCandidatosAsync(CancellationToken ct)
+        public async Task<IReadOnlyList<(int Id, string Nombre, string Partido, string? ImagenUrl, int NumeroLista)>> GetCandidatosAsync(CancellationToken ct)
         {
             var proc = await _proceso.GetProcesoActivoAsync(ct);
-            if (proc == null) return Array.Empty<(int, string, string)>();
+            if (proc == null) return Array.Empty<(int, string, string, string?, int)>();
 
             var list = await _db.Candidatos
                 .AsNoTracking()
                 .Where(c => c.ProcesoElectoralId == proc.Id && c.Activo)
                 .OrderBy(c => c.NumeroLista)
-                .Select(c => new { c.Id, c.NombreCompleto, c.Partido })
+                .Select(c => new { c.Id, c.NombreCompleto, c.Partido, c.ImagenUrl, c.NumeroLista })
                 .ToListAsync(ct);
 
-            return list.Select(x => (x.Id, x.NombreCompleto, x.Partido)).ToList();
+            return list.Select(x => (x.Id, x.NombreCompleto, x.Partido, x.ImagenUrl, x.NumeroLista)).ToList();
         }
 
         public async Task<EmitirVotoResult> EmitirVotoAsync(string cedula, string codigoPad, int? candidatoId, CancellationToken ct)

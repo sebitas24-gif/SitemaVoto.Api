@@ -10,6 +10,8 @@
         {
             public string nombre { get; set; } = "";
             public int votos { get; set; }
+            public string? imagenUrl { get; set; } // ✅ nuevo
+
         }
 
         public class LiderProvincia
@@ -17,6 +19,8 @@
             public string provincia { get; set; } = "";
             public string lider { get; set; } = "";
             public int votosLider { get; set; }
+            public string? imagenUrl { get; set; } // ✅ nuevo
+
         }
 
     }

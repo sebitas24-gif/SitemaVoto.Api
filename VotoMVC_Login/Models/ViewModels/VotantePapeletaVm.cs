@@ -19,5 +19,7 @@ namespace VotoMVC_Login.Models.ViewModels
 
         public string? Error { get; set; }
         public string? Info { get; set; }
+        public string? ImagenUrl { get; set; }
+
     }
 }

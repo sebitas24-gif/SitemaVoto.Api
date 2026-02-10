@@ -37,7 +37,9 @@ namespace SitemaVoto.Api.Controllers
                     Partido = c.Partido,
                     Binomio = c.Binomio,
                     NumeroLista = c.NumeroLista,
-                    Activo = c.Activo
+                    Activo = c.Activo,
+                    ImagenUrl = c.ImagenUrl,
+
                 })
                 .ToListAsync(ct);
 
@@ -53,36 +55,30 @@ namespace SitemaVoto.Api.Controllers
             return Ok(candidato);
         }
 
-        // PUT: api/Candidatoes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCandidato(int id, Candidato candidato)
         {
-            if (id != candidato.Id)
-            {
-                return BadRequest();
-            }
+            if (id != candidato.Id) return BadRequest();
 
-            _context.Entry(candidato).State = EntityState.Modified;
+            // Traer el existente de BD (incluye lo requerido ya guardado)
+            var existing = await _context.Candidatos.FirstOrDefaultAsync(x => x.Id == id);
+            if (existing == null) return NotFound();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CandidatoExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            // Actualiza SOLO los campos editables (incluye ImagenUrl)
+            existing.NombreCompleto = candidato.NombreCompleto;
+            existing.Partido = candidato.Partido;
+            existing.Binomio = candidato.Binomio;
+            existing.NumeroLista = candidato.NumeroLista;
+            existing.Activo = candidato.Activo;
+            existing.ImagenUrl = candidato.ImagenUrl;
+            existing.ProcesoElectoralId = candidato.ProcesoElectoralId; // si lo permites
 
+            // NO toques existing.ProcesoElectoral
+
+            await _context.SaveChangesAsync();
             return NoContent();
         }
+
 
         // POST: api/Candidatoes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -103,7 +99,9 @@ namespace SitemaVoto.Api.Controllers
                 Partido = dto.Partido,
                 Binomio = dto.Binomio,
                 NumeroLista = dto.NumeroLista,
-                Activo = dto.Activo
+                Activo = dto.Activo,
+                ImagenUrl = dto.ImagenUrl,
+
             };
 
             _context.Candidatos.Add(candidato);

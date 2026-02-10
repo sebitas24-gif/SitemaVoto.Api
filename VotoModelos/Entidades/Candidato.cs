@@ -12,7 +12,7 @@ namespace VotoModelos.Entidades
         [Key] public int Id { get; set; }
 
         public int ProcesoElectoralId { get; set; }
-        public ProcesoElectoral ProcesoElectoral { get; set; } = null!;
+        public ProcesoElectoral? ProcesoElectoral { get; set; } 
 
         [Required, MaxLength(160)]
         public string NombreCompleto { get; set; } = default!;
@@ -26,5 +26,7 @@ namespace VotoModelos.Entidades
         public int NumeroLista { get; set; }
 
         public bool Activo { get; set; } = true;
+        [MaxLength(500)]
+        public string? ImagenUrl { get; set; }
     }
 }

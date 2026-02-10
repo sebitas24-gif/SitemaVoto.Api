@@ -44,7 +44,6 @@ public class Program
 
         // Tu ApiService local (el que usa IHttpClientFactory y CreateClient("Api"))
        
-        builder.Services.AddControllersWithViews();
 
         // =======================
         // Session (para guardar cedula mientras OTP)

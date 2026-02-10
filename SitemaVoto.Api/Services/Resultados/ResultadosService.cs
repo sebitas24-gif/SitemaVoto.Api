@@ -15,17 +15,26 @@ namespace SitemaVoto.Api.Services.Resultados
             _proceso = proceso;
         }
 
+
         public async Task<ResultadosResponse> GetNacionalAsync(CancellationToken ct)
         {
             var proc = await _proceso.GetProcesoActivoAsync(ct)
-                      ?? await _db.ProcesoElectorales.AsNoTracking().OrderByDescending(x => x.Id).FirstOrDefaultAsync(ct);
+                      ?? await _db.ProcesoElectorales.AsNoTracking()
+                            .OrderByDescending(x => x.Id)
+                            .FirstOrDefaultAsync(ct);
 
             if (proc == null)
                 return new("CONFIGURACION", Array.Empty<ResultadoItem>(), Array.Empty<LiderProvincia>());
 
-            var mapCandidatos = await _db.Candidatos.AsNoTracking()
+            // ✅ Mapa: Id -> Nombre
+            var mapNombre = await _db.Candidatos.AsNoTracking()
                 .Where(c => c.ProcesoElectoralId == proc.Id)
                 .ToDictionaryAsync(c => c.Id, c => c.NombreCompleto, ct);
+
+            // ✅ Mapa: Id -> ImagenUrl
+            var mapFoto = await _db.Candidatos.AsNoTracking()
+                .Where(c => c.ProcesoElectoralId == proc.Id)
+                .ToDictionaryAsync(c => c.Id, c => c.ImagenUrl, ct);
 
             // Nacional
             var porCandidato = await _db.Votos.AsNoTracking()
@@ -37,9 +46,15 @@ namespace SitemaVoto.Api.Services.Resultados
             var listaNacional = porCandidato
                 .Select(x =>
                 {
-                    var nombre = x.CandidatoId == null ? "Voto en Blanco" :
-                        (mapCandidatos.TryGetValue(x.CandidatoId.Value, out var n) ? n : "Candidato");
-                    return new ResultadoItem(nombre, x.Total);
+                    if (x.CandidatoId == null)
+                        return new ResultadoItem("Voto en Blanco", x.Total, null);
+
+                    var id = x.CandidatoId.Value;
+
+                    var nombre = mapNombre.TryGetValue(id, out var n) ? n : "Candidato";
+                    var foto = mapFoto.TryGetValue(id, out var u) ? u : null;
+
+                    return new ResultadoItem(nombre, x.Total, foto);
                 })
                 .OrderByDescending(x => x.Votos)
                 .ToList();
@@ -56,27 +71,45 @@ namespace SitemaVoto.Api.Services.Resultados
                 .Select(g =>
                 {
                     var top = g.OrderByDescending(x => x.Total).First();
-                    var nombre = top.CandidatoId == null ? "Voto en Blanco" :
-                        (mapCandidatos.TryGetValue(top.CandidatoId.Value, out var n) ? n : "Candidato");
-                    return new LiderProvincia(g.Key, nombre, top.Total);
+
+                    if (top.CandidatoId == null)
+                        return new LiderProvincia(g.Key, "Voto en Blanco", top.Total, null);
+
+                    var id = top.CandidatoId.Value;
+
+                    var nombre = mapNombre.TryGetValue(id, out var n) ? n : "Candidato";
+                    var foto = mapFoto.TryGetValue(id, out var u) ? u : null;
+
+                    return new LiderProvincia(g.Key, nombre, top.Total, foto);
                 })
                 .OrderBy(x => x.Provincia)
                 .ToList();
 
-            var estado = (await _proceso.GetEstadoActualAsync(ct)).ToString().ToUpperInvariant();
+            var estado = (await _proceso.GetEstadoActualAsync(ct))
+                .ToString()
+                .ToUpperInvariant();
+
             return new ResultadosResponse(estado, listaNacional, lideres);
         }
 
         public async Task<IReadOnlyList<ResultadoItem>> GetPorProvinciaAsync(string provincia, CancellationToken ct)
         {
             var proc = await _proceso.GetProcesoActivoAsync(ct)
-                      ?? await _db.ProcesoElectorales.AsNoTracking().OrderByDescending(x => x.Id).FirstOrDefaultAsync(ct);
+                      ?? await _db.ProcesoElectorales.AsNoTracking()
+                            .OrderByDescending(x => x.Id)
+                            .FirstOrDefaultAsync(ct);
 
             if (proc == null) return Array.Empty<ResultadoItem>();
 
-            var mapCandidatos = await _db.Candidatos.AsNoTracking()
+            // ✅ Mapa: Id -> Nombre
+            var mapNombre = await _db.Candidatos.AsNoTracking()
                 .Where(c => c.ProcesoElectoralId == proc.Id)
                 .ToDictionaryAsync(c => c.Id, c => c.NombreCompleto, ct);
+
+            // ✅ Mapa: Id -> ImagenUrl
+            var mapFoto = await _db.Candidatos.AsNoTracking()
+                .Where(c => c.ProcesoElectoralId == proc.Id)
+                .ToDictionaryAsync(c => c.Id, c => c.ImagenUrl, ct);
 
             var porProv = await _db.Votos.AsNoTracking()
                 .Where(v => v.ProcesoElectoralId == proc.Id && v.Provincia == provincia)
@@ -84,14 +117,21 @@ namespace SitemaVoto.Api.Services.Resultados
                 .Select(g => new { CandidatoId = g.Key, Total = g.LongCount() })
                 .ToListAsync(ct);
 
-            return porProv.Select(x =>
-            {
-                var nombre = x.CandidatoId == null ? "Voto en Blanco" :
-                    (mapCandidatos.TryGetValue(x.CandidatoId.Value, out var n) ? n : "Candidato");
-                return new ResultadoItem(nombre, x.Total);
-            })
-            .OrderByDescending(x => x.Votos)
-            .ToList();
+            return porProv
+                .Select(x =>
+                {
+                    if (x.CandidatoId == null)
+                        return new ResultadoItem("Voto en Blanco", x.Total, null);
+
+                    var id = x.CandidatoId.Value;
+
+                    var nombre = mapNombre.TryGetValue(id, out var n) ? n : "Candidato";
+                    var foto = mapFoto.TryGetValue(id, out var u) ? u : null;
+
+                    return new ResultadoItem(nombre, x.Total, foto);
+                })
+                .OrderByDescending(x => x.Votos)
+                .ToList();
         }
     }
-}
+    }

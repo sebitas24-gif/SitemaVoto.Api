@@ -1,4 +1,6 @@
-﻿namespace SitemaVoto.Api.DTOs.Candidatos
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SitemaVoto.Api.DTOs.Candidatos
 {
     public class CandidatoResponseDto
     {
@@ -11,5 +13,8 @@
 
         public int NumeroLista { get; set; }
         public bool Activo { get; set; }
+        [MaxLength(500)]
+        public string? ImagenUrl { get; set; }
+
     }
 }

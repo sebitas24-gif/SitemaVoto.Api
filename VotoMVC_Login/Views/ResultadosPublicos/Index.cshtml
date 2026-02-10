@@ -99,7 +99,6 @@
                 </div>
 
                 <div class="mt-4">
-                  
                 </div>
             </div>
         </div>
@@ -136,6 +135,16 @@
             <div class="fw-semibold" style="opacity:.95;">
                 🏆 <span class="ms-1">GANADOR / LÍDER NACIONAL</span>
             </div>
+
+            @* ✅ FOTO GANADOR *@
+            @if (!string.IsNullOrWhiteSpace(top?.imagenUrl))
+            {
+                <img src="@top.imagenUrl"
+                     alt="Foto de @(top?.nombre ?? "Candidato")"
+                     class="mx-auto mb-3"
+                     style="width:92px;height:92px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,255,255,.6);"
+                     onerror="this.style.display='none';" />
+            }
 
             <div class="display-6 fw-bold mt-2">
                 @(top?.nombre ?? "—")
@@ -234,7 +243,33 @@
                         @foreach (var c in porCandidato.OrderByDescending(x => x.votos))
                         {
                             <tr>
-                                <td>@c.nombre</td>
+                                @* ✅ FOTO EN TABLA NACIONAL *@
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if (!string.IsNullOrWhiteSpace(c.imagenUrl))
+                                        {
+                                            <img src="@c.imagenUrl"
+                                                 alt="Foto"
+                                                 style="width:34px;height:34px;object-fit:cover;border-radius:10px;border:1px solid #e9ecef;"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+
+                                            <div class="d-none align-items-center justify-content-center"
+                                                 style="width:34px;height:34px;border-radius:10px;background:#e9ecef;font-weight:800;">
+                                                @((c.nombre?.Length ?? 0) >= 2 ? c.nombre.Substring(0, 2).ToUpper() : "CV")
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="d-flex align-items-center justify-content-center"
+                                                 style="width:34px;height:34px;border-radius:10px;background:#e9ecef;font-weight:800;">
+                                                @((c.nombre?.Length ?? 0) >= 2 ? c.nombre.Substring(0, 2).ToUpper() : "CV")
+                                            </div>
+                                        }
+
+                                        <span>@c.nombre</span>
+                                    </div>
+                                </td>
+
                                 <td class="text-end">@fmtNum(c.votos)</td>
                             </tr>
                         }
@@ -270,7 +305,34 @@
                         {
                             <tr data-prov="@l.provincia">
                                 <td>@l.provincia</td>
-                                <td class="fw-semibold">@l.lider</td>
+
+                                @* ✅ FOTO EN LÍDER POR PROVINCIA *@
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if (!string.IsNullOrWhiteSpace(l.imagenUrl))
+                                        {
+                                            <img src="@l.imagenUrl"
+                                                 alt="Foto líder"
+                                                 style="width:30px;height:30px;object-fit:cover;border-radius:10px;border:1px solid #e9ecef;"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+
+                                            <div class="d-none align-items-center justify-content-center"
+                                                 style="width:30px;height:30px;border-radius:10px;background:#e9ecef;font-weight:800;">
+                                                @((l.lider?.Length ?? 0) >= 2 ? l.lider.Substring(0, 2).ToUpper() : "CV")
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="d-flex align-items-center justify-content-center"
+                                                 style="width:30px;height:30px;border-radius:10px;background:#e9ecef;font-weight:800;">
+                                                @((l.lider?.Length ?? 0) >= 2 ? l.lider.Substring(0, 2).ToUpper() : "CV")
+                                            </div>
+                                        }
+
+                                        <span class="fw-semibold">@l.lider</span>
+                                    </div>
+                                </td>
+
                                 <td class="text-end">@fmtNum(l.votosLider)</td>
                             </tr>
                         }
@@ -307,7 +369,7 @@
         const lideresProvincia = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
         lideres
             .Where(x => !string.IsNullOrWhiteSpace(x.provincia) && x.votosLider > 0)
-            .Select(x => new { provincia = x.provincia, lider = x.lider, votosLider = x.votosLider })
+            .Select(x => new { provincia = x.provincia, lider = x.lider, votosLider = x.votosLider, imagenUrl = x.imagenUrl })
             .ToList()
     ));
 

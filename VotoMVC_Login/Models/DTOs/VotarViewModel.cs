@@ -12,5 +12,7 @@ namespace VotoMVC_Login.Models.DTOs
         public string? error { get; set; }
         public string? comprobante { get; set; }
         public int ProcesoElectoralId { get; set; }
+        public string? ImagenUrl { get; set; }
+
     }
 }

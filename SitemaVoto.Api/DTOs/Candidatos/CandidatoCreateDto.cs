@@ -19,5 +19,8 @@ namespace SitemaVoto.Api.DTOs.Candidatos
         public int NumeroLista { get; set; }
 
         public bool Activo { get; set; } = true;
+        [MaxLength(500)]
+        public string? ImagenUrl { get; set; }
+
     }
 }

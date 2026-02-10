@@ -281,7 +281,9 @@ namespace VotoMVC_Login.Controllers
                 Partido = x.Partido,
                 Binomio = x.Binomio,
                 NumeroLista = x.NumeroLista,
-                Activo = x.Activo
+                Activo = x.Activo,
+                ImagenUrl = x.ImagenUrl
+
             }).ToList();
 
             return View(vm);
@@ -321,7 +323,9 @@ namespace VotoMVC_Login.Controllers
                     Partido = x.Partido,
                     Binomio = x.Binomio,
                     NumeroLista = x.NumeroLista,
-                    Activo = x.Activo
+                    Activo = x.Activo,
+                    ImagenUrl = x.ImagenUrl
+
                 }).ToList();
 
                 return View(vm);
@@ -335,7 +339,9 @@ namespace VotoMVC_Login.Controllers
                 Partido = (vm.Nuevo.Partido ?? "").Trim(),
                 Binomio = (vm.Nuevo.Binomio ?? "").Trim(),
                 NumeroLista = vm.Nuevo.NumeroLista,
-                Activo = vm.Nuevo.Activo
+                Activo = vm.Nuevo.Activo,
+                ImagenUrl = vm.Nuevo.ImagenUrl // ✅
+
             };
 
             // 3) Validación extra (según tipo) SIN cambiar BD
@@ -355,7 +361,9 @@ namespace VotoMVC_Login.Controllers
                     Partido = x.Partido,
                     Binomio = x.Binomio,
                     NumeroLista = x.NumeroLista,
-                    Activo = x.Activo
+                    Activo = x.Activo,
+                    ImagenUrl = x.ImagenUrl
+
                 }).ToList();
 
                 return View(vm);

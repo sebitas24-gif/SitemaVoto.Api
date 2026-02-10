@@ -81,6 +81,36 @@
                         <input class="form-control" asp-for="Nuevo.NumeroLista" type="number" min="0" />
                     </div>
 
+                    @* ✅ NUEVO: URL de la foto + preview *@
+                    <div class="col-md-8">
+                        <label class="form-label">URL de la foto</label>
+                        <input class="form-control"
+                               asp-for="Nuevo.ImagenUrl"
+                               id="imgUrlInput"
+                               placeholder="https://..." />
+
+                        <div class="form-text">
+                            Pega una URL pública (Supabase Storage público o URL accesible desde navegador).
+                        </div>
+
+                        <div class="mt-2 d-flex align-items-center gap-2">
+                            <img id="imgPreview"
+                                 src=""
+                                 alt="Preview"
+                                 style="display:none;width:72px;height:72px;object-fit:cover;border-radius:14px;border:1px solid #e9ecef;" />
+                            <div id="imgPreviewFallback" class="text-muted small" style="display:block;">
+                                (Se previsualiza aquí)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" asp-for="Nuevo.Activo" />
+                            <label class="form-check-label">Activo</label>
+                        </div>
+                    </div>
+
                     @if (mostrarBinomio)
                     {
                         <div class="col-md-8">
@@ -108,13 +138,6 @@
                             </div>
                         </div>
                     }
-
-                    <div class="col-md-4 d-flex align-items-end">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" asp-for="Nuevo.Activo" />
-                            <label class="form-check-label">Activo</label>
-                        </div>
-                    </div>
                 </div>
 
                 <button class="btn btn-primary mt-3">Crear</button>
@@ -132,6 +155,7 @@
                     <thead>
                         <tr>
                             <th>Id</th>
+                            <th>Foto</th> @* ✅ NUEVO *@
                             <th>Nombre</th>
                             <th>Partido</th>
                             <th>
@@ -161,6 +185,29 @@
                         {
                             <tr>
                                 <td>@c.Id</td>
+
+                                @* ✅ NUEVO: Miniatura de foto (con fallback) *@
+                                <td style="width:60px;">
+                                    @if (!string.IsNullOrWhiteSpace(c.ImagenUrl))
+                                    {
+                                        <img src="@c.ImagenUrl"
+                                             alt="Foto"
+                                             style="width:42px;height:42px;object-fit:cover;border-radius:10px;border:1px solid #e9ecef;"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                        <div class="d-none align-items-center justify-content-center"
+                                             style="width:42px;height:42px;border-radius:10px;background:#e9ecef;font-weight:800;">
+                                            @((c.NombreCompleto?.Length ?? 0) >= 2 ? c.NombreCompleto.Substring(0, 2).ToUpper() : "CV")
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="d-flex align-items-center justify-content-center"
+                                             style="width:42px;height:42px;border-radius:10px;background:#e9ecef;font-weight:800;">
+                                            @((c.NombreCompleto?.Length ?? 0) >= 2 ? c.NombreCompleto.Substring(0, 2).ToUpper() : "CV")
+                                        </div>
+                                    }
+                                </td>
+
                                 <td>@c.NombreCompleto</td>
                                 <td>@c.Partido</td>
                                 <td>@c.Binomio</td>
@@ -175,3 +222,41 @@
         </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        const input = document.getElementById('imgUrlInput');
+        const img = document.getElementById('imgPreview');
+        const fallback = document.getElementById('imgPreviewFallback');
+
+        if (!input || !img || !fallback) return;
+
+        function update() {
+            const url = (input.value || '').trim();
+            if (!url) {
+                img.style.display = 'none';
+                img.src = '';
+                fallback.style.display = 'block';
+                fallback.textContent = '(Se previsualiza aquí)';
+                return;
+            }
+            img.src = url;
+            img.style.display = 'inline-block';
+            fallback.style.display = 'none';
+        }
+
+        input.addEventListener('input', update);
+
+        img.addEventListener('error', function () {
+            img.style.display = 'none';
+            fallback.style.display = 'block';
+            fallback.textContent = '(La URL no carga. Debe ser pública.)';
+        });
+
+        img.addEventListener('load', function () {
+            fallback.style.display = 'none';
+        });
+
+        update();
+    })();
+</script>

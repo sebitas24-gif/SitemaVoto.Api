@@ -14,9 +14,10 @@ namespace VotoMVC_Login.Service
         private readonly IHttpClientFactory _http;
         private readonly IConfiguration _cfg;
 
-        private readonly JsonSerializerOptions _jsonOpts = new()
+        private static readonly JsonSerializerOptions _jsonOpts = new JsonSerializerOptions
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
         public ApiService(IHttpClientFactory http, IConfiguration cfg)
@@ -347,6 +348,9 @@ namespace VotoMVC_Login.Service
 
             [JsonPropertyName("activo")]
             public bool activo { get; set; }
+            [JsonPropertyName("imagenUrl")]
+            public string? ImagenUrl { get; set; }
+
         }
 
         // ============================
@@ -502,6 +506,9 @@ namespace VotoMVC_Login.Service
             public string Binomio { get; set; } = "";
             public int NumeroLista { get; set; }
             public bool Activo { get; set; }
+            [JsonPropertyName("imagenUrl")]
+            public string? ImagenUrl { get; set; }
+
         }
 
         public class CandidatoAdminDto
@@ -513,6 +520,9 @@ namespace VotoMVC_Login.Service
             public string Binomio { get; set; } = "";
             public int NumeroLista { get; set; }
             public bool Activo { get; set; }
+            [JsonPropertyName("imagenUrl")]
+            public string? ImagenUrl { get; set; }
+
         }
         public class ApiResp<T>
         {
